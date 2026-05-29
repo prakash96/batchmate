@@ -1,0 +1,25 @@
+[01:47:08.968] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[01:47:08.968] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-f3a61ce2e2b3]
+[01:47:09.428] INFO  workflow.execution — result: [{"id":1,"message":"sample message"}]
+[01:47:09.451] INFO  workflow.execution — -----BEGIN PGP MESSAGE-----
+Version: BCPG v1.70
+
+hF4DgB7o3PpLlgQSAQdAMgnQ8jNfJh3QD2D0Pby/cX4cEh4eR7lNnpse/udhdy8w
+fzvWVzUabY9nSb+ZyBTKVkymmRO/XXIyIw5isBJISA2fOj5QT+8n5U0FDwnx8QUN
+0lwBvArHL/ALfIgRE2pvDjMbjp6TsBEK6KC62LNq2cJmkQkx9jEYFve/3Njl33Vo
+efDRanpf97sQYojw9Jsf/5yXrgnVFyYA2YqQ5sIjKdFy8T4zRnMr1UT+yr8nMg==
+=3BcT
+-----END PGP MESSAGE-----
+
+[01:47:10.812] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: B15E55DB6EBE6EB-0000000000000000 on ExchangeId: B15E55DB6EBE6EB-0000000000000000). Exhausted after delivery attempt: 1 caught: org.bouncycastle.openpgp.PGPException: checksum mismatch at in checksum of 20 bytes
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         1821
+	...
+camel-route.yaml:47                      20fce9c9-b4c2-49e8-86a3-b9780b bean[ref:pgpHelper method:decrypt]                            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[01:47:10.919] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: checksum mismatch at in checksum of 20 bytes

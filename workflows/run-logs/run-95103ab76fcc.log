@@ -1,0 +1,14 @@
+[18:36:04.898] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[18:36:04.898] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-95103ab76fcc]
+[18:36:06.092] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: C08FF4087300F1F-0000000000000000 on ExchangeId: C08FF4087300F1F-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: TypeError: Cannot read property 'testVar' of undefined
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ca84eb35-13f0-480e-b79a-f4007e from[direct://ca84eb35-13f0-480e-b79a-f4007e328b14         1168
+	...
+camel-route.yaml:16                      ca84eb35-13f0-480e-b79a-f4007e split[js{vars.testVar}]                                       0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[18:36:06.155] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Exception occurred during execution on the exchange: Exchange[C08FF4087300F1F-0000000000000000]

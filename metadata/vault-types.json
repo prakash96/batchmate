@@ -1,0 +1,59 @@
+{
+  "password": {
+    "label": "Password / Secret",
+    "icon": "🔐",
+    "fields": [
+      { "key": "value", "label": "Secret Value", "type": "password", "required": true, "placeholder": "Enter secret value" }
+    ]
+  },
+  "pgp-key": {
+    "label": "PGP Key",
+    "icon": "🔑",
+    "fields": [
+      {
+        "key": "keyType",
+        "label": "Key Type",
+        "type": "select",
+        "options": [
+          { "value": "public",  "label": "Public Key"  },
+          { "value": "private", "label": "Private Key" }
+        ]
+      },
+      { "key": "keyContent",  "label": "Key Content",  "type": "textarea", "required": true,  "placeholder": "-----BEGIN PGP PUBLIC KEY BLOCK-----\n..." },
+      { "key": "passphrase",  "label": "Passphrase",   "type": "password",  "placeholder": "Passphrase (if any)", "showWhen": { "key": "keyType", "value": "private" } }
+    ]
+  },
+  "ssh-key": {
+    "label": "SSH Key",
+    "icon": "🗝️",
+    "fields": [
+      { "key": "keyContent", "label": "Private Key", "type": "textarea", "required": true, "placeholder": "-----BEGIN OPENSSH PRIVATE KEY-----\n..." },
+      { "key": "passphrase", "label": "Passphrase",  "type": "password",  "placeholder": "Passphrase (if any)" }
+    ]
+  },
+  "certificate": {
+    "label": "Certificate",
+    "icon": "📜",
+    "fields": [
+      { "key": "certContent", "label": "Certificate (PEM)", "type": "textarea", "required": true, "placeholder": "-----BEGIN CERTIFICATE-----\n..." }
+    ]
+  },
+  "keystore": {
+    "label": "Keystore / Truststore",
+    "icon": "🏛️",
+    "fields": [
+      {
+        "key": "keystoreType",
+        "label": "Format",
+        "type": "select",
+        "options": [
+          { "value": "PKCS12", "label": "PKCS12 (.p12 / .pfx)" },
+          { "value": "JKS",    "label": "JKS (.jks)"            }
+        ]
+      },
+      { "key": "keystoreData", "label": "Keystore File", "type": "file", "required": true, "accept": ".p12,.pfx,.jks,.keystore" },
+      { "key": "password",     "label": "Password",      "type": "password", "required": true, "placeholder": "Keystore password" },
+      { "key": "alias",        "label": "Alias",         "type": "text",     "placeholder": "Key alias (optional)" }
+    ]
+  }
+}

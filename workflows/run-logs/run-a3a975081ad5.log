@@ -1,0 +1,19 @@
+[14:28:22.951] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[14:28:22.957] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-a3a975081ad5]
+[14:28:23.879] INFO  workflow.execution — respStatus: 200 resp: {
+    "id": 1,
+    "title": "Create an endpoint at Beeceptor.",
+    "completed": true
+}
+[14:28:23.915] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: E7BCE729A09DAFE-0000000000000008 on ExchangeId: E7BCE729A09DAFE-0000000000000008). Exhausted after delivery attempt: 1 caught: java.lang.RuntimeException: JSON compare mismatch (mode=keys-only)
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ca84eb35-13f0-480e-b79a-f4007e from[direct://ca84eb35-13f0-480e-b79a-f4007e328b14          938
+	...
+camel-route.yaml:62                      ca84eb35-13f0-480e-b79a-f4007e bean[ref:compareHelper method:compareJson]                    0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[14:28:23.966] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Exception occurred during execution on the exchange: Exchange[E7BCE729A09DAFE-0000000000000008]

@@ -1,0 +1,37 @@
+[ {
+  "name" : "Sample Pub",
+  "type" : "pgp-key",
+  "config" : {
+    "keyContent" : "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQINBGhKExampleBEAC7Qw1R3K0dJfV8Jv4uXK8fW9Y6y5Q2xV\n8W0nX1mN7X2dL0Jj9V8K1K9v3L6m8Q==\n=AbCd\n-----END PGP PUBLIC KEY BLOCK-----"
+  },
+  "packageId" : "a033ede8-84c9-421c-a824-42346ecb5533",
+  "id" : "vault-1779816096520-htuba"
+}, {
+  "name" : "Sample Private",
+  "type" : "pgp-key",
+  "config" : {
+    "keyType" : "private",
+    "keyContent" : "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nlQPGBGhKExampleBCAC7Qw1R3K0dJfV8Jv4uXK8fW9Y6y5Q2xV\n8W0nX1mN7X2dL0Jj9V8K1K9v3L6m8QAA==\n=EfGh\n-----END PGP PRIVATE KEY BLOCK-----",
+    "passphrase" : "sample"
+  },
+  "packageId" : "a033ede8-84c9-421c-a824-42346ecb5533",
+  "id" : "vault-1779816144095-9zkya"
+}, {
+  "name" : "batchmate_pub",
+  "type" : "pgp-key",
+  "config" : {
+    "keyContent" : "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmDMEahdI1xYJKwYBBAHaRw8BAQdAculNp0NSmiXOrGXiJCTFx6S4CvLoFcO9yoRR\nrq7cH+20BUFkbWluiLUEExYKAF0WIQQ5aesN7Jo/LryRElYPbEVdoa0X8QUCahdI\n1xsUgAAAAAAEAA5tYW51MiwyLjUrMS4xMiwyLDECGwMFCQWlhBEFCwkIBwICIgIG\nFQoJCAsCBBYCAwECHgcCF4AACgkQD2xFXaGtF/EmnwEAoJ9qRUAqhb6yCOAHcbKG\nl3TQWbmq7/Y9jNn3EvLLjTkBAMYK5RL2CNlJIkWz0ZgDHyDs6MOaXPv7NuH9pz1V\nfI0FuDgEahdI1xIKKwYBBAGXVQEFAQEHQM7Cfj1c1iI0oFOBI6/AE/kArFpTkv9j\ncqT81zAVcdR+AwEIB4iaBBgWCgBCFiEEOWnrDeyaPy68kRJWD2xFXaGtF/EFAmoX\nSNcbFIAAAAAABAAObWFudTIsMi41KzEuMTIsMiwxAhsMBQkFpYQRAAoJEA9sRV2h\nrRfx1uYBAJa36eQcVCEyNmlwugpm9t9XRpEOl+UxbysEnwEiIo01AQDsI5RzAlbw\nGYVcg6mHYeEZqETMj9f5tbhQPDZ/ehbdDA==\n=OrXw\n-----END PGP PUBLIC KEY BLOCK-----\n"
+  },
+  "packageId" : "a033ede8-84c9-421c-a824-42346ecb5533",
+  "id" : "vault-1779911014288-zak6v"
+}, {
+  "name" : "batchmate_private",
+  "type" : "pgp-key",
+  "config" : {
+    "keyType" : "private",
+    "passphrase" : "batchmate",
+    "keyContent" : "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nlIYEahdI1xYJKwYBBAHaRw8BAQdAculNp0NSmiXOrGXiJCTFx6S4CvLoFcO9yoRR\nrq7cH+3+BwMCHD3V1vlxgQv/u1/eMTmDyZ5C7lsK7TuPLRrsLCii8UZOOuxke7L4\n6hG5zyuSMb6xRDOnP0J8BAQGYug60UypTR5IAVUXCBU/Pci30CRIsrQFQWRtaW6I\ntQQTFgoAXRYhBDlp6w3smj8uvJESVg9sRV2hrRfxBQJqF0jXGxSAAAAAAAQADm1h\nbnUyLDIuNSsxLjEyLDIsMQIbAwUJBaWEEQULCQgHAgIiAgYVCgkICwIEFgIDAQIe\nBwIXgAAKCRAPbEVdoa0X8SafAQCgn2pFQCqFvrII4AdxsoaXdNBZuarv9j2M2fcS\n8suNOQEAxgrlEvYI2UkiRbPRmAMfIOzow5pc+/s24f2nPVV8jQWciwRqF0jXEgor\nBgEEAZdVAQUBAQdAzsJ+PVzWIjSgU4Ejr8AT+QCsWlOS/2NypPzXMBVx1H4DAQgH\n/gcDAl/herIUZboZ/+i0tLfb28Ixt28r5EuiAyMuNILWzmA4m9L7yl87P/TmQjXl\nmeSTelkkslCkHWsq+O4llV7FsgMBvPILTIUzT06o0wMBTWuImgQYFgoAQhYhBDlp\n6w3smj8uvJESVg9sRV2hrRfxBQJqF0jXGxSAAAAAAAQADm1hbnUyLDIuNSsxLjEy\nLDIsMQIbDAUJBaWEEQAKCRAPbEVdoa0X8dbmAQCWt+nkHFQhMjZpcLoKZvbfV0aR\nDpflMW8rBJ8BIiKNNQEA7COUcwJW8BmFXIOph2HhGahEzI/X+bW4UDw2f3oW3Qw=\n=Y3P7\n-----END PGP PRIVATE KEY BLOCK-----\n"
+  },
+  "packageId" : "a033ede8-84c9-421c-a824-42346ecb5533",
+  "id" : "vault-1779912991051-8g59j"
+} ]

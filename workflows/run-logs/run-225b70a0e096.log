@@ -1,0 +1,4 @@
+[16:21:31.887] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[16:21:31.887] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-225b70a0e096]
+[16:21:33.440] INFO  workflow.execution — result: GenericFile[C:\Users\Admin\Downloads\test-grid.json]
+[16:21:33.480] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1593ms

@@ -1,0 +1,31 @@
+{
+  "runId" : "run-15054f5fc103",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-28T01:44:02.6399333",
+  "status" : "success",
+  "durationMs" : 779,
+  "resultBody" : "[B@fc45e0d",
+  "steps" : [ {
+    "nodeId" : "97d154e6-0ac6-4312-a0cc-93ce6766fa75",
+    "nodeType" : "dbexecute",
+    "nodeName" : "SQL Execute",
+    "section" : "processing"
+  }, {
+    "nodeId" : "be91d8a8-a1ae-4711-8eb4-c650804be382",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  }, {
+    "nodeId" : "50ad81d9-1855-4fa6-b3ef-8d7201ef7ea9",
+    "nodeType" : "pgpencrypt",
+    "nodeName" : "PGP Encrypt",
+    "section" : "processing"
+  }, {
+    "nodeId" : "6f7b2c52-8035-4afc-9c14-fd706432860a",
+    "nodeType" : "log",
+    "nodeName" : "Log",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

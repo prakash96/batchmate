@@ -1,0 +1,14 @@
+[19:15:12.586] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[19:15:12.589] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-c2981ddd90da]
+[19:15:12.633] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 62778E608D291F3-0000000000000006 on ExchangeId: 62778E608D291F3-0000000000000006). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: ReferenceError: exchangeProperty is not defined
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ca84eb35-13f0-480e-b79a-f4007e from[direct://ca84eb35-13f0-480e-b79a-f4007e328b14           35
+	...
+camel-route.yaml:16                      ca84eb35-13f0-480e-b79a-f4007e split[js{exchangeProperty.testVar}]                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[19:15:12.709] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Exception occurred during execution on the exchange: Exchange[62778E608D291F3-0000000000000006]

@@ -1,0 +1,133 @@
+{
+  "sftp": {
+    "label": "SFTP",
+    "icon": "🔐",
+    "fields": [
+      { "key": "host",                 "label": "Host",             "type": "text",     "placeholder": "sftp.example.com",       "required": true  },
+      { "key": "port",                 "label": "Port",             "type": "number",   "placeholder": "22" },
+      { "key": "username",             "label": "Username",         "type": "text",     "placeholder": "user",                   "required": true  },
+      { "key": "password",             "label": "Password",         "type": "password", "placeholder": "••••••••" },
+      { "key": "privateKeyFile",       "label": "Private Key Path", "type": "text",     "placeholder": "/home/user/.ssh/id_rsa" },
+      { "key": "privateKeyPassphrase", "label": "Key Passphrase",   "type": "password", "placeholder": "••••••••" }
+    ]
+  },
+  "ftp": {
+    "label": "FTP/FTPS",
+    "icon": "📡",
+    "fields": [
+      { "key": "host",         "label": "Host",          "type": "text",     "placeholder": "ftp.example.com", "required": true },
+      { "key": "port",         "label": "Port",          "type": "number",   "placeholder": "21" },
+      { "key": "username",     "label": "Username",      "type": "text",     "placeholder": "user",            "required": true },
+      { "key": "password",     "label": "Password",      "type": "password", "placeholder": "••••••••" },
+      { "key": "securityMode", "label": "Security Mode", "type": "select",   "options": [
+        { "value": "none",     "label": "None (plain FTP)" },
+        { "value": "explicit", "label": "FTPS Explicit (STARTTLS)" },
+        { "value": "implicit", "label": "FTPS Implicit (SSL)" }
+      ]},
+      { "key": "transferMode", "label": "Transfer Mode", "type": "select",   "options": [
+        { "value": "passive", "label": "Passive (recommended)" },
+        { "value": "active",  "label": "Active" }
+      ]}
+    ]
+  },
+  "http": {
+    "label": "HTTP",
+    "icon": "🌐",
+    "fields": [
+      { "key": "baseUrl",      "label": "Base URL",    "type": "text",     "placeholder": "https://api.example.com", "required": true },
+      { "key": "authType",     "label": "Auth Type",   "type": "select",   "options": [
+        { "value": "none",   "label": "None" },
+        { "value": "basic",  "label": "Basic Auth" },
+        { "value": "bearer", "label": "Bearer Token" },
+        { "value": "apikey", "label": "API Key" }
+      ]},
+      { "key": "username",     "label": "Username",    "type": "text",     "placeholder": "user",       "showWhen": { "key": "authType", "value": "basic"  }, "required": true },
+      { "key": "password",     "label": "Password",    "type": "password", "placeholder": "••••••••",   "showWhen": { "key": "authType", "value": "basic"  }, "required": true },
+      { "key": "bearerToken",  "label": "Token",       "type": "password", "placeholder": "eyJ...",     "showWhen": { "key": "authType", "value": "bearer" }, "required": true },
+      { "key": "apiKey",       "label": "API Key",     "type": "password", "placeholder": "sk-...",     "showWhen": { "key": "authType", "value": "apikey" }, "required": true },
+      { "key": "apiKeyHeader", "label": "Header Name", "type": "text",     "placeholder": "X-Api-Key",  "showWhen": { "key": "authType", "value": "apikey" }, "required": true }
+    ]
+  },
+  "postgresql": {
+    "label": "PostgreSQL",
+    "icon": "🐘",
+    "fields": [
+      { "key": "host",     "label": "Host",     "type": "text",     "placeholder": "localhost",   "required": true },
+      { "key": "port",     "label": "Port",     "type": "number",   "placeholder": "5432" },
+      { "key": "database", "label": "Database", "type": "text",     "placeholder": "mydb",        "required": true },
+      { "key": "username", "label": "Username", "type": "text",     "placeholder": "postgres",    "required": true },
+      { "key": "password", "label": "Password", "type": "password", "placeholder": "••••••••" },
+      { "key": "ssl",      "label": "Use SSL",  "type": "checkbox" }
+    ]
+  },
+  "mysql": {
+    "label": "MySQL",
+    "icon": "🐬",
+    "fields": [
+      { "key": "host",     "label": "Host",     "type": "text",     "placeholder": "localhost", "required": true },
+      { "key": "port",     "label": "Port",     "type": "number",   "placeholder": "3306" },
+      { "key": "database", "label": "Database", "type": "text",     "placeholder": "mydb",      "required": true },
+      { "key": "username", "label": "Username", "type": "text",     "placeholder": "root",      "required": true },
+      { "key": "password", "label": "Password", "type": "password", "placeholder": "••••••••" },
+      { "key": "useSSL",   "label": "Use SSL",  "type": "checkbox" }
+    ]
+  },
+  "oracle": {
+    "label": "Oracle",
+    "icon": "🔴",
+    "fields": [
+      { "key": "host",           "label": "Host",            "type": "text",   "placeholder": "localhost", "required": true },
+      { "key": "port",           "label": "Port",            "type": "number", "placeholder": "1521" },
+      { "key": "connectionType", "label": "Connection Type", "type": "select", "options": [
+        { "value": "service", "label": "Service Name" },
+        { "value": "sid",     "label": "SID" }
+      ]},
+      { "key": "sidOrService", "label": "Service Name / SID", "type": "text",     "placeholder": "ORCL",    "required": true },
+      { "key": "username",     "label": "Username",           "type": "text",     "placeholder": "system",  "required": true },
+      { "key": "password",     "label": "Password",           "type": "password", "placeholder": "••••••••" }
+    ]
+  },
+  "sqlserver": {
+    "label": "SQL Server",
+    "icon": "🪟",
+    "fields": [
+      { "key": "host",                   "label": "Host",                     "type": "text",     "placeholder": "localhost",   "required": true },
+      { "key": "port",                   "label": "Port",                     "type": "number",   "placeholder": "1433" },
+      { "key": "database",               "label": "Database",                 "type": "text",     "placeholder": "master",      "required": true },
+      { "key": "username",               "label": "Username",                 "type": "text",     "placeholder": "sa",          "required": true },
+      { "key": "password",               "label": "Password",                 "type": "password", "placeholder": "••••••••" },
+      { "key": "trustServerCertificate", "label": "Trust Server Certificate", "type": "checkbox" }
+    ]
+  },
+  "db": {
+    "label": "Database (Generic JDBC)",
+    "icon": "🗄️",
+    "fields": [
+      { "key": "jdbcUrl",     "label": "JDBC URL",     "type": "text",     "placeholder": "jdbc:postgresql://host:5432/db", "required": true },
+      { "key": "username",    "label": "Username",     "type": "text",     "placeholder": "db_user",                       "required": true },
+      { "key": "password",    "label": "Password",     "type": "password", "placeholder": "••••••••" },
+      { "key": "driverClass", "label": "Driver Class", "type": "text",     "placeholder": "org.postgresql.Driver" }
+    ]
+  },
+  "s3": {
+    "label": "AWS S3",
+    "icon": "☁️",
+    "fields": [
+      { "key": "awsRegion",       "label": "Region",          "type": "text",     "placeholder": "us-east-1",              "required": true },
+      { "key": "accessKeyId",     "label": "Access Key ID",   "type": "text",     "placeholder": "AKIA...",                "required": true },
+      { "key": "secretAccessKey", "label": "Secret Key",      "type": "password", "placeholder": "••••••••",              "required": true },
+      { "key": "endpoint",        "label": "Custom Endpoint", "type": "text",     "placeholder": "https://minio.local:9000" }
+    ]
+  },
+  "smtp": {
+    "label": "SMTP",
+    "icon": "📧",
+    "fields": [
+      { "key": "smtpHost",     "label": "SMTP Host", "type": "text",     "placeholder": "smtp.example.com", "required": true },
+      { "key": "smtpPort",     "label": "Port",      "type": "number",   "placeholder": "587",              "required": true },
+      { "key": "smtpUser",     "label": "Username",  "type": "text",     "placeholder": "user@example.com" },
+      { "key": "smtpPassword", "label": "Password",  "type": "password", "placeholder": "••••••••" },
+      { "key": "smtpTls",      "label": "Use TLS",   "type": "checkbox" }
+    ]
+  }
+}

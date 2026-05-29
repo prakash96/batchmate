@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+camel:
+  springboot:
+    stream-caching-enabled: false
+
+spring:
+  application:
+    name: workflow
+
+plugins:
+  dir: plugins
+
+workflows:
+  base-dir: workflows
+
+metadata:
+  dir: metadata
+  
+connections:
+  file: ${metadata.dir}/connections.json
+

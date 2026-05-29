@@ -1,0 +1,16 @@
+[22:39:13.189] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[22:39:13.189] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-a0c0725f50ab]
+[22:39:16.185] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 196F39426CD87CF-0000000000000000 on ExchangeId: 196F39426CD87CF-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Assertion failed:
+Condition 1: actual="pqr"  expected == "pqr2"
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ca84eb35-13f0-480e-b79a-f4007e from[direct://ca84eb35-13f0-480e-b79a-f4007e328b14         2968
+	...
+camel-route.yaml:12                      ca84eb35-13f0-480e-b79a-f4007e script[js{var _failures=[];var _l0=(body.abc);var             0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[22:39:16.241] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Assertion failed:
+Condition 1: actual="pqr"  expected == "pqr2"

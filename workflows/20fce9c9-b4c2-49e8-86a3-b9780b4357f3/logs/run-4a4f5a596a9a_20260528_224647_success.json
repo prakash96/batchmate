@@ -1,0 +1,21 @@
+{
+  "runId" : "run-4a4f5a596a9a",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-28T22:46:40.4274716",
+  "status" : "success",
+  "durationMs" : 7257,
+  "resultBody" : "filewrite",
+  "steps" : [ {
+    "nodeId" : "f402a494-f25c-45c2-bd92-aead7d04752e",
+    "nodeType" : "sftpread",
+    "nodeName" : "SFTP Read",
+    "section" : "processing"
+  }, {
+    "nodeId" : "cf1ced89-1de3-4566-9418-d5dd6bffa4af",
+    "nodeType" : "filewrite",
+    "nodeName" : "File Write",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

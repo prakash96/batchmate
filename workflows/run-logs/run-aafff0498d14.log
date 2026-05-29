@@ -1,0 +1,11 @@
+[01:16:15.528] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[01:16:15.528] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-aafff0498d14]
+[01:16:15.579] INFO  workflow.execution — body: {"abc": "pqr1779651975571"}
+[01:16:16.570] INFO  workflow.execution — respStatus: 200 resp: {
+    "id": 1,
+    "title": "Create an endpoint at Beeceptor.",
+    "completed": true
+}
+[01:16:16.585] INFO  workflow.execution — [TODO] Unsupported: gzipcompress
+[01:16:16.585] INFO  workflow.execution — body: ewogICAgImlkIjogMSwKICAgICJ0aXRsZSI6ICJDcmVhdGUgYW4gZW5kcG9pbnQgYXQgQmVlY2VwdG9yLiIsCiAgICAiY29tcGxldGVkIjogdHJ1ZQp9
+[01:16:16.585] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1057ms

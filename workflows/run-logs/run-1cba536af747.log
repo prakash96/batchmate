@@ -1,0 +1,197 @@
+[00:40:46.710] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:40:46.714] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-1cba536af747]
+[00:40:46.749] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[00:40:46.749] INFO  workflow.execution — sftplist: Listing /pub/example
+[00:40:51.144] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.246] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000001 on ExchangeId: D7C74EDDE17B923-0000000000000001). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/imap-console-client.png","fileName":"imap-console-client.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000001]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4524
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.304] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.313] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000002 on ExchangeId: D7C74EDDE17B923-0000000000000002). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/KeyGenerator.png","fileName":"KeyGenerator.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000002]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4587
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.316] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.321] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000003 on ExchangeId: D7C74EDDE17B923-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/KeyGeneratorSmall.png","fileName":"KeyGeneratorSmall.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000003]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4604
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.321] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.329] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000004 on ExchangeId: D7C74EDDE17B923-0000000000000004). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/mail-editor.png","fileName":"mail-editor.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000004]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4604
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.329] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.337] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000005 on ExchangeId: D7C74EDDE17B923-0000000000000005). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/mail-send-winforms.png","fileName":"mail-send-winforms.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000005]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4612
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.337] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.345] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000006 on ExchangeId: D7C74EDDE17B923-0000000000000006). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/mime-explorer.png","fileName":"mime-explorer.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000006]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4626
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.349] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.351] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000007 on ExchangeId: D7C74EDDE17B923-0000000000000007). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/pocketftp.png","fileName":"pocketftp.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000007]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4634
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.351] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.354] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000008 on ExchangeId: D7C74EDDE17B923-0000000000000008). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/pocketftpSmall.png","fileName":"pocketftpSmall.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000008]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4637
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.354] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.354] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000009 on ExchangeId: D7C74EDDE17B923-0000000000000009). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/pop3-browser.png","fileName":"pop3-browser.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000009]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4637
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.362] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.366] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-000000000000000A on ExchangeId: D7C74EDDE17B923-000000000000000A). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/pop3-console-client.png","fileName":"pop3-console-client.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-000000000000000A]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4649
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.369] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.371] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-000000000000000B on ExchangeId: D7C74EDDE17B923-000000000000000B). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/readme.txt","fileName":"readme.txt"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-000000000000000B]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4652
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.371] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.371] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-000000000000000C on ExchangeId: D7C74EDDE17B923-000000000000000C). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/ResumableTransfer.png","fileName":"ResumableTransfer.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-000000000000000C]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4654
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.379] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.379] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-000000000000000D on ExchangeId: D7C74EDDE17B923-000000000000000D). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/winceclient.png","fileName":"winceclient.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-000000000000000D]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4662
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.387] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.387] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-000000000000000E on ExchangeId: D7C74EDDE17B923-000000000000000E). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/winceclientSmall.png","fileName":"winceclientSmall.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-000000000000000E]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4670
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.387] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.395] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-000000000000000F on ExchangeId: D7C74EDDE17B923-000000000000000F). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/WinFormClient.png","fileName":"WinFormClient.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-000000000000000F]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4670
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.397] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:40:51.401] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: D7C74EDDE17B923-0000000000000010 on ExchangeId: D7C74EDDE17B923-0000000000000010). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/WinFormClientSmall.png","fileName":"WinFormClientSmall.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000010]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         4682
+	...
+camel-route.yaml:64                      20fce9c9-b4c2-49e8-86a3-b9780b log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:40:51.403] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {"filePath":"/pub/example/WinFormClientSmall.png","fileName":"WinFormClientSmall.png"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000010]

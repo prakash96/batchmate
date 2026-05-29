@@ -1,0 +1,14 @@
+[02:22:43.772] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[02:22:43.774] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-54b2c46afd4c]
+[02:22:43.948] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 9FAF61030C8DF30-0000000000000001 on ExchangeId: 9FAF61030C8DF30-0000000000000001). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: TypeError: (intermediate value).getBytes is not a function
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ca84eb35-13f0-480e-b79a-f4007e from[direct://ca84eb35-13f0-480e-b79a-f4007e328b14          162
+	...
+camel-route.yaml:22                      ca84eb35-13f0-480e-b79a-f4007e script[js{var _b=exchange.getMessage().getBody();v            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[02:22:44.003] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: TypeError: (intermediate value).getBytes is not a function

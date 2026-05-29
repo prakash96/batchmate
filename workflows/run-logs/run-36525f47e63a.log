@@ -1,0 +1,14 @@
+[01:38:53.969] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[01:38:53.969] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-36525f47e63a]
+[01:38:54.586] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 6539202BD8AA1B4-0000000000000003 on ExchangeId: 6539202BD8AA1B4-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: id on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: id not found on bean: {id=1, message=sample message} of type: java.util.LinkedHashMap on the exchange: Exchange[6539202BD8AA1B4-0000000000000003]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       05bbf73f-05ae-43b7-8808-e1873d from[direct://05bbf73f-05ae-43b7-8808-e1873d255a26          613
+	...
+camel-route.yaml:14                      05bbf73f-05ae-43b7-8808-e1873d log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[01:38:54.643] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Failed to invoke method: id on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: id not found on bean: {id=1, message=sample message} of type: java.util.LinkedHashMap on the exchange: Exchange[6539202BD8AA1B4-0000000000000003]

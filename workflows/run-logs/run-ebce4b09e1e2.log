@@ -1,0 +1,6 @@
+[23:13:11.273] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[23:13:11.273] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-ebce4b09e1e2]
+[23:13:11.326] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[23:13:11.331] INFO  workflow.execution — sftplist: Listing /pub/example
+[23:13:16.826] INFO  workflow.execution — /pub/example/imap-console-client.png,/pub/example/KeyGenerator.png,/pub/example/KeyGeneratorSmall.png,/pub/example/mail-editor.png,/pub/example/mail-send-winforms.png,/pub/example/mime-explorer.png,/pub/example/pocketftp.png,/pub/example/pocketftpSmall.png,/pub/example/pop3-browser.png,/pub/example/pop3-console-client.png,/pub/example/readme.txt,/pub/example/ResumableTransfer.png,/pub/example/winceclient.png,/pub/example/winceclientSmall.png,/pub/example/WinFormClient.png,/pub/example/WinFormClientSmall.png
+[23:13:16.889] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 5616ms

@@ -1,0 +1,283 @@
+{
+  "id" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
+  "name" : "New Workflow",
+  "description" : "",
+  "inputBody" : { },
+  "inputHeaders" : { },
+  "workflow" : {
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : -21
+      },
+      "data" : {
+        "containerType" : "processing"
+      },
+      "style" : {
+        "width" : 554,
+        "height" : 357
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 694,
+        "height" : 323
+      },
+      "selected" : true,
+      "width" : 694,
+      "height" : 323,
+      "resizing" : false,
+      "dragging" : false
+    }, {
+      "id" : "wc-processingFailed",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 307
+      },
+      "data" : {
+        "containerType" : "processingFailed",
+        "minimized" : false,
+        "savedHeight" : 200
+      },
+      "style" : {
+        "width" : 528,
+        "height" : 200
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 528,
+        "height" : 200
+      },
+      "selected" : false,
+      "dragging" : false
+    }, {
+      "id" : "fc9b659a-c2e5-4aec-8557-afb0ef3e3afb",
+      "type" : "sftplist",
+      "position" : {
+        "x" : 24,
+        "y" : 133.5
+      },
+      "data" : {
+        "name" : "SFTP List",
+        "port" : 22,
+        "hostVerification" : "ask",
+        "recursive" : false,
+        "connectionId" : "conn-1779979189884-vyg9t",
+        "remotePath" : "${vars.testSftpPath}",
+        "resultVar" : "",
+        "filter" : "*.txt"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    }, {
+      "id" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+      "type" : "iteration",
+      "position" : {
+        "x" : 110,
+        "y" : 133.5
+      },
+      "data" : {
+        "name" : "Iteration",
+        "collection" : "body",
+        "concurrency" : 1,
+        "depth" : 1
+      },
+      "style" : {
+        "width" : 364,
+        "height" : 120
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 378,
+        "height" : 161
+      },
+      "selected" : false,
+      "section" : "processing",
+      "width" : 378,
+      "height" : 161,
+      "resizing" : false
+    }, {
+      "id" : "c7321e10-acc0-4679-acbb-7af4aca63bd2",
+      "type" : "sftpread",
+      "position" : {
+        "x" : 24,
+        "y" : 34
+      },
+      "data" : {
+        "name" : "SFTP Read",
+        "port" : 22,
+        "hostVerification" : "ask",
+        "textEncoding" : "UTF-8",
+        "fileLockStrategy" : "none",
+        "proxyType" : "SOCKS5",
+        "setAsBody" : true,
+        "connectionId" : "conn-1779979189884-vyg9t",
+        "deleteAfterDownload" : false,
+        "remoteDirectory" : "${vars.testSftpPath}",
+        "filePattern" : "${body[fileName]}",
+        "streamContent" : true,
+        "scanSubfolders" : true
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    }, {
+      "id" : "cf0b50af-14ad-400f-8c83-28796a5f1ffe",
+      "type" : "filewrite",
+      "position" : {
+        "x" : 282,
+        "y" : 34
+      },
+      "data" : {
+        "name" : "File Write",
+        "encoding" : "utf8",
+        "directory" : "C:/files",
+        "overwriteExisting" : true
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing",
+      "dragging" : true,
+      "parentNode" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d"
+    }, {
+      "id" : "15bcaed6-713b-4236-8ee3-0bb79818a835",
+      "type" : "pgpencrypt",
+      "position" : {
+        "x" : 110,
+        "y" : 34
+      },
+      "data" : {
+        "name" : "PGP Encrypt",
+        "recipientKeySource" : "vault",
+        "armorOutput" : true,
+        "cipherAlgorithm" : "AES256",
+        "compressionAlgorithm" : "ZIP",
+        "contentSource" : "body",
+        "setAsBody" : true,
+        "recipientKeyVault" : "vault-1779911014288-zak6v"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+      "section" : "processing"
+    }, {
+      "id" : "71770cbc-5e1b-4a4d-8332-5f07d38c7e56",
+      "type" : "pgpdecrypt",
+      "position" : {
+        "x" : 196,
+        "y" : 34
+      },
+      "data" : {
+        "name" : "PGP Decrypt",
+        "privateKeySource" : "vault",
+        "contentSource" : "body",
+        "setAsBody" : true,
+        "privateKeyVault" : "vault-1779912991051-8g59j",
+        "passphrase" : "batchmate"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+      "section" : "processing"
+    } ],
+    "edges" : [ {
+      "source" : "fc9b659a-c2e5-4aec-8557-afb0ef3e3afb",
+      "target" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__fc9b659a-c2e5-4aec-8557-afb0ef3e3afb-338e8199-fe1c-45ba-a92b-9eb96f04f78d"
+    }, {
+      "source" : "c7321e10-acc0-4679-acbb-7af4aca63bd2",
+      "target" : "15bcaed6-713b-4236-8ee3-0bb79818a835",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__c7321e10-acc0-4679-acbb-7af4aca63bd2-15bcaed6-713b-4236-8ee3-0bb79818a835"
+    }, {
+      "source" : "15bcaed6-713b-4236-8ee3-0bb79818a835",
+      "target" : "71770cbc-5e1b-4a4d-8332-5f07d38c7e56",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__15bcaed6-713b-4236-8ee3-0bb79818a835-71770cbc-5e1b-4a4d-8332-5f07d38c7e56"
+    }, {
+      "source" : "71770cbc-5e1b-4a4d-8332-5f07d38c7e56",
+      "target" : "cf0b50af-14ad-400f-8c83-28796a5f1ffe",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__71770cbc-5e1b-4a4d-8332-5f07d38c7e56-cf0b50af-14ad-400f-8c83-28796a5f1ffe"
+    } ]
+  }
+}

@@ -1,0 +1,5 @@
+[22:57:29.497] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[22:57:29.500] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-4bfef725c65c]
+[22:57:29.502] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[22:57:29.503] INFO  workflow.execution — sftplist: Listing /pub/example
+[22:57:31.687] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 2190ms

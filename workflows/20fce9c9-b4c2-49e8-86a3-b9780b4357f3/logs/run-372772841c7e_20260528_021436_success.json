@@ -1,0 +1,36 @@
+{
+  "runId" : "run-372772841c7e",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-28T02:14:04.0498485",
+  "status" : "success",
+  "durationMs" : 32255,
+  "resultBody" : "[B@15611473",
+  "steps" : [ {
+    "nodeId" : "be91d8a8-a1ae-4711-8eb4-c650804be382",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  }, {
+    "nodeId" : "50ad81d9-1855-4fa6-b3ef-8d7201ef7ea9",
+    "nodeType" : "pgpencrypt",
+    "nodeName" : "PGP Encrypt",
+    "section" : "processing"
+  }, {
+    "nodeId" : "60f210f9-5990-407a-864c-e99b37abf182",
+    "nodeType" : "pgpdecrypt",
+    "nodeName" : "PGP Decrypt",
+    "section" : "processing"
+  }, {
+    "nodeId" : "20884133-dbed-41f6-ac99-19d7be2696c7",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  }, {
+    "nodeId" : "0a3caadf-be65-49c1-a1d1-110ad6140ea2",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

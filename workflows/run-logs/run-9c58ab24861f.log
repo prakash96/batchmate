@@ -1,0 +1,261 @@
+[00:19:36.978] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:19:36.983] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-9c58ab24861f]
+[00:19:36.987] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[00:19:36.987] INFO  workflow.execution — sftplist: Listing /pub/example
+[00:19:39.870] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:19:39.873] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/imap-console-client.png
+[00:19:39.933] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:19:44.594] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:19:48.174] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:19:48.188] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000002 on ExchangeId: AF3F81CE67E9642-0000000000000002). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000002
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        11195
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:19:48.191] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:19:48.191] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/KeyGenerator.png
+[00:19:48.191] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:19:53.051] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:19:56.603] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:19:56.606] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000003 on ExchangeId: AF3F81CE67E9642-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000003
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        19623
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:19:56.606] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:19:56.631] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/KeyGeneratorSmall.png
+[00:19:56.636] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:01.388] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:04.899] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:20:04.904] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000004 on ExchangeId: AF3F81CE67E9642-0000000000000004). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000004
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        27918
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:20:04.908] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:20:04.910] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/mail-editor.png
+[00:20:04.931] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:09.611] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:13.378] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:20:13.394] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000005 on ExchangeId: AF3F81CE67E9642-0000000000000005). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000005
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        36411
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:20:13.394] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:20:13.394] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/mail-send-winforms.png
+[00:20:13.406] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:17.930] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:21.559] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:20:21.566] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000006 on ExchangeId: AF3F81CE67E9642-0000000000000006). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000006
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        44583
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:20:21.566] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:20:21.573] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/mime-explorer.png
+[00:20:21.573] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:26.419] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:30.039] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:20:30.052] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000007 on ExchangeId: AF3F81CE67E9642-0000000000000007). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000007
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        53069
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:20:30.056] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:20:30.056] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/pocketftp.png
+[00:20:30.077] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:34.768] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:38.360] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:20:38.376] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000008 on ExchangeId: AF3F81CE67E9642-0000000000000008). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000008
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        61393
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:20:38.380] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:20:38.380] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/pocketftpSmall.png
+[00:20:38.388] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:43.250] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:46.785] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:20:46.790] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000009 on ExchangeId: AF3F81CE67E9642-0000000000000009). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000009
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        69807
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:20:46.793] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:20:46.801] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/pop3-browser.png
+[00:20:46.809] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:51.735] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:20:55.498] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:20:55.498] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-000000000000000A on ExchangeId: AF3F81CE67E9642-000000000000000A). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-000000000000000A
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        78515
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:20:55.498] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:20:55.511] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/pop3-console-client.png
+[00:20:55.520] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:00.294] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:03.784] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:21:03.784] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-000000000000000B on ExchangeId: AF3F81CE67E9642-000000000000000B). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-000000000000000B
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        86801
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:21:03.881] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:21:03.897] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/readme.txt
+[00:21:03.926] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:08.670] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:12.394] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:21:12.403] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-000000000000000C on ExchangeId: AF3F81CE67E9642-000000000000000C). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-000000000000000C
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        95418
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:21:12.410] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:21:12.410] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/ResumableTransfer.png
+[00:21:12.421] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:16.985] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:20.518] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:21:20.526] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-000000000000000D on ExchangeId: AF3F81CE67E9642-000000000000000D). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-000000000000000D
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3       103543
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:21:20.526] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:21:20.526] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/winceclient.png
+[00:21:20.534] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:25.259] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:28.733] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:21:28.738] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-000000000000000E on ExchangeId: AF3F81CE67E9642-000000000000000E). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-000000000000000E
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3       111755
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:21:28.741] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:21:28.743] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/winceclientSmall.png
+[00:21:28.743] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:33.429] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:36.853] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:21:36.866] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-000000000000000F on ExchangeId: AF3F81CE67E9642-000000000000000F). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-000000000000000F
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3       119883
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:21:36.868] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:21:36.870] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/WinFormClient.png
+[00:21:36.876] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:41.412] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:45.215] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:21:45.234] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000010 on ExchangeId: AF3F81CE67E9642-0000000000000010). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000010
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3       128251
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:21:45.234] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:21:45.256] INFO  workflow.execution — sftpread: Reading /pub/example//pub/example/WinFormClientSmall.png
+[00:21:45.266] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:49.832] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:21:53.366] INFO  workflow.execution — filewrite: Writing to c:/files/<original name>
+[00:21:53.369] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AF3F81CE67E9642-0000000000000011 on ExchangeId: AF3F81CE67E9642-0000000000000011). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000011
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3       136385
+	...
+camel-route.yaml:76                      20fce9c9-b4c2-49e8-86a3-b9780b file:c:/files?autoCreate=true                                 0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:21:53.370] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Cannot write null body to file: c:\files\AF3F81CE67E9642-0000000000000011

@@ -1,0 +1,16 @@
+[23:27:20.208] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[23:27:20.229] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-a0b67fdd2304]
+[23:27:20.257] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[23:27:20.260] INFO  workflow.execution — sftplist: Listing /pub/example
+[23:27:22.732] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 8FE3AD4E3050FD7-0000000000000000 on ExchangeId: 8FE3AD4E3050FD7-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.ExpressionEvaluationException: com.jayway.jsonpath.PathNotFoundException: Expected to find an object with property ["/pub/example/imap-console-client.png","/pub/example/KeyGenerator.png","/pub/example/KeyGeneratorSmall.png","/pub/example/mail-editor.png","/pub/example/mail-send-winforms.png","/pub/example/mime-explorer.png","/pub/example/pocketftp.png","/pub/example/pocketftpSmall.png","/pub/example/pop3-browser.png","/pub/example/pop3-console-client.png","/pub/example/readme.txt","/pub/example/ResumableTransfer.png","/pub/example/winceclient.png","/pub/example/winceclientSmall.png","/pub/example/WinFormClient.png","/pub/example/WinFormClientSmall.png"] in path $ but found 'java.util.ArrayList'. This is not a json object according to the JsonProvider: 'com.jayway.jsonpath.spi.json.JacksonJsonProvider'.
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2485
+	...
+camel-route.yaml:56                      20fce9c9-b4c2-49e8-86a3-b9780b split[jsonpath{${body}}]                                      0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:27:22.732] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: com.jayway.jsonpath.PathNotFoundException: Expected to find an object with property ["/pub/example/imap-console-client.png","/pub/example/KeyGenerator.png","/pub/example/KeyGeneratorSmall.png","/pub/example/mail-editor.png","/pub/example/mail-send-winforms.png","/pub/example/mime-explorer.png","/pub/example/pocketftp.png","/pub/example/pocketftpSmall.png","/pub/example/pop3-browser.png","/pub/example/pop3-console-client.png","/pub/example/readme.txt","/pub/example/ResumableTransfer.png","/pub/example/winceclient.png","/pub/example/winceclientSmall.png","/pub/example/WinFormClient.png","/pub/example/WinFormClientSmall.png"] in path $ but found 'java.util.ArrayList'. This is not a json object according to the JsonProvider: 'com.jayway.jsonpath.spi.json.JacksonJsonProvider'.

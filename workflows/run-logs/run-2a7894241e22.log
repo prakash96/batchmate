@@ -1,0 +1,17 @@
+[22:39:21.565] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[22:39:21.583] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-2a7894241e22]
+[22:39:22.390] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 2FBFA2031A472CB-0000000000000000 on ExchangeId: 2FBFA2031A472CB-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.ExpressionEvaluationException: org.apache.camel.language.simple.types.SimpleIllegalSyntaxException: Unknown function: vars.testVar at location 0
+${vars.testVar}
+*
+
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ca84eb35-13f0-480e-b79a-f4007e from[direct://ca84eb35-13f0-480e-b79a-f4007e328b14          803
+	...
+camel-route.yaml:16                      ca84eb35-13f0-480e-b79a-f4007e split[jsonpath{${vars.testVar}}]                              0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[22:39:22.407] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Exception occurred during execution on the exchange: Exchange[2FBFA2031A472CB-0000000000000000]

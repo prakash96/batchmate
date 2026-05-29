@@ -1,0 +1,3652 @@
+[
+  {
+    "type": "sftpread",
+    "label": "SFTP Read",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "SFTP",
+    "sidebarLabel": "Read",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "SFTP Read",
+      "port": 22,
+      "hostVerification": "ask",
+      "textEncoding": "UTF-8",
+      "fileLockStrategy": "none",
+      "proxyType": "SOCKS5",
+      "setAsBody": true
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "sftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "sftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "22",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyFile",
+            "label": "Private Key File Path",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/id_rsa",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyPassphrase",
+            "label": "Private Key Passphrase",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "hostVerification",
+            "label": "Host Verification",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "yes",
+                "label": "Yes  strict checking"
+              },
+              {
+                "value": "no",
+                "label": "No  skip verification"
+              },
+              {
+                "value": "ask",
+                "label": "Ask  prompt on unknown"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Remote Location",
+        "open": true,
+        "fields": [
+          {
+            "key": "remoteDirectory",
+            "label": "Remote Directory",
+            "type": "text",
+            "placeholder": "/upload/inbox"
+          },
+          {
+            "key": "filePattern",
+            "label": "File Name / Pattern",
+            "type": "text",
+            "placeholder": "*.csv  or  report_*.txt"
+          },
+          {
+            "key": "includePattern",
+            "label": "Include Pattern (glob)",
+            "type": "text",
+            "placeholder": "**/*.xml"
+          },
+          {
+            "key": "excludePattern",
+            "label": "Exclude Pattern (glob)",
+            "type": "text",
+            "placeholder": "**/*.tmp"
+          },
+          {
+            "key": "scanSubfolders",
+            "label": "Scan Sub-folders Recursively",
+            "type": "checkbox"
+          },
+          {
+            "key": "includeHiddenFiles",
+            "label": "Include Hidden Files (dot files)",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "After Download Behavior",
+        "open": false,
+        "fields": [
+          {
+            "key": "readOnlyMode",
+            "label": "Read-Only Mode (never move or delete)",
+            "type": "checkbox"
+          },
+          {
+            "key": "deleteAfterDownload",
+            "label": "Delete File After Download",
+            "type": "checkbox"
+          },
+          {
+            "key": "moveToPath",
+            "label": "Move File To (path after success)",
+            "type": "text",
+            "placeholder": "/upload/done"
+          },
+          {
+            "key": "moveFailedToPath",
+            "label": "Move Failed File To",
+            "type": "text",
+            "placeholder": "/upload/failed"
+          },
+          {
+            "key": "autoCreateFolders",
+            "label": "Auto-Create Remote Folders If Missing",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "File Filters (Size & Age)",
+        "open": false,
+        "fields": [
+          {
+            "key": "minFileAge",
+            "label": "Minimum File Age (ms)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          },
+          {
+            "key": "maxFileAge",
+            "label": "Maximum File Age (ms)",
+            "type": "number",
+            "placeholder": "unlimited",
+            "min": 0
+          },
+          {
+            "key": "minFileSize",
+            "label": "Minimum File Size (bytes)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          },
+          {
+            "key": "maxFileSize",
+            "label": "Maximum File Size (bytes)",
+            "type": "number",
+            "placeholder": "unlimited",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Transfer Settings",
+        "open": false,
+        "fields": [
+          {
+            "key": "binaryMode",
+            "label": "Binary Transfer Mode",
+            "type": "checkbox"
+          },
+          {
+            "key": "streamContent",
+            "label": "Stream Content (don't load full file into memory)",
+            "type": "checkbox"
+          },
+          {
+            "key": "flattenFolderStructure",
+            "label": "Flatten Folder Structure",
+            "type": "checkbox"
+          },
+          {
+            "key": "textEncoding",
+            "label": "Text Encoding",
+            "type": "select",
+            "options": [
+              {
+                "value": "UTF-8",
+                "label": "UTF-8"
+              },
+              {
+                "value": "UTF-16",
+                "label": "UTF-16"
+              },
+              {
+                "value": "ISO-8859-1",
+                "label": "ISO-8859-1 (Latin-1)"
+              },
+              {
+                "value": "US-ASCII",
+                "label": "US-ASCII"
+              },
+              {
+                "value": "windows-1252",
+                "label": "Windows-1252"
+              }
+            ]
+          },
+          {
+            "key": "bufferSize",
+            "label": "Transfer Buffer Size (bytes)",
+            "type": "number",
+            "placeholder": "32768",
+            "min": 1
+          },
+          {
+            "key": "localWorkDir",
+            "label": "Local Working Directory (for streaming)",
+            "type": "text",
+            "placeholder": "/tmp/sftp-work"
+          }
+        ]
+      },
+      {
+        "title": "Polling Schedule",
+        "open": false,
+        "fields": [
+          {
+            "key": "pollInterval",
+            "label": "Poll Every (ms)",
+            "type": "number",
+            "placeholder": "500",
+            "min": 0
+          },
+          {
+            "key": "startupDelay",
+            "label": "Startup Delay Before First Poll (ms)",
+            "type": "number",
+            "placeholder": "1000",
+            "min": 0
+          },
+          {
+            "key": "maxFilesPerPoll",
+            "label": "Max Files Per Poll",
+            "type": "number",
+            "placeholder": "unlimited",
+            "min": 1
+          }
+        ]
+      },
+      {
+        "title": "Duplicate Detection",
+        "open": false,
+        "fields": [
+          {
+            "key": "skipAlreadyProcessed",
+            "label": "Skip Already Processed Files",
+            "type": "checkbox"
+          },
+          {
+            "key": "trackingKeyExpression",
+            "label": "Tracking Key Expression",
+            "type": "text",
+            "placeholder": "${file:name}-${file:size}"
+          },
+          {
+            "key": "fileLockStrategy",
+            "label": "File Lock Strategy",
+            "type": "select",
+            "options": [
+              {
+                "value": "none",
+                "label": "None"
+              },
+              {
+                "value": "markerFile",
+                "label": "Marker File (.camelLock)"
+              },
+              {
+                "value": "changed",
+                "label": "Changed (wait until stable size)"
+              },
+              {
+                "value": "fileLock",
+                "label": "File Lock (OS-level)"
+              },
+              {
+                "value": "rename",
+                "label": "Rename (atomic rename)"
+              },
+              {
+                "value": "idempotent",
+                "label": "Idempotent (same as skip-processed)"
+              }
+            ]
+          },
+          {
+            "key": "lockWaitTimeout",
+            "label": "Lock Wait Timeout (ms)",
+            "type": "number",
+            "placeholder": "10000",
+            "min": 0
+          },
+          {
+            "key": "lockCheckInterval",
+            "label": "Lock Check Interval (ms)",
+            "type": "number",
+            "placeholder": "1000",
+            "min": 0
+          },
+          {
+            "key": "lockMinAge",
+            "label": "Lock Minimum File Age (ms)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          },
+          {
+            "key": "lockMinSize",
+            "label": "Lock Minimum File Size (bytes)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Connection Reliability",
+        "open": false,
+        "fields": [
+          {
+            "key": "connectTimeout",
+            "label": "Connection Timeout (ms)",
+            "type": "number",
+            "placeholder": "10000",
+            "min": 0
+          },
+          {
+            "key": "socketTimeout",
+            "label": "Socket Timeout (ms)",
+            "type": "number",
+            "placeholder": "30000",
+            "min": 0
+          },
+          {
+            "key": "maxReconnectAttempts",
+            "label": "Max Reconnect Attempts",
+            "type": "number",
+            "placeholder": "3",
+            "min": 0
+          },
+          {
+            "key": "reconnectWait",
+            "label": "Reconnect Wait (ms)",
+            "type": "number",
+            "placeholder": "1000",
+            "min": 0
+          },
+          {
+            "key": "disconnectAfterUse",
+            "label": "Disconnect After Each Use",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "open": false,
+        "fields": [
+          {
+            "key": "knownHostsFile",
+            "label": "Known Hosts File",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/known_hosts"
+          },
+          {
+            "key": "preferredAuthMethods",
+            "label": "Preferred Authentication Methods",
+            "type": "text",
+            "placeholder": "publickey,password"
+          },
+          {
+            "key": "compressionLevel",
+            "label": "Compression Level (0 = off, 19)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Proxy",
+        "open": false,
+        "fields": [
+          {
+            "key": "proxyHost",
+            "label": "Proxy Server",
+            "type": "text",
+            "placeholder": "proxy.internal.com"
+          },
+          {
+            "key": "proxyPort",
+            "label": "Proxy Port",
+            "type": "number",
+            "placeholder": "1080",
+            "min": 1
+          },
+          {
+            "key": "proxyType",
+            "label": "Proxy Type",
+            "type": "select",
+            "options": [
+              {
+                "value": "SOCKS4",
+                "label": "SOCKS4"
+              },
+              {
+                "value": "SOCKS5",
+                "label": "SOCKS5"
+              },
+              {
+                "value": "HTTP",
+                "label": "HTTP"
+              }
+            ]
+          },
+          {
+            "key": "proxyUsername",
+            "label": "Proxy Username",
+            "type": "text",
+            "placeholder": "proxy-user"
+          },
+          {
+            "key": "proxyPassword",
+            "label": "Proxy Password",
+            "type": "password",
+            "placeholder": ""
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "sftpFileContent"
+          },
+          {
+            "key": "setAsBody",
+            "label": "Set File Content As Body",
+            "type": "checkbox"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "sftpwrite",
+    "label": "SFTP Write",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "SFTP",
+    "sidebarLabel": "Write",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "SFTP Write",
+      "port": 22,
+      "hostVerification": "ask",
+      "textEncoding": "UTF-8",
+      "contentSource": "body"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "sftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "sftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "22",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyFile",
+            "label": "Private Key File Path",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/id_rsa",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyPassphrase",
+            "label": "Private Key Passphrase",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "hostVerification",
+            "label": "Host Verification",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "yes",
+                "label": "Yes  strict checking"
+              },
+              {
+                "value": "no",
+                "label": "No  skip verification"
+              },
+              {
+                "value": "ask",
+                "label": "Ask  prompt on unknown"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Destination",
+        "open": true,
+        "fields": [
+          {
+            "key": "remoteDirectory",
+            "label": "Remote Directory",
+            "type": "text",
+            "placeholder": "/upload/outbox"
+          },
+          {
+            "key": "fileName",
+            "label": "Output File Name",
+            "type": "text",
+            "placeholder": "report.csv"
+          },
+          {
+            "key": "overwriteExisting",
+            "label": "Overwrite Existing File",
+            "type": "checkbox"
+          },
+          {
+            "key": "autoCreateFolders",
+            "label": "Auto-Create Remote Folders If Missing",
+            "type": "checkbox"
+          },
+          {
+            "key": "tempFileSuffix",
+            "label": "Temporary File Name Suffix (write as tmp, rename)",
+            "type": "text",
+            "placeholder": ".tmp"
+          },
+          {
+            "key": "filePermission",
+            "label": "File Permission (octal, e.g. 644)",
+            "type": "text",
+            "placeholder": "644"
+          }
+        ]
+      },
+      {
+        "title": "Transfer Settings",
+        "open": false,
+        "fields": [
+          {
+            "key": "binaryMode",
+            "label": "Binary Transfer Mode",
+            "type": "checkbox"
+          },
+          {
+            "key": "textEncoding",
+            "label": "Text Encoding",
+            "type": "select",
+            "options": [
+              {
+                "value": "UTF-8",
+                "label": "UTF-8"
+              },
+              {
+                "value": "UTF-16",
+                "label": "UTF-16"
+              },
+              {
+                "value": "ISO-8859-1",
+                "label": "ISO-8859-1 (Latin-1)"
+              },
+              {
+                "value": "US-ASCII",
+                "label": "US-ASCII"
+              },
+              {
+                "value": "windows-1252",
+                "label": "Windows-1252"
+              }
+            ]
+          },
+          {
+            "key": "bufferSize",
+            "label": "Transfer Buffer Size (bytes)",
+            "type": "number",
+            "placeholder": "32768",
+            "min": 1
+          },
+          {
+            "key": "compressionLevel",
+            "label": "Compression Level (0 = off, 19)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Content Source",
+        "open": true,
+        "fields": [
+          {
+            "key": "contentSource",
+            "label": "Write From",
+            "type": "select",
+            "options": [
+              {
+                "value": "body",
+                "label": "Current Body"
+              },
+              {
+                "value": "variable",
+                "label": "Variable"
+              },
+              {
+                "value": "expression",
+                "label": "JavaScript Expression"
+              }
+            ]
+          },
+          {
+            "key": "contentVariable",
+            "label": "Variable Name",
+            "type": "text",
+            "placeholder": "myVar",
+            "showWhen": {
+              "key": "contentSource",
+              "value": "variable"
+            }
+          },
+          {
+            "key": "contentExpression",
+            "label": "Expression",
+            "type": "expression",
+            "placeholder": "JSON.stringify(body)",
+            "showWhen": {
+              "key": "contentSource",
+              "value": "expression"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Connection Reliability",
+        "open": false,
+        "fields": [
+          {
+            "key": "connectTimeout",
+            "label": "Connection Timeout (ms)",
+            "type": "number",
+            "placeholder": "10000",
+            "min": 0
+          },
+          {
+            "key": "socketTimeout",
+            "label": "Socket Timeout (ms)",
+            "type": "number",
+            "placeholder": "30000",
+            "min": 0
+          },
+          {
+            "key": "maxReconnectAttempts",
+            "label": "Max Reconnect Attempts",
+            "type": "number",
+            "placeholder": "3",
+            "min": 0
+          },
+          {
+            "key": "reconnectWait",
+            "label": "Reconnect Wait (ms)",
+            "type": "number",
+            "placeholder": "1000",
+            "min": 0
+          },
+          {
+            "key": "disconnectAfterUse",
+            "label": "Disconnect After Each Use",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "open": false,
+        "fields": [
+          {
+            "key": "knownHostsFile",
+            "label": "Known Hosts File",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/known_hosts"
+          },
+          {
+            "key": "preferredAuthMethods",
+            "label": "Preferred Authentication Methods",
+            "type": "text",
+            "placeholder": "publickey,password"
+          },
+          {
+            "key": "compressionLevel",
+            "label": "Compression Level (0 = off, 19)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Proxy",
+        "open": false,
+        "fields": [
+          {
+            "key": "proxyHost",
+            "label": "Proxy Server",
+            "type": "text",
+            "placeholder": "proxy.internal.com"
+          },
+          {
+            "key": "proxyPort",
+            "label": "Proxy Port",
+            "type": "number",
+            "placeholder": "1080",
+            "min": 1
+          },
+          {
+            "key": "proxyType",
+            "label": "Proxy Type",
+            "type": "select",
+            "options": [
+              {
+                "value": "SOCKS4",
+                "label": "SOCKS4"
+              },
+              {
+                "value": "SOCKS5",
+                "label": "SOCKS5"
+              },
+              {
+                "value": "HTTP",
+                "label": "HTTP"
+              }
+            ]
+          },
+          {
+            "key": "proxyUsername",
+            "label": "Proxy Username",
+            "type": "text",
+            "placeholder": "proxy-user"
+          },
+          {
+            "key": "proxyPassword",
+            "label": "Proxy Password",
+            "type": "password",
+            "placeholder": ""
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "uploadResult"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "sftpdelete",
+    "label": "SFTP Delete",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "SFTP",
+    "sidebarLabel": "Delete",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "SFTP Delete",
+      "port": 22,
+      "hostVerification": "ask"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "sftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "sftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "22",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyFile",
+            "label": "Private Key File Path",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/id_rsa",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyPassphrase",
+            "label": "Private Key Passphrase",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "hostVerification",
+            "label": "Host Verification",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "yes",
+                "label": "Yes  strict checking"
+              },
+              {
+                "value": "no",
+                "label": "No  skip verification"
+              },
+              {
+                "value": "ask",
+                "label": "Ask  prompt on unknown"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Target",
+        "open": true,
+        "fields": [
+          {
+            "key": "remoteFilePath",
+            "label": "Remote File Path",
+            "type": "text",
+            "placeholder": "/upload/done/report.csv"
+          },
+          {
+            "key": "remoteDirectory",
+            "label": "Remote Directory (delete by pattern)",
+            "type": "text",
+            "placeholder": "/upload/done"
+          },
+          {
+            "key": "filePattern",
+            "label": "File Pattern (glob, used with directory)",
+            "type": "text",
+            "placeholder": "*.csv"
+          },
+          {
+            "key": "recursive",
+            "label": "Delete Recursively (entire directory tree)",
+            "type": "checkbox"
+          },
+          {
+            "key": "ignoreNotFound",
+            "label": "Ignore If File Not Found",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Connection Reliability",
+        "open": false,
+        "fields": [
+          {
+            "key": "connectTimeout",
+            "label": "Connection Timeout (ms)",
+            "type": "number",
+            "placeholder": "10000",
+            "min": 0
+          },
+          {
+            "key": "socketTimeout",
+            "label": "Socket Timeout (ms)",
+            "type": "number",
+            "placeholder": "30000",
+            "min": 0
+          },
+          {
+            "key": "maxReconnectAttempts",
+            "label": "Max Reconnect Attempts",
+            "type": "number",
+            "placeholder": "3",
+            "min": 0
+          },
+          {
+            "key": "reconnectWait",
+            "label": "Reconnect Wait (ms)",
+            "type": "number",
+            "placeholder": "1000",
+            "min": 0
+          },
+          {
+            "key": "disconnectAfterUse",
+            "label": "Disconnect After Each Use",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "open": false,
+        "fields": [
+          {
+            "key": "knownHostsFile",
+            "label": "Known Hosts File",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/known_hosts"
+          },
+          {
+            "key": "preferredAuthMethods",
+            "label": "Preferred Authentication Methods",
+            "type": "text",
+            "placeholder": "publickey,password"
+          },
+          {
+            "key": "compressionLevel",
+            "label": "Compression Level (0 = off, 19)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Proxy",
+        "open": false,
+        "fields": [
+          {
+            "key": "proxyHost",
+            "label": "Proxy Server",
+            "type": "text",
+            "placeholder": "proxy.internal.com"
+          },
+          {
+            "key": "proxyPort",
+            "label": "Proxy Port",
+            "type": "number",
+            "placeholder": "1080",
+            "min": 1
+          },
+          {
+            "key": "proxyType",
+            "label": "Proxy Type",
+            "type": "select",
+            "options": [
+              {
+                "value": "SOCKS4",
+                "label": "SOCKS4"
+              },
+              {
+                "value": "SOCKS5",
+                "label": "SOCKS5"
+              },
+              {
+                "value": "HTTP",
+                "label": "HTTP"
+              }
+            ]
+          },
+          {
+            "key": "proxyUsername",
+            "label": "Proxy Username",
+            "type": "text",
+            "placeholder": "proxy-user"
+          },
+          {
+            "key": "proxyPassword",
+            "label": "Proxy Password",
+            "type": "password",
+            "placeholder": ""
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "deleteResult"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "sftpmove",
+    "label": "SFTP Move",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "SFTP",
+    "sidebarLabel": "Move",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "SFTP Move",
+      "port": 22,
+      "hostVerification": "ask"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "sftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "sftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "22",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyFile",
+            "label": "Private Key File Path",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/id_rsa",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyPassphrase",
+            "label": "Private Key Passphrase",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "hostVerification",
+            "label": "Host Verification",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "yes",
+                "label": "Yes  strict checking"
+              },
+              {
+                "value": "no",
+                "label": "No  skip verification"
+              },
+              {
+                "value": "ask",
+                "label": "Ask  prompt on unknown"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Move / Rename",
+        "open": true,
+        "fields": [
+          {
+            "key": "sourcePath",
+            "label": "Source File Path",
+            "type": "text",
+            "placeholder": "/upload/inbox/report.csv"
+          },
+          {
+            "key": "destinationPath",
+            "label": "Destination File Path",
+            "type": "text",
+            "placeholder": "/upload/done/report.csv"
+          },
+          {
+            "key": "overwriteExisting",
+            "label": "Overwrite If Destination Already Exists",
+            "type": "checkbox"
+          },
+          {
+            "key": "autoCreateFolders",
+            "label": "Auto-Create Destination Folders If Missing",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Connection Reliability",
+        "open": false,
+        "fields": [
+          {
+            "key": "connectTimeout",
+            "label": "Connection Timeout (ms)",
+            "type": "number",
+            "placeholder": "10000",
+            "min": 0
+          },
+          {
+            "key": "socketTimeout",
+            "label": "Socket Timeout (ms)",
+            "type": "number",
+            "placeholder": "30000",
+            "min": 0
+          },
+          {
+            "key": "maxReconnectAttempts",
+            "label": "Max Reconnect Attempts",
+            "type": "number",
+            "placeholder": "3",
+            "min": 0
+          },
+          {
+            "key": "reconnectWait",
+            "label": "Reconnect Wait (ms)",
+            "type": "number",
+            "placeholder": "1000",
+            "min": 0
+          },
+          {
+            "key": "disconnectAfterUse",
+            "label": "Disconnect After Each Use",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "open": false,
+        "fields": [
+          {
+            "key": "knownHostsFile",
+            "label": "Known Hosts File",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/known_hosts"
+          },
+          {
+            "key": "preferredAuthMethods",
+            "label": "Preferred Authentication Methods",
+            "type": "text",
+            "placeholder": "publickey,password"
+          },
+          {
+            "key": "compressionLevel",
+            "label": "Compression Level (0 = off, 19)",
+            "type": "number",
+            "placeholder": "0",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Proxy",
+        "open": false,
+        "fields": [
+          {
+            "key": "proxyHost",
+            "label": "Proxy Server",
+            "type": "text",
+            "placeholder": "proxy.internal.com"
+          },
+          {
+            "key": "proxyPort",
+            "label": "Proxy Port",
+            "type": "number",
+            "placeholder": "1080",
+            "min": 1
+          },
+          {
+            "key": "proxyType",
+            "label": "Proxy Type",
+            "type": "select",
+            "options": [
+              {
+                "value": "SOCKS4",
+                "label": "SOCKS4"
+              },
+              {
+                "value": "SOCKS5",
+                "label": "SOCKS5"
+              },
+              {
+                "value": "HTTP",
+                "label": "HTTP"
+              }
+            ]
+          },
+          {
+            "key": "proxyUsername",
+            "label": "Proxy Username",
+            "type": "text",
+            "placeholder": "proxy-user"
+          },
+          {
+            "key": "proxyPassword",
+            "label": "Proxy Password",
+            "type": "password",
+            "placeholder": ""
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "moveResult"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "sftpexists",
+    "label": "SFTP Exists",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "SFTP",
+    "sidebarLabel": "Exists",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "SFTP Exists",
+      "port": 22,
+      "hostVerification": "ask",
+      "onNotFound": "continue"
+    },
+    "zones": [
+      "processing",
+      "processingFailed",
+      "validation"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "sftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "sftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "22",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyFile",
+            "label": "Private Key File Path",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/id_rsa",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyPassphrase",
+            "label": "Private Key Passphrase",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "hostVerification",
+            "label": "Host Verification",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "yes",
+                "label": "Yes  strict checking"
+              },
+              {
+                "value": "no",
+                "label": "No  skip verification"
+              },
+              {
+                "value": "ask",
+                "label": "Ask  prompt on unknown"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Remote File",
+        "open": true,
+        "fields": [
+          {
+            "key": "remotePath",
+            "label": "Remote Path",
+            "type": "text",
+            "placeholder": "/upload/report.csv"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "sftpExists"
+          },
+          {
+            "key": "onNotFound",
+            "label": "If Not Found",
+            "type": "select",
+            "options": [
+              {
+                "value": "continue",
+                "label": "Continue"
+              },
+              {
+                "value": "stop",
+                "label": "Stop workflow"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "sftplist",
+    "label": "SFTP List",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "SFTP",
+    "sidebarLabel": "List",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "SFTP List",
+      "port": 22,
+      "hostVerification": "ask",
+      "recursive": false
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "sftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "sftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "22",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyFile",
+            "label": "Private Key File Path",
+            "type": "text",
+            "placeholder": "/home/user/.ssh/id_rsa",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "privateKeyPassphrase",
+            "label": "Private Key Passphrase",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "hostVerification",
+            "label": "Host Verification",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "yes",
+                "label": "Yes  strict checking"
+              },
+              {
+                "value": "no",
+                "label": "No  skip verification"
+              },
+              {
+                "value": "ask",
+                "label": "Ask  prompt on unknown"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Remote Directory",
+        "open": true,
+        "fields": [
+          {
+            "key": "remotePath",
+            "label": "Remote Path",
+            "type": "text",
+            "placeholder": "/upload/"
+          },
+          {
+            "key": "filter",
+            "label": "Filter (glob)",
+            "type": "text",
+            "placeholder": "*.csv"
+          },
+          {
+            "key": "recursive",
+            "label": "Recursive",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "sftpFileList"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "ftpread",
+    "label": "FTP Read",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "FTP / FTPS",
+    "sidebarLabel": "Read",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "FTP Read",
+      "port": 21,
+      "securityMode": "none",
+      "transferMode": "passive",
+      "textEncoding": "UTF-8",
+      "setAsBody": true
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "ftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "ftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "21",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "securityMode",
+            "label": "Security Mode",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "none",
+                "label": "None (plain FTP)"
+              },
+              {
+                "value": "explicit",
+                "label": "FTPS Explicit (STARTTLS)"
+              },
+              {
+                "value": "implicit",
+                "label": "FTPS Implicit (SSL)"
+              }
+            ]
+          },
+          {
+            "key": "transferMode",
+            "label": "Transfer Mode",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "passive",
+                "label": "Passive (recommended)"
+              },
+              {
+                "value": "active",
+                "label": "Active"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Remote Location",
+        "open": true,
+        "fields": [
+          {
+            "key": "remoteDirectory",
+            "label": "Remote Directory",
+            "type": "text",
+            "placeholder": "/upload/inbox"
+          },
+          {
+            "key": "filePattern",
+            "label": "File Name / Pattern",
+            "type": "text",
+            "placeholder": "*.csv"
+          },
+          {
+            "key": "includePattern",
+            "label": "Include Pattern (glob)",
+            "type": "text",
+            "placeholder": "**/*.xml"
+          },
+          {
+            "key": "excludePattern",
+            "label": "Exclude Pattern (glob)",
+            "type": "text",
+            "placeholder": "**/*.tmp"
+          },
+          {
+            "key": "scanSubfolders",
+            "label": "Scan Sub-folders Recursively",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "After Download Behavior",
+        "open": false,
+        "fields": [
+          {
+            "key": "readOnlyMode",
+            "label": "Read-Only Mode (never move or delete)",
+            "type": "checkbox"
+          },
+          {
+            "key": "deleteAfterDownload",
+            "label": "Delete File After Download",
+            "type": "checkbox"
+          },
+          {
+            "key": "moveToPath",
+            "label": "Move File To (path after success)",
+            "type": "text",
+            "placeholder": "/upload/done"
+          },
+          {
+            "key": "moveFailedToPath",
+            "label": "Move Failed File To",
+            "type": "text",
+            "placeholder": "/upload/failed"
+          }
+        ]
+      },
+      {
+        "title": "Transfer Settings",
+        "open": false,
+        "fields": [
+          {
+            "key": "binaryMode",
+            "label": "Binary Transfer Mode",
+            "type": "checkbox"
+          },
+          {
+            "key": "textEncoding",
+            "label": "Text Encoding",
+            "type": "select",
+            "options": [
+              {
+                "value": "UTF-8",
+                "label": "UTF-8"
+              },
+              {
+                "value": "UTF-16",
+                "label": "UTF-16"
+              },
+              {
+                "value": "ISO-8859-1",
+                "label": "ISO-8859-1 (Latin-1)"
+              },
+              {
+                "value": "US-ASCII",
+                "label": "US-ASCII"
+              },
+              {
+                "value": "windows-1252",
+                "label": "Windows-1252"
+              }
+            ]
+          },
+          {
+            "key": "bufferSize",
+            "label": "Transfer Buffer Size (bytes)",
+            "type": "number",
+            "placeholder": "32768",
+            "min": 1
+          }
+        ]
+      },
+      {
+        "title": "Polling Schedule",
+        "open": false,
+        "fields": [
+          {
+            "key": "pollInterval",
+            "label": "Poll Every (ms)",
+            "type": "number",
+            "placeholder": "500",
+            "min": 0
+          },
+          {
+            "key": "startupDelay",
+            "label": "Startup Delay (ms)",
+            "type": "number",
+            "placeholder": "1000",
+            "min": 0
+          },
+          {
+            "key": "maxFilesPerPoll",
+            "label": "Max Files Per Poll",
+            "type": "number",
+            "placeholder": "unlimited",
+            "min": 1
+          }
+        ]
+      },
+      {
+        "title": "Duplicate Detection",
+        "open": false,
+        "fields": [
+          {
+            "key": "skipAlreadyProcessed",
+            "label": "Skip Already Processed Files",
+            "type": "checkbox"
+          },
+          {
+            "key": "fileLockStrategy",
+            "label": "File Lock Strategy",
+            "type": "select",
+            "options": [
+              {
+                "value": "none",
+                "label": "None"
+              },
+              {
+                "value": "markerFile",
+                "label": "Marker File"
+              },
+              {
+                "value": "changed",
+                "label": "Changed (wait until stable size)"
+              },
+              {
+                "value": "rename",
+                "label": "Rename (atomic)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Connection Reliability",
+        "open": false,
+        "fields": [
+          {
+            "key": "connectTimeout",
+            "label": "Connection Timeout (ms)",
+            "type": "number",
+            "placeholder": "10000",
+            "min": 0
+          },
+          {
+            "key": "dataTimeout",
+            "label": "Data Timeout (ms)",
+            "type": "number",
+            "placeholder": "30000",
+            "min": 0
+          },
+          {
+            "key": "maxReconnectAttempts",
+            "label": "Max Reconnect Attempts",
+            "type": "number",
+            "placeholder": "3",
+            "min": 0
+          },
+          {
+            "key": "disconnectAfterUse",
+            "label": "Disconnect After Each Use",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "ftpFileContent"
+          },
+          {
+            "key": "setAsBody",
+            "label": "Set File Content As Body",
+            "type": "checkbox"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "ftpwrite",
+    "label": "FTP Write",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "FTP / FTPS",
+    "sidebarLabel": "Write",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "FTP Write",
+      "port": 21,
+      "securityMode": "none",
+      "transferMode": "passive",
+      "textEncoding": "UTF-8",
+      "contentSource": "body"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "ftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "ftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "21",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "securityMode",
+            "label": "Security Mode",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "none",
+                "label": "None (plain FTP)"
+              },
+              {
+                "value": "explicit",
+                "label": "FTPS Explicit (STARTTLS)"
+              },
+              {
+                "value": "implicit",
+                "label": "FTPS Implicit (SSL)"
+              }
+            ]
+          },
+          {
+            "key": "transferMode",
+            "label": "Transfer Mode",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "passive",
+                "label": "Passive (recommended)"
+              },
+              {
+                "value": "active",
+                "label": "Active"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Destination",
+        "open": true,
+        "fields": [
+          {
+            "key": "remoteDirectory",
+            "label": "Remote Directory",
+            "type": "text",
+            "placeholder": "/upload/outbox"
+          },
+          {
+            "key": "fileName",
+            "label": "Output File Name",
+            "type": "text",
+            "placeholder": "report.csv"
+          },
+          {
+            "key": "overwriteExisting",
+            "label": "Overwrite Existing File",
+            "type": "checkbox"
+          },
+          {
+            "key": "autoCreateFolders",
+            "label": "Auto-Create Remote Folders If Missing",
+            "type": "checkbox"
+          },
+          {
+            "key": "tempFileSuffix",
+            "label": "Temporary File Name Suffix (write as tmp, rename)",
+            "type": "text",
+            "placeholder": ".tmp"
+          }
+        ]
+      },
+      {
+        "title": "Transfer Settings",
+        "open": false,
+        "fields": [
+          {
+            "key": "binaryMode",
+            "label": "Binary Transfer Mode",
+            "type": "checkbox"
+          },
+          {
+            "key": "textEncoding",
+            "label": "Text Encoding",
+            "type": "select",
+            "options": [
+              {
+                "value": "UTF-8",
+                "label": "UTF-8"
+              },
+              {
+                "value": "UTF-16",
+                "label": "UTF-16"
+              },
+              {
+                "value": "ISO-8859-1",
+                "label": "ISO-8859-1 (Latin-1)"
+              },
+              {
+                "value": "US-ASCII",
+                "label": "US-ASCII"
+              },
+              {
+                "value": "windows-1252",
+                "label": "Windows-1252"
+              }
+            ]
+          },
+          {
+            "key": "bufferSize",
+            "label": "Transfer Buffer Size (bytes)",
+            "type": "number",
+            "placeholder": "32768",
+            "min": 1
+          }
+        ]
+      },
+      {
+        "title": "Content Source",
+        "open": true,
+        "fields": [
+          {
+            "key": "contentSource",
+            "label": "Write From",
+            "type": "select",
+            "options": [
+              {
+                "value": "body",
+                "label": "Current Body"
+              },
+              {
+                "value": "variable",
+                "label": "Variable"
+              },
+              {
+                "value": "expression",
+                "label": "JavaScript Expression"
+              }
+            ]
+          },
+          {
+            "key": "contentVariable",
+            "label": "Variable Name",
+            "type": "text",
+            "placeholder": "myVar",
+            "showWhen": {
+              "key": "contentSource",
+              "value": "variable"
+            }
+          },
+          {
+            "key": "contentExpression",
+            "label": "Expression",
+            "type": "expression",
+            "placeholder": "JSON.stringify(body)",
+            "showWhen": {
+              "key": "contentSource",
+              "value": "expression"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Connection Reliability",
+        "open": false,
+        "fields": [
+          {
+            "key": "connectTimeout",
+            "label": "Connection Timeout (ms)",
+            "type": "number",
+            "placeholder": "10000",
+            "min": 0
+          },
+          {
+            "key": "maxReconnectAttempts",
+            "label": "Max Reconnect Attempts",
+            "type": "number",
+            "placeholder": "3",
+            "min": 0
+          },
+          {
+            "key": "disconnectAfterUse",
+            "label": "Disconnect After Each Use",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "uploadResult"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "ftpexists",
+    "label": "FTP Exists",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "FTP / FTPS",
+    "sidebarLabel": "Exists",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "FTP Exists",
+      "port": 21,
+      "securityMode": "none",
+      "transferMode": "passive",
+      "onNotFound": "continue"
+    },
+    "zones": [
+      "processing",
+      "processingFailed",
+      "validation"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "ftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "ftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "21",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "securityMode",
+            "label": "Security Mode",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "none",
+                "label": "None (plain FTP)"
+              },
+              {
+                "value": "explicit",
+                "label": "FTPS Explicit (STARTTLS)"
+              },
+              {
+                "value": "implicit",
+                "label": "FTPS Implicit (SSL)"
+              }
+            ]
+          },
+          {
+            "key": "transferMode",
+            "label": "Transfer Mode",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "passive",
+                "label": "Passive (recommended)"
+              },
+              {
+                "value": "active",
+                "label": "Active"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Remote File",
+        "open": true,
+        "fields": [
+          {
+            "key": "remotePath",
+            "label": "Remote Path",
+            "type": "text",
+            "placeholder": "/upload/report.csv"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "ftpFileExists"
+          },
+          {
+            "key": "onNotFound",
+            "label": "If Not Found",
+            "type": "select",
+            "options": [
+              {
+                "value": "continue",
+                "label": "Continue"
+              },
+              {
+                "value": "stop",
+                "label": "Stop workflow"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "ftplist",
+    "label": "FTP List",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "FTP / FTPS",
+    "sidebarLabel": "List",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "FTP List",
+      "port": 21,
+      "securityMode": "none",
+      "transferMode": "passive",
+      "recursive": false
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "ftp"
+          },
+          {
+            "key": "host",
+            "label": "Server Address",
+            "type": "text",
+            "placeholder": "ftp.example.com",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "21",
+            "min": 1,
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "user",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "securityMode",
+            "label": "Security Mode",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "none",
+                "label": "None (plain FTP)"
+              },
+              {
+                "value": "explicit",
+                "label": "FTPS Explicit (STARTTLS)"
+              },
+              {
+                "value": "implicit",
+                "label": "FTPS Implicit (SSL)"
+              }
+            ]
+          },
+          {
+            "key": "transferMode",
+            "label": "Transfer Mode",
+            "type": "select",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            },
+            "options": [
+              {
+                "value": "passive",
+                "label": "Passive (recommended)"
+              },
+              {
+                "value": "active",
+                "label": "Active"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Remote Directory",
+        "open": true,
+        "fields": [
+          {
+            "key": "remotePath",
+            "label": "Remote Path",
+            "type": "text",
+            "placeholder": "/upload/"
+          },
+          {
+            "key": "filter",
+            "label": "Filter (glob)",
+            "type": "text",
+            "placeholder": "*.csv"
+          },
+          {
+            "key": "recursive",
+            "label": "Recursive",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "ftpFileList"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "s3read",
+    "label": "S3 Read",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "Cloud Storage",
+    "sidebarLabel": "Read",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "S3 Read",
+      "setAsBody": true
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "AWS Credentials",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "s3"
+          },
+          {
+            "key": "awsRegion",
+            "label": "AWS Region",
+            "type": "text",
+            "placeholder": "us-east-1",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "accessKeyId",
+            "label": "Access Key ID",
+            "type": "text",
+            "placeholder": "AKIA...",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "secretAccessKey",
+            "label": "Secret Access Key",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "sessionToken",
+            "label": "Session Token (temporary credentials)",
+            "type": "text",
+            "placeholder": "optional",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "endpoint",
+            "label": "Custom Endpoint (S3-compatible storage)",
+            "type": "text",
+            "placeholder": "https://minio.internal:9000",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "pathStyleAccess",
+            "label": "Force Path-Style Access (required for custom endpoints)",
+            "type": "checkbox",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          }
+        ]
+      },
+      {
+        "title": "Source Object",
+        "open": true,
+        "fields": [
+          {
+            "key": "bucketName",
+            "label": "Bucket Name",
+            "type": "text",
+            "placeholder": "my-data-bucket"
+          },
+          {
+            "key": "objectKey",
+            "label": "Object Key / Prefix",
+            "type": "text",
+            "placeholder": "inbox/reports/  or  inbox/report.csv"
+          },
+          {
+            "key": "filePattern",
+            "label": "File Name Pattern (glob, with prefix)",
+            "type": "text",
+            "placeholder": "*.csv"
+          },
+          {
+            "key": "versionId",
+            "label": "Version ID (download specific version)",
+            "type": "text",
+            "placeholder": "optional"
+          }
+        ]
+      },
+      {
+        "title": "After Download Behavior",
+        "open": false,
+        "fields": [
+          {
+            "key": "deleteAfterDownload",
+            "label": "Delete Object After Download",
+            "type": "checkbox"
+          },
+          {
+            "key": "moveToPrefix",
+            "label": "Move To Prefix After Download (copy+delete)",
+            "type": "text",
+            "placeholder": "done/reports/"
+          },
+          {
+            "key": "moveFailedToPrefix",
+            "label": "Move Failed To Prefix",
+            "type": "text",
+            "placeholder": "failed/reports/"
+          }
+        ]
+      },
+      {
+        "title": "Encryption",
+        "open": false,
+        "fields": [
+          {
+            "key": "serverSideEncryption",
+            "label": "Server-Side Encryption",
+            "type": "select",
+            "options": [
+              {
+                "value": "none",
+                "label": "None"
+              },
+              {
+                "value": "AES256",
+                "label": "SSE-S3 (AES-256, managed by S3)"
+              },
+              {
+                "value": "aws:kms",
+                "label": "SSE-KMS (AWS Key Management Service)"
+              }
+            ]
+          },
+          {
+            "key": "kmsKeyId",
+            "label": "KMS Key ID",
+            "type": "text",
+            "placeholder": "arn:aws:kms:...",
+            "showWhen": {
+              "key": "serverSideEncryption",
+              "value": "aws:kms"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Polling",
+        "open": false,
+        "fields": [
+          {
+            "key": "maxObjectsPerPoll",
+            "label": "Max Objects Per Poll",
+            "type": "number",
+            "placeholder": "10",
+            "min": 1
+          },
+          {
+            "key": "skipAlreadyProcessed",
+            "label": "Skip Already Processed Objects",
+            "type": "checkbox"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "s3FileContent"
+          },
+          {
+            "key": "setAsBody",
+            "label": "Set File Content As Body",
+            "type": "checkbox"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "s3write",
+    "label": "S3 Write",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "Cloud Storage",
+    "sidebarLabel": "Write",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "S3 Write",
+      "acl": "private",
+      "storageClass": "STANDARD",
+      "contentSource": "body"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "AWS Credentials",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "s3"
+          },
+          {
+            "key": "awsRegion",
+            "label": "AWS Region",
+            "type": "text",
+            "placeholder": "us-east-1",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "accessKeyId",
+            "label": "Access Key ID",
+            "type": "text",
+            "placeholder": "AKIA...",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "secretAccessKey",
+            "label": "Secret Access Key",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "sessionToken",
+            "label": "Session Token (temporary credentials)",
+            "type": "text",
+            "placeholder": "optional",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "endpoint",
+            "label": "Custom Endpoint (S3-compatible storage)",
+            "type": "text",
+            "placeholder": "https://minio.internal:9000",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "pathStyleAccess",
+            "label": "Force Path-Style Access (required for custom endpoints)",
+            "type": "checkbox",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          }
+        ]
+      },
+      {
+        "title": "Destination Object",
+        "open": true,
+        "fields": [
+          {
+            "key": "bucketName",
+            "label": "Bucket Name",
+            "type": "text",
+            "placeholder": "my-data-bucket"
+          },
+          {
+            "key": "objectKey",
+            "label": "Object Key (path in bucket)",
+            "type": "text",
+            "placeholder": "outbox/reports/report.csv"
+          },
+          {
+            "key": "contentType",
+            "label": "Content Type",
+            "type": "text",
+            "placeholder": "text/csv  or  application/json"
+          }
+        ]
+      },
+      {
+        "title": "Content Source",
+        "open": true,
+        "fields": [
+          {
+            "key": "contentSource",
+            "label": "Write From",
+            "type": "select",
+            "options": [
+              {
+                "value": "body",
+                "label": "Current Body"
+              },
+              {
+                "value": "variable",
+                "label": "Variable"
+              },
+              {
+                "value": "expression",
+                "label": "JavaScript Expression"
+              }
+            ]
+          },
+          {
+            "key": "contentVariable",
+            "label": "Variable Name",
+            "type": "text",
+            "placeholder": "myVar",
+            "showWhen": {
+              "key": "contentSource",
+              "value": "variable"
+            }
+          },
+          {
+            "key": "contentExpression",
+            "label": "Expression",
+            "type": "expression",
+            "placeholder": "JSON.stringify(body)",
+            "showWhen": {
+              "key": "contentSource",
+              "value": "expression"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Object Settings",
+        "open": false,
+        "fields": [
+          {
+            "key": "acl",
+            "label": "Access Control",
+            "type": "select",
+            "options": [
+              {
+                "value": "private",
+                "label": "Private (default)"
+              },
+              {
+                "value": "public-read",
+                "label": "Public Read"
+              },
+              {
+                "value": "public-read-write",
+                "label": "Public Read-Write"
+              },
+              {
+                "value": "authenticated-read",
+                "label": "Authenticated Read"
+              },
+              {
+                "value": "bucket-owner-full-control",
+                "label": "Bucket Owner Full Control"
+              }
+            ]
+          },
+          {
+            "key": "storageClass",
+            "label": "Storage Class",
+            "type": "select",
+            "options": [
+              {
+                "value": "STANDARD",
+                "label": "Standard"
+              },
+              {
+                "value": "INTELLIGENT_TIERING",
+                "label": "Intelligent-Tiering"
+              },
+              {
+                "value": "STANDARD_IA",
+                "label": "Standard Infrequent Access"
+              },
+              {
+                "value": "ONEZONE_IA",
+                "label": "One Zone Infrequent Access"
+              },
+              {
+                "value": "GLACIER",
+                "label": "Glacier (archive)"
+              },
+              {
+                "value": "DEEP_ARCHIVE",
+                "label": "Glacier Deep Archive"
+              }
+            ]
+          },
+          {
+            "key": "metadata",
+            "label": "Object Metadata (JSON key-value pairs)",
+            "type": "textarea",
+            "rows": 3,
+            "placeholder": "{\"x-source\": \"workflow\"}"
+          }
+        ]
+      },
+      {
+        "title": "Encryption",
+        "open": false,
+        "fields": [
+          {
+            "key": "serverSideEncryption",
+            "label": "Server-Side Encryption",
+            "type": "select",
+            "options": [
+              {
+                "value": "none",
+                "label": "None"
+              },
+              {
+                "value": "AES256",
+                "label": "SSE-S3 (AES-256)"
+              },
+              {
+                "value": "aws:kms",
+                "label": "SSE-KMS"
+              }
+            ]
+          },
+          {
+            "key": "kmsKeyId",
+            "label": "KMS Key ID",
+            "type": "text",
+            "placeholder": "arn:aws:kms:...",
+            "showWhen": {
+              "key": "serverSideEncryption",
+              "value": "aws:kms"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Multipart Upload",
+        "open": false,
+        "fields": [
+          {
+            "key": "multipartThreshold",
+            "label": "Multipart Threshold (bytes, files above use multipart)",
+            "type": "number",
+            "placeholder": "104857600 (100 MB)",
+            "min": 0
+          },
+          {
+            "key": "multipartPartSize",
+            "label": "Part Size (bytes)",
+            "type": "number",
+            "placeholder": "52428800 (50 MB)",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "s3UploadResult"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "pgpencrypt",
+    "label": "PGP Encrypt",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "Security",
+    "sidebarLabel": "PGP Encrypt",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "PGP Encrypt",
+      "recipientKeySource": "file",
+      "armorOutput": true,
+      "cipherAlgorithm": "AES256",
+      "compressionAlgorithm": "ZIP",
+      "contentSource": "body",
+      "setAsBody": true
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Recipient Key",
+        "open": true,
+        "fields": [
+          {
+            "key": "recipientKeySource",
+            "label": "Recipient Public Key Source",
+            "type": "select",
+            "options": [
+              {
+                "value": "file",
+                "label": "File Path"
+              },
+              {
+                "value": "inline",
+                "label": "Inline (paste key)"
+              },
+              {
+                "value": "variable",
+                "label": "Variable"
+              }
+            ]
+          },
+          {
+            "key": "recipientKeyFile",
+            "label": "Public Key File Path",
+            "type": "text",
+            "placeholder": "/keys/recipient-pub.asc",
+            "showWhen": {
+              "key": "recipientKeySource",
+              "value": "file"
+            }
+          },
+          {
+            "key": "recipientKeyInline",
+            "label": "Public Key (PEM / ASCII Armored)",
+            "type": "textarea",
+            "rows": 5,
+            "placeholder": "-----BEGIN PGP PUBLIC KEY BLOCK-----...",
+            "showWhen": {
+              "key": "recipientKeySource",
+              "value": "inline"
+            }
+          },
+          {
+            "key": "recipientKeyVariable",
+            "label": "Variable Name",
+            "type": "text",
+            "placeholder": "pgpPublicKey",
+            "showWhen": {
+              "key": "recipientKeySource",
+              "value": "variable"
+            }
+          },
+          {
+            "key": "recipientUserId",
+            "label": "Key User ID / Email (if multiple keys in keyring)",
+            "type": "text",
+            "placeholder": "recipient@example.com"
+          }
+        ]
+      },
+      {
+        "title": "Signing (Optional)",
+        "open": false,
+        "fields": [
+          {
+            "key": "signMessage",
+            "label": "Sign the Encrypted Message",
+            "type": "checkbox"
+          },
+          {
+            "key": "signingKeySource",
+            "label": "Signing Private Key Source",
+            "type": "select",
+            "options": [
+              {
+                "value": "file",
+                "label": "File Path"
+              },
+              {
+                "value": "inline",
+                "label": "Inline"
+              }
+            ],
+            "showWhen": {
+              "key": "signMessage",
+              "value": true
+            }
+          },
+          {
+            "key": "signingKeyFile",
+            "label": "Signing Private Key File Path",
+            "type": "text",
+            "placeholder": "/keys/sender-priv.asc",
+            "showWhen": {
+              "key": "signingKeySource",
+              "value": "file"
+            }
+          },
+          {
+            "key": "signingKeyInline",
+            "label": "Signing Private Key (PEM / ASCII Armored)",
+            "type": "textarea",
+            "rows": 5,
+            "placeholder": "-----BEGIN PGP PRIVATE KEY BLOCK-----...",
+            "showWhen": {
+              "key": "signingKeySource",
+              "value": "inline"
+            }
+          },
+          {
+            "key": "signingPassphrase",
+            "label": "Signing Key Passphrase",
+            "type": "password",
+            "placeholder": "",
+            "showWhen": {
+              "key": "signMessage",
+              "value": true
+            }
+          }
+        ]
+      },
+      {
+        "title": "Encryption Options",
+        "open": true,
+        "fields": [
+          {
+            "key": "armorOutput",
+            "label": "ASCII Armor Output (text-safe, larger)",
+            "type": "checkbox"
+          },
+          {
+            "key": "cipherAlgorithm",
+            "label": "Cipher Algorithm",
+            "type": "select",
+            "options": [
+              {
+                "value": "AES256",
+                "label": "AES-256 (recommended)"
+              },
+              {
+                "value": "AES192",
+                "label": "AES-192"
+              },
+              {
+                "value": "AES128",
+                "label": "AES-128"
+              },
+              {
+                "value": "CAMELLIA256",
+                "label": "Camellia-256"
+              },
+              {
+                "value": "3DES",
+                "label": "Triple-DES (legacy)"
+              },
+              {
+                "value": "BLOWFISH",
+                "label": "Blowfish (legacy)"
+              }
+            ]
+          },
+          {
+            "key": "compressionAlgorithm",
+            "label": "Compression Inside Encryption",
+            "type": "select",
+            "options": [
+              {
+                "value": "ZIP",
+                "label": "ZIP"
+              },
+              {
+                "value": "ZLIB",
+                "label": "ZLIB"
+              },
+              {
+                "value": "BZIP2",
+                "label": "BZIP2"
+              },
+              {
+                "value": "UNCOMPRESSED",
+                "label": "None (no compression)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Content Source",
+        "open": true,
+        "fields": [
+          {
+            "key": "contentSource",
+            "label": "Encrypt From",
+            "type": "select",
+            "options": [
+              {
+                "value": "body",
+                "label": "Current Body"
+              },
+              {
+                "value": "variable",
+                "label": "Variable"
+              }
+            ]
+          },
+          {
+            "key": "contentVariable",
+            "label": "Variable Name",
+            "type": "text",
+            "placeholder": "clearTextData",
+            "showWhen": {
+              "key": "contentSource",
+              "value": "variable"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "encryptedData"
+          },
+          {
+            "key": "setAsBody",
+            "label": "Set Encrypted Content As Body",
+            "type": "checkbox"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "pgpdecrypt",
+    "label": "PGP Decrypt",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "Security",
+    "sidebarLabel": "PGP Decrypt",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "PGP Decrypt",
+      "privateKeySource": "file",
+      "contentSource": "body",
+      "setAsBody": true
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Private Key",
+        "open": true,
+        "fields": [
+          {
+            "key": "privateKeySource",
+            "label": "Private Key Source",
+            "type": "select",
+            "options": [
+              {
+                "value": "file",
+                "label": "File Path"
+              },
+              {
+                "value": "inline",
+                "label": "Inline (paste key)"
+              },
+              {
+                "value": "variable",
+                "label": "Variable"
+              }
+            ]
+          },
+          {
+            "key": "privateKeyFile",
+            "label": "Private Key File Path",
+            "type": "text",
+            "placeholder": "/keys/recipient-priv.asc",
+            "showWhen": {
+              "key": "privateKeySource",
+              "value": "file"
+            }
+          },
+          {
+            "key": "privateKeyInline",
+            "label": "Private Key (PEM / ASCII Armored)",
+            "type": "textarea",
+            "rows": 5,
+            "placeholder": "-----BEGIN PGP PRIVATE KEY BLOCK-----...",
+            "showWhen": {
+              "key": "privateKeySource",
+              "value": "inline"
+            }
+          },
+          {
+            "key": "privateKeyVariable",
+            "label": "Variable Name",
+            "type": "text",
+            "placeholder": "pgpPrivateKey",
+            "showWhen": {
+              "key": "privateKeySource",
+              "value": "variable"
+            }
+          },
+          {
+            "key": "passphrase",
+            "label": "Private Key Passphrase",
+            "type": "password",
+            "placeholder": ""
+          }
+        ]
+      },
+      {
+        "title": "Signature Verification (Optional)",
+        "open": false,
+        "fields": [
+          {
+            "key": "verifySignature",
+            "label": "Verify Digital Signature",
+            "type": "checkbox"
+          },
+          {
+            "key": "signerKeySource",
+            "label": "Signer Public Key Source",
+            "type": "select",
+            "options": [
+              {
+                "value": "file",
+                "label": "File Path"
+              },
+              {
+                "value": "inline",
+                "label": "Inline"
+              }
+            ],
+            "showWhen": {
+              "key": "verifySignature",
+              "value": true
+            }
+          },
+          {
+            "key": "signerKeyFile",
+            "label": "Signer Public Key File Path",
+            "type": "text",
+            "placeholder": "/keys/sender-pub.asc",
+            "showWhen": {
+              "key": "signerKeySource",
+              "value": "file"
+            }
+          },
+          {
+            "key": "signerKeyInline",
+            "label": "Signer Public Key (PEM / ASCII Armored)",
+            "type": "textarea",
+            "rows": 5,
+            "placeholder": "-----BEGIN PGP PUBLIC KEY BLOCK-----...",
+            "showWhen": {
+              "key": "signerKeySource",
+              "value": "inline"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Content Source",
+        "open": true,
+        "fields": [
+          {
+            "key": "contentSource",
+            "label": "Decrypt From",
+            "type": "select",
+            "options": [
+              {
+                "value": "body",
+                "label": "Current Body"
+              },
+              {
+                "value": "variable",
+                "label": "Variable"
+              }
+            ]
+          },
+          {
+            "key": "contentVariable",
+            "label": "Variable Name",
+            "type": "text",
+            "placeholder": "encryptedData",
+            "showWhen": {
+              "key": "contentSource",
+              "value": "variable"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "decryptedData"
+          },
+          {
+            "key": "setAsBody",
+            "label": "Set Decrypted Content As Body",
+            "type": "checkbox"
+          }
+        ]
+      }
+    ]
+  }
+]

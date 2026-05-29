@@ -1,0 +1,16 @@
+[22:58:29.998] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[22:58:29.999] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-0f8408c9376d]
+[22:58:30.005] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[22:58:30.014] INFO  workflow.execution — sftplist: Listing /pub/example
+[22:58:32.377] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 22F97CDE19BC6E2-0000000000000003 on ExchangeId: 22F97CDE19BC6E2-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.ExpressionEvaluationException: org.apache.camel.CamelExchangeException: Cannot read message body as supported JSON value. Exchange[]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2370
+	...
+camel-route.yaml:56                      20fce9c9-b4c2-49e8-86a3-b9780b split[jsonpath{${body}}]                                      0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[22:58:32.429] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: org.apache.camel.CamelExchangeException: Cannot read message body as supported JSON value. Exchange[]

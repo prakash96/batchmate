@@ -1,0 +1,21 @@
+[00:53:16.388] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:53:16.388] INFO  controller.WorkflowController — Workflow 'Copy of New Workflow' run started [runId=run-0e73ed463933]
+[00:53:16.840] INFO  workflow.execution — respStatus: 200 resp: {
+    "id": 1,
+    "title": "Create an endpoint at Beeceptor.",
+    "completed": true
+}
+[00:53:16.970] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 85EABF480AC7F40-0000000000000000 on ExchangeId: 85EABF480AC7F40-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Assertion failed:
+Condition 1: actual="200"  expected == "400"
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d1f2a0d8-54b7-4139-9561-5a80e8 from[direct://d1f2a0d8-54b7-4139-9561-5a80e8f6b276          548
+	...
+camel-route.yaml:28                      d1f2a0d8-54b7-4139-9561-5a80e8 script[js{var _failures=[];var _l0=(exchange.getMe            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:53:16.981] ERROR controller.WorkflowController — Workflow 'Copy of New Workflow' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Assertion failed:
+Condition 1: actual="200"  expected == "400"

@@ -1,0 +1,21 @@
+{
+  "runId" : "run-089a7fc8a5d8",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-27T19:44:11.2753217",
+  "status" : "success",
+  "durationMs" : 4956,
+  "resultBody" : "[B@7c369912",
+  "steps" : [ {
+    "nodeId" : "97d154e6-0ac6-4312-a0cc-93ce6766fa75",
+    "nodeType" : "dbexecute",
+    "nodeName" : "SQL Execute",
+    "section" : "processing"
+  }, {
+    "nodeId" : "be91d8a8-a1ae-4711-8eb4-c650804be382",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

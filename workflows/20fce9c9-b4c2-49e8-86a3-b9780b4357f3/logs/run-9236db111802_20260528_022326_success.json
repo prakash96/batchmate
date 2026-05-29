@@ -1,0 +1,21 @@
+{
+  "runId" : "run-9236db111802",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-28T02:23:26.2568141",
+  "status" : "success",
+  "durationMs" : 242,
+  "resultBody" : "GenericFile[C:\\Users\\Admin\\Downloads\\test-grid.json]",
+  "steps" : [ {
+    "nodeId" : "be91d8a8-a1ae-4711-8eb4-c650804be382",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  }, {
+    "nodeId" : "0a3caadf-be65-49c1-a1d1-110ad6140ea2",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

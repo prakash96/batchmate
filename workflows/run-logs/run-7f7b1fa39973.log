@@ -1,0 +1,121 @@
+[21:30:19.284] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:30:19.299] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-7f7b1fa39973]
+[21:30:20.315] INFO  workflow.execution — Error: null: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: <eval>:1:11 Expected an operand but found eof
+'body - ' +
+           ^
+ org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: <eval>:1:11 Expected an operand but found eof
+'body - ' +
+           ^
+
+	at com.batchmate.workflow.camel.JsLanguage.eval(JsLanguage.java:78)
+	at com.batchmate.workflow.camel.JsLanguage$1.evaluate(JsLanguage.java:45)
+	at org.apache.camel.support.ExpressionAdapter.evaluate(ExpressionAdapter.java:45)
+	at org.apache.camel.processor.SetPropertyProcessor.process(SetPropertyProcessor.java:47)
+	at org.apache.camel.impl.engine.CamelInternalProcessor.process(CamelInternalProcessor.java:390)
+	at org.apache.camel.processor.Pipeline$PipelineTask.run(Pipeline.java:104)
+	at org.apache.camel.impl.engine.DefaultReactiveExecutor$Worker.schedule(DefaultReactiveExecutor.java:181)
+	at org.apache.camel.impl.engine.DefaultReactiveExecutor.scheduleMain(DefaultReactiveExecutor.java:59)
+	at org.apache.camel.processor.Pipeline.process(Pipeline.java:165)
+	at org.apache.camel.impl.engine.CamelInternalProcessor.process(CamelInternalProcessor.java:390)
+	at org.apache.camel.component.direct.DirectProducer.process(DirectProducer.java:96)
+	at org.apache.camel.impl.engine.SharedCamelInternalProcessor.process(SharedCamelInternalProcessor.java:214)
+	at org.apache.camel.impl.engine.SharedCamelInternalProcessor$1.process(SharedCamelInternalProcessor.java:111)
+	at org.apache.camel.impl.engine.DefaultAsyncProcessorAwaitManager.process(DefaultAsyncProcessorAwaitManager.java:83)
+	at org.apache.camel.impl.engine.SharedCamelInternalProcessor.process(SharedCamelInternalProcessor.java:108)
+	at org.apache.camel.support.cache.DefaultProducerCache.send(DefaultProducerCache.java:199)
+	at org.apache.camel.impl.engine.DefaultProducerTemplate.send(DefaultProducerTemplate.java:176)
+	at org.apache.camel.impl.engine.DefaultProducerTemplate.send(DefaultProducerTemplate.java:172)
+	at org.apache.camel.impl.engine.DefaultProducerTemplate.send(DefaultProducerTemplate.java:137)
+	at com.batchmate.workflow.controller.WorkflowController.runWorkflow(WorkflowController.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:895)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:808)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1072)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:965)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:555)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:623)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:209)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter.doFilterInternal(WebMvcMetricsFilter.java:96)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:168)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:481)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:130)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:342)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:390)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:928)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1794)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: javax.script.ScriptException: org.graalvm.polyglot.PolyglotException: SyntaxError: <eval>:1:11 Expected an operand but found eof
+'body - ' +
+           ^
+
+	at com.oracle.truffle.js.scriptengine.GraalJSScriptEngine.toScriptException(GraalJSScriptEngine.java:503)
+	at com.oracle.truffle.js.scriptengine.GraalJSScriptEngine.eval(GraalJSScriptEngine.java:480)
+	at com.oracle.truffle.js.scriptengine.GraalJSScriptEngine.eval(GraalJSScriptEngine.java:446)
+	at java.scripting/javax.script.AbstractScriptEngine.eval(AbstractScriptEngine.java:264)
+	at com.batchmate.workflow.camel.JsLanguage.eval(JsLanguage.java:76)
+	... 73 more
+Caused by: org.graalvm.polyglot.PolyglotException: SyntaxError: <eval>:1:11 Expected an operand but found eof
+'body - ' +
+           ^
+
+	at org.graalvm.polyglot.Context.eval(Context.java:399)
+	at com.oracle.truffle.js.scriptengine.GraalJSScriptEngine.eval(GraalJSScriptEngine.java:478)
+	... 76 more
+
+[21:30:20.350] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 0AF21734C1122A0-0000000000000002 on ExchangeId: 0AF21734C1122A0-0000000000000002). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Error Processing Sample Message:
+JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: <eval>:1:11 Expected an operand but found eof
+'body - ' +
+           ^
+
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       05bbf73f-05ae-43b7-8808-e1873d from[direct://05bbf73f-05ae-43b7-8808-e1873d255a26         1040
+	...
+camel-route.yaml:62                      05bbf73f-05ae-43b7-8808-e1873d script[js{throw new Error('Error Processing Sample            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[21:30:20.366] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Error Processing Sample Message:
+JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: <eval>:1:11 Expected an operand but found eof
+'body - ' +
+           ^
+

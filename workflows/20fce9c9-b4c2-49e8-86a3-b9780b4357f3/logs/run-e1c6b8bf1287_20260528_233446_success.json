@@ -1,0 +1,26 @@
+{
+  "runId" : "run-e1c6b8bf1287",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-28T23:34:43.5517331",
+  "status" : "success",
+  "durationMs" : 3214,
+  "resultBody" : "[\"/pub/example/imap-console-client.png\",\"/pub/example/KeyGenerator.png\",\"/pub/example/KeyGeneratorSmall.png\",\"/pub/example/mail-editor.png\",\"/pub/example/mail-send-winforms.png\",\"/pub/example/mime-explorer.png\",\"/pub/example/pocketftp.png\",\"/pub/example/pocketftpSmall.png\",\"/pub/example/pop3-browser.png\",\"/pub/example/pop3-console-client.png\",\"/pub/example/readme.txt\",\"/pub/example/ResumableTransfer.png\",\"/pub/example/winceclient.png\",\"/pub/example/winceclientSmall.png\",\"/pub/example/WinFormClient.png\",\"/pub/example/WinFormClientSmall.png\"]",
+  "steps" : [ {
+    "nodeId" : "fc9b659a-c2e5-4aec-8557-afb0ef3e3afb",
+    "nodeType" : "sftplist",
+    "nodeName" : "SFTP List",
+    "section" : "processing"
+  }, {
+    "nodeId" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+    "nodeType" : "iteration",
+    "nodeName" : "Iteration",
+    "section" : "processing"
+  }, {
+    "nodeId" : "f21abb3f-fdfc-4ef8-a3ea-8405e80ae48b",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

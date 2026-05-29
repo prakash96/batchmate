@@ -1,0 +1,271 @@
+package com.batchmate.workflow.camel;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.batchmate.workflow.camel.api.ConnectionTester;
+import com.batchmate.workflow.camel.api.ConversionUtils;
+import com.batchmate.workflow.camel.api.NodeConverter;
+import com.batchmate.workflow.camel.api.NodeConverterPlugin;
+import com.batchmate.workflow.camel.api.TestResult;
+import com.batchmate.workflow.service.ConnectionService;
+import com.batchmate.workflow.service.VaultService;
+import com.batchmate.workflow.util.PathResolver;
+import org.apache.camel.CamelContext;
+import org.apache.camel.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ServiceLoader;
+import java.util.stream.Stream;
+import java.util.zip.ZipFile;
+
+@Service
+public class NodeConverterRegistry {
+
+    private static final Logger log = LoggerFactory.getLogger(NodeConverterRegistry.class);
+
+    private final Map<String, NodeConverter>    converters        = new LinkedHashMap<>();
+    private final Map<String, ConnectionTester> connectionTesters = new LinkedHashMap<>();
+    private final List<String> pluginStatus = new ArrayList<>();
+    private final CamelContext camelContext;
+    private final VaultService vaultService;
+    private final ConnectionService connectionService;
+
+    @Value("${plugins.dir:../plugins}")
+    private String pluginsDir;
+
+    public NodeConverterRegistry(CamelContext camelContext, VaultService vaultService, ConnectionService connectionService) {
+        this.camelContext = camelContext;
+        this.vaultService = vaultService;
+        this.connectionService = connectionService;
+    }
+
+    @PostConstruct
+    public void loadPlugins() {
+        camelContext.getPropertiesComponent()
+            .addPropertiesSource(new ConnectionPropertiesSource(connectionService));
+        camelContext.getPropertiesComponent()
+            .addPropertiesSource(new VaultPropertiesSource(vaultService));
+
+        Path dir = PathResolver.resolveDir(pluginsDir, "plugins");
+        if (!Files.exists(dir)) {
+            String msg = "WARN  Plugins directory not found: " + dir.toAbsolutePath() + " — no node types will be available";
+            log.warn(msg);
+            pluginStatus.add(msg);
+            return;
+        }
+        pluginStatus.add("INFO  Plugins directory: " + dir.toAbsolutePath());
+        log.info("Loading plugins from: {}", dir.toAbsolutePath());
+        try (Stream<Path> entries = Files.list(dir)) {
+            entries.filter(p -> p.getFileName().toString().endsWith(".jar"))
+                   .sorted()
+                   .forEach(this::loadJar);
+        } catch (IOException e) {
+            log.error("Failed to scan plugins directory: {}", e.getMessage());
+            pluginStatus.add("ERROR Failed to scan plugins directory: " + e.getMessage());
+        }
+        pluginStatus.add("INFO  Total node types registered: " + converters.size()
+                + " [" + String.join(", ", converters.keySet()) + "]");
+    }
+
+    private void loadJar(Path jar) {
+        try {
+            URLClassLoader cl = new URLClassLoader(
+                    new URL[]{ jar.toUri().toURL() },
+                    getClass().getClassLoader());
+
+            registerCamelComponents(jar, cl);
+            registerJdbcDrivers(jar, cl);
+
+            int loaded = 0;
+            for (NodeConverterPlugin plugin : ServiceLoader.load(NodeConverterPlugin.class, cl)) {
+                Map<String, NodeConverter> provided = plugin.converters();
+                provided.forEach((type, converter) -> converters.put(type, converter));
+                plugin.connectionTesters().forEach(connectionTesters::put);
+                plugin.beans().forEach((name, bean) -> {
+                    try {
+                        camelContext.getRegistry().bind(name, bean);
+                        log.info("Registered bean '{}' from plugin '{}'", name, plugin.pluginId());
+                    } catch (Exception e) {
+                        log.warn("Could not register bean '{}' from plugin '{}': {}", name, plugin.pluginId(), e.getMessage());
+                    }
+                });
+                String msg = "INFO  Plugin '" + plugin.pluginId() + "' → "
+                        + provided.size() + " type(s): " + String.join(", ", provided.keySet())
+                        + "  [" + jar.getFileName() + "]";
+                log.info("Plugin '{}' loaded {} type(s) from {}", plugin.pluginId(), provided.size(), jar.getFileName());
+                pluginStatus.add(msg);
+                loaded++;
+            }
+            if (loaded == 0) {
+                String msg = "WARN  No plugin found in " + jar.getFileName() + " — missing META-INF/services?";
+                log.warn(msg);
+                pluginStatus.add(msg);
+            }
+        } catch (Exception e) {
+            String msg = "ERROR Failed to load " + jar.getFileName() + ": " + e.getMessage();
+            log.error(msg);
+            pluginStatus.add(msg);
+        }
+    }
+
+    private static final String CAMEL_COMPONENT_PREFIX = "META-INF/services/org/apache/camel/component/";
+
+    @SuppressWarnings("unchecked")
+    private void registerCamelComponents(Path jar, URLClassLoader cl) {
+        try (ZipFile zf = new ZipFile(jar.toFile())) {
+            zf.stream()
+              .filter(e -> !e.isDirectory()
+                        && e.getName().startsWith(CAMEL_COMPONENT_PREFIX)
+                        && !e.getName().substring(CAMEL_COMPONENT_PREFIX.length()).contains("/"))
+              .forEach(entry -> {
+                  String scheme = entry.getName().substring(CAMEL_COMPONENT_PREFIX.length());
+                  try (InputStream is = zf.getInputStream(entry)) {
+                      Properties props = new Properties();
+                      props.load(is);
+                      String className = props.getProperty("class");
+                      if (className == null) return;
+                      Class<? extends Component> compClass =
+                          (Class<? extends Component>) cl.loadClass(className);
+                      camelContext.addComponent(scheme, compClass.getDeclaredConstructor().newInstance());
+                      log.info("Registered Camel component '{}' from plugin: {}", scheme, jar.getFileName());
+                      pluginStatus.add("INFO  Camel component '" + scheme + "' registered from " + jar.getFileName());
+                  } catch (Exception e) {
+                      log.debug("Could not register component '{}' from {}: {}", scheme, jar.getFileName(), e.getMessage());
+                  }
+              });
+        } catch (IOException e) {
+            log.debug("Could not scan {} for Camel components: {}", jar.getFileName(), e.getMessage());
+        }
+    }
+
+    private void registerJdbcDrivers(Path jar, URLClassLoader cl) {
+        try {
+            for (java.sql.Driver driver : ServiceLoader.load(java.sql.Driver.class, cl)) {
+                try {
+                    java.sql.DriverManager.registerDriver(new DriverShim(driver));
+                    String name = driver.getClass().getName();
+                    log.info("Registered JDBC driver '{}' from {}", name, jar.getFileName());
+                    pluginStatus.add("INFO  JDBC driver '" + name + "' registered from " + jar.getFileName());
+                } catch (java.sql.SQLException e) {
+                    log.warn("Could not register JDBC driver from {}: {}", jar.getFileName(), e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            log.debug("No JDBC drivers in {}: {}", jar.getFileName(), e.getMessage());
+        }
+    }
+
+    /** Returns the plugin loading summary lines to be logged at run start. */
+    public List<String> getPluginStatus() {
+        return Collections.unmodifiableList(pluginStatus);
+    }
+
+    public List<Map<String, Object>> convert(String type, JsonNode data) {
+        NodeConverter c = converters.get(type);
+        if (c == null) return Collections.singletonList(ConversionUtils.logMsg("[TODO] Unsupported: " + type));
+        return c.convert(resolveVaultRefs(resolveConnectionRef(data)));
+    }
+
+    /**
+     * When node data contains a connectionId, looks up the saved connection and merges its
+     * config fields (host, port, username, password, etc.) into the node data so plugins
+     * can read connection fields directly without needing to resolve the reference themselves.
+     * Connection config fields always take precedence over any defaults already in node data.
+     */
+    private static final java.util.Set<String> SENSITIVE_FIELDS = java.util.Set.of(
+        "password", "privateKeyPassphrase", "passphrase", "secret", "apiSecret", "apiKey"
+    );
+
+    private JsonNode resolveConnectionRef(JsonNode data) {
+        if (!data.isObject()) return data;
+        String connectionId = data.path("connectionId").asText("");
+        if (connectionId.isEmpty()) return data;
+        try {
+            JsonNode conn = connectionService.list().stream()
+                .filter(c -> connectionId.equals(c.path("id").asText()))
+                .findFirst().orElse(null);
+            if (conn == null) {
+                log.warn("Connection '{}' not found — using node data as-is", connectionId);
+                return data;
+            }
+            JsonNode config = conn.path("config");
+            if (!config.isObject()) return data;
+            ObjectNode merged = data.deepCopy();
+            config.fields().forEachRemaining(e -> {
+                String key = e.getKey();
+                if (SENSITIVE_FIELDS.contains(key)) {
+                    // Store a property placeholder — actual value resolved at runtime by ConnectionPropertiesSource
+                    merged.put(key, "{{conn." + connectionId + "." + key + "}}");
+                } else {
+                    merged.set(key, e.getValue());
+                }
+            });
+            return merged;
+        } catch (Exception e) {
+            log.warn("Could not resolve connection ref '{}': {}", connectionId, e.getMessage());
+            return data;
+        }
+    }
+
+    /**
+     * For each *Source field whose value is "vault", looks up the corresponding *Vault entry ID,
+     * fetches keyContent from the vault, then rewrites the node data with source="inline" and
+     * the resolved key content in the *Inline field so plugins don't need vault awareness.
+     */
+    private JsonNode resolveVaultRefs(JsonNode data) {
+        if (!data.isObject()) return data;
+        List<JsonNode> entries;
+        try {
+            entries = vaultService.list();
+        } catch (Exception e) {
+            log.warn("Could not load vault entries for ref resolution: {}", e.getMessage());
+            return data;
+        }
+        ObjectNode copy = null;
+        for (java.util.Iterator<Map.Entry<String, JsonNode>> it = data.fields(); it.hasNext(); ) {
+            Map.Entry<String, JsonNode> field = it.next();
+            String key = field.getKey();
+            if (!key.endsWith("Source") || !"vault".equals(field.getValue().asText())) continue;
+            String prefix      = key.substring(0, key.length() - "Source".length());
+            String vaultIdField = prefix + "Vault";
+            String inlineField  = prefix + "Inline";
+            String vaultId = data.path(vaultIdField).asText("");
+            if (vaultId.isEmpty()) continue;
+            String content = entries.stream()
+                .filter(e -> vaultId.equals(e.path("id").asText()))
+                .findFirst()
+                .map(e -> e.path("config").path("keyContent").asText(null))
+                .orElse(null);
+            if (content == null) {
+                log.warn("Vault entry '{}' not found or has no keyContent", vaultId);
+                continue;
+            }
+            if (copy == null) copy = data.deepCopy();
+            copy.put(key, "inline");
+            copy.put(inlineField, content);
+        }
+        return copy != null ? copy : data;
+    }
+
+    public TestResult testConnection(String type, JsonNode config) {
+        ConnectionTester tester = connectionTesters.get(type);
+        if (tester == null) return new TestResult(false, "No tester registered for connection type: " + type);
+        return tester.test(config);
+    }
+}

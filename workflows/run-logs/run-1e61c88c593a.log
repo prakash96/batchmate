@@ -1,0 +1,69 @@
+[01:01:23.431] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[01:01:23.431] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-1e61c88c593a]
+[01:01:23.431] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[01:01:23.452] INFO  workflow.execution — sftplist: Listing /pub/example
+[01:01:26.646] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:01:26.658] INFO  workflow.execution — sftpread: Reading /pub/example/imap-console-client.png
+[01:01:26.658] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:01:34.963] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:01:34.974] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:01:34.991] INFO  workflow.execution — sftpread: Reading /pub/example/KeyGenerator.png
+[01:01:34.991] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:01:43.769] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:01:43.775] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:01:43.781] INFO  workflow.execution — sftpread: Reading /pub/example/KeyGeneratorSmall.png
+[01:01:43.785] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:01:52.471] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:01:52.522] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:01:52.536] INFO  workflow.execution — sftpread: Reading /pub/example/mail-editor.png
+[01:01:52.539] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:02:01.285] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:02:01.414] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:02:01.517] INFO  workflow.execution — sftpread: Reading /pub/example/mail-send-winforms.png
+[01:02:01.538] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:02:10.905] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:02:10.913] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:02:10.915] INFO  workflow.execution — sftpread: Reading /pub/example/mime-explorer.png
+[01:02:10.918] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:02:19.606] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:02:19.616] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:02:19.616] INFO  workflow.execution — sftpread: Reading /pub/example/pocketftp.png
+[01:02:19.620] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:02:28.313] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:02:28.320] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:02:28.352] INFO  workflow.execution — sftpread: Reading /pub/example/pocketftpSmall.png
+[01:02:28.359] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:02:36.914] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:02:36.918] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:02:36.918] INFO  workflow.execution — sftpread: Reading /pub/example/pop3-browser.png
+[01:02:36.934] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:02:45.220] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:02:45.260] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:02:45.270] INFO  workflow.execution — sftpread: Reading /pub/example/pop3-console-client.png
+[01:02:45.285] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:02:54.023] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:02:54.055] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:02:54.169] INFO  workflow.execution — sftpread: Reading /pub/example/readme.txt
+[01:02:54.201] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:03:03.014] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:03:03.029] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:03:03.045] INFO  workflow.execution — sftpread: Reading /pub/example/ResumableTransfer.png
+[01:03:03.087] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:03:12.346] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:03:12.346] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:03:12.346] INFO  workflow.execution — sftpread: Reading /pub/example/winceclient.png
+[01:03:12.346] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:03:20.169] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:03:20.225] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:03:20.227] INFO  workflow.execution — sftpread: Reading /pub/example/winceclientSmall.png
+[01:03:20.235] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:03:28.622] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:03:28.622] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:03:28.638] INFO  workflow.execution — sftpread: Reading /pub/example/WinFormClient.png
+[01:03:28.638] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:03:37.841] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:03:37.851] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[01:03:37.853] INFO  workflow.execution — sftpread: Reading /pub/example/WinFormClientSmall.png
+[01:03:37.859] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[01:03:46.238] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
+[01:03:46.248] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 142816ms

@@ -1,0 +1,31 @@
+[14:21:48.405] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[14:21:48.464] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-959eb5dc27ac]
+[14:21:49.446] INFO  workflow.execution — respStatus: 200 resp: [
+  {
+    "id": 1,
+    "title": "Create an endpoint at Beeceptor.",
+    "completed": true
+  },
+  {
+    "id": 2,
+    "title": "Send a request to your new Beeceptor endpoint.",
+    "completed": true
+  },
+  {
+    "id": 3,
+    "title": "Create a mocking rule to send dummy data.",
+    "completed": false
+  },
+  {
+    "id": 4,
+    "title": "Try out a failure response by sending 500 HTTP status code.",
+    "completed": false
+  },
+  {
+    "id": 5,
+    "title": "Use the proxy feature to send a request to a real API. Intercept traffic using Beeceptor.",
+    "completed": false
+  }
+]
+[14:21:49.506] INFO  workflow.execution — error: java.lang.RuntimeException
+[14:21:49.506] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1101ms

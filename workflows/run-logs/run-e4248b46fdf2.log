@@ -1,0 +1,245 @@
+[00:27:39.378] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:27:39.393] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-e4248b46fdf2]
+[00:27:39.442] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[00:27:39.444] INFO  workflow.execution — sftplist: Listing /pub/example
+[00:27:44.384] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:27:44.391] INFO  workflow.execution — sftpread: Reading /pub/example/imap-console-client.png
+[00:27:44.587] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:27:47.921] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:27:47.962] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000001 on ExchangeId: 3B5A4F8940ACB63-0000000000000001). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: imap-console-client.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         8531
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:27:47.973] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:27:47.977] INFO  workflow.execution — sftpread: Reading /pub/example/KeyGenerator.png
+[00:27:47.985] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:27:51.084] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:27:51.095] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000002 on ExchangeId: 3B5A4F8940ACB63-0000000000000002). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: KeyGenerator.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        11690
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:27:51.102] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:27:51.102] INFO  workflow.execution — sftpread: Reading /pub/example/KeyGeneratorSmall.png
+[00:27:51.110] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:27:54.366] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:27:54.366] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000003 on ExchangeId: 3B5A4F8940ACB63-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: KeyGeneratorSmall.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        14968
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:27:54.366] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:27:54.384] INFO  workflow.execution — sftpread: Reading /pub/example/mail-editor.png
+[00:27:54.394] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:27:57.608] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:27:57.628] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000004 on ExchangeId: 3B5A4F8940ACB63-0000000000000004). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: mail-editor.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        18221
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:27:57.628] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:27:57.628] INFO  workflow.execution — sftpread: Reading /pub/example/mail-send-winforms.png
+[00:27:57.636] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:00.673] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:00.686] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000005 on ExchangeId: 3B5A4F8940ACB63-0000000000000005). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: mail-send-winforms.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        21288
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:00.686] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:00.694] INFO  workflow.execution — sftpread: Reading /pub/example/mime-explorer.png
+[00:28:00.694] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:03.939] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:03.952] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000006 on ExchangeId: 3B5A4F8940ACB63-0000000000000006). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: mime-explorer.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        24545
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:03.955] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:03.956] INFO  workflow.execution — sftpread: Reading /pub/example/pocketftp.png
+[00:28:03.961] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:07.002] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:07.009] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000007 on ExchangeId: 3B5A4F8940ACB63-0000000000000007). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: pocketftp.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        27606
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:07.011] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:07.012] INFO  workflow.execution — sftpread: Reading /pub/example/pocketftpSmall.png
+[00:28:07.019] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:10.041] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:10.045] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000008 on ExchangeId: 3B5A4F8940ACB63-0000000000000008). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: pocketftpSmall.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        30643
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:10.050] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:10.052] INFO  workflow.execution — sftpread: Reading /pub/example/pop3-browser.png
+[00:28:10.052] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:13.206] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:13.215] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000009 on ExchangeId: 3B5A4F8940ACB63-0000000000000009). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: pop3-browser.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        33812
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:13.217] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:13.219] INFO  workflow.execution — sftpread: Reading /pub/example/pop3-console-client.png
+[00:28:13.223] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:16.507] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:16.523] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-000000000000000A on ExchangeId: 3B5A4F8940ACB63-000000000000000A). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: pop3-console-client.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        37117
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:16.523] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:16.537] INFO  workflow.execution — sftpread: Reading /pub/example/readme.txt
+[00:28:16.547] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:19.655] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:19.680] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-000000000000000B on ExchangeId: 3B5A4F8940ACB63-000000000000000B). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: readme.txt]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        40265
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:19.689] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:19.689] INFO  workflow.execution — sftpread: Reading /pub/example/ResumableTransfer.png
+[00:28:19.689] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:22.919] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:22.934] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-000000000000000C on ExchangeId: 3B5A4F8940ACB63-000000000000000C). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: ResumableTransfer.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        43528
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:22.939] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:22.939] INFO  workflow.execution — sftpread: Reading /pub/example/winceclient.png
+[00:28:22.943] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:26.030] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:26.039] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-000000000000000D on ExchangeId: 3B5A4F8940ACB63-000000000000000D). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: winceclient.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        46635
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:26.041] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:26.044] INFO  workflow.execution — sftpread: Reading /pub/example/winceclientSmall.png
+[00:28:26.051] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:28.299] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:28.305] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-000000000000000E on ExchangeId: 3B5A4F8940ACB63-000000000000000E). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: pub]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        48903
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:28.317] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:28.318] INFO  workflow.execution — sftpread: Reading /pub/example/WinFormClient.png
+[00:28:28.322] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:31.516] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:31.524] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-000000000000000F on ExchangeId: 3B5A4F8940ACB63-000000000000000F). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: WinFormClient.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        52118
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:31.571] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[00:28:31.578] INFO  workflow.execution — sftpread: Reading /pub/example/WinFormClientSmall.png
+[00:28:31.581] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:28:34.642] WARN  remote.RemoteFilePollingConsumerPollStrategy — Trying to recover by force disconnecting from remote server and re-connecting at next poll: sftp://demo@test.rebex.net:22
+[00:28:34.654] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 3B5A4F8940ACB63-0000000000000010 on ExchangeId: 3B5A4F8940ACB63-0000000000000010). Exhausted after delivery attempt: 1 caught: org.apache.camel.CamelExchangeException: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: WinFormClientSmall.png]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3        55245
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[simple{sftp://demo:xxxxxx@test.rebex.ne            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:28:34.658] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Error during poll. Exchange[]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot change directory to: WinFormClientSmall.png]

@@ -1,0 +1,22 @@
+{
+  "runId" : "run-a24e7fcb23c8",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-28T21:41:58.2357002",
+  "status" : "failed",
+  "durationMs" : 66,
+  "error" : "Failed to resolve endpoint: sftp://localhost:22/pub/example?disconnect=true&fileName=*.csv&idempotent=false&noop=true&strictHostKeyChecking=no due to: Failed to resolve endpoint: sftp://localhost:22/pub/example?disconnect=true&fileName=*.csv&idempotent=false&noop=true&strictHostKeyChecking=no due to: There are 1 parameters that couldn't be set on the endpoint. Check the uri if the parameters are spelt correctly and that they are properties of the endpoint. Unknown parameters=[{strictHostKeyChecking=no}]",
+  "resultBody" : "",
+  "steps" : [ {
+    "nodeId" : "1405687d-4bbf-453a-900b-2deeae394c19",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  }, {
+    "nodeId" : "f402a494-f25c-45c2-bd92-aead7d04752e",
+    "nodeType" : "sftpread",
+    "nodeName" : "SFTP Read",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

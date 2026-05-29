@@ -1,0 +1,31 @@
+[14:17:26.188] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[14:17:26.203] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-33758a15849a]
+[14:17:27.151] INFO  workflow.execution — respStatus: 200 resp: [
+  {
+    "id": 1,
+    "title": "Create an endpoint at Beeceptor.",
+    "completed": true
+  },
+  {
+    "id": 2,
+    "title": "Send a request to your new Beeceptor endpoint.",
+    "completed": true
+  },
+  {
+    "id": 3,
+    "title": "Create a mocking rule to send dummy data.",
+    "completed": false
+  },
+  {
+    "id": 4,
+    "title": "Try out a failure response by sending 500 HTTP status code.",
+    "completed": false
+  },
+  {
+    "id": 5,
+    "title": "Use the proxy feature to send a request to a real API. Intercept traffic using Beeceptor.",
+    "completed": false
+  }
+]
+[14:17:27.243] INFO  workflow.execution — error: JSON compare mismatch (mode=deep-equal)
+[14:17:27.258] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1070ms

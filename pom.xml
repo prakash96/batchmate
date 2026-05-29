@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.18</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.batchmate.workflow</groupId>
+    <artifactId>workflow-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>workflow-parent</name>
+
+    <!-- ========================= -->
+    <!-- Sub-modules               -->
+    <!-- Build order (no explicit  -->
+    <!-- inter-module deps needed  -->
+    <!-- beyond Maven dependency   -->
+    <!-- declarations):            -->
+    <!--   workflow-api → plugins → app -->
+    <!-- ========================= -->
+    <modules>
+        <module>workflow-api</module>
+        <module>workflow-plugin-core-nodes</module>
+        <module>workflow-plugin-file</module>
+        <module>workflow-plugin-sftp</module>
+        <module>workflow-plugin-ftp</module>
+        <module>workflow-plugin-notification</module>
+        <module>workflow-plugin-db</module>
+        <module>workflow-plugin-aws</module>
+        <module>workflow-plugin-security</module>
+        <module>workflow-plugin-compression</module>
+        <module>workflow-plugin-converter</module>
+        <module>app</module>
+    </modules>
+
+    <!-- ========================= -->
+    <!-- Properties                -->
+    <!-- ========================= -->
+    <properties>
+        <java.version>11</java.version>
+        <camel.version>3.22.2</camel.version>
+        <graalvm.version>22.3.2</graalvm.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Plugins skip boot repackage; app/pom.xml overrides to false -->
+        <skipBootRepackage>true</skipBootRepackage>
+    </properties>
+
+    <!-- ========================= -->
+    <!-- Dependency Management     -->
+    <!-- Inherited by all modules  -->
+    <!-- ========================= -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-bom</artifactId>
+                <version>${camel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ========================= -->
+    <!-- Shared dependencies       -->
+    <!-- (all modules: api,        -->
+    <!--  plugins, app)            -->
+    <!-- ========================= -->
+    <dependencies>
+
+        <!-- Spring context — needed by plugin @Component classes -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Jackson — for JsonNode in converter interfaces -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Camel core — needed by plugin converters -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-spring-boot-starter</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+
+        <!-- Lombok (optional) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <!-- ========================= -->
+    <!-- Build                     -->
+    <!-- ========================= -->
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals><goal>repackage</goal></goals>
+                        <configuration>
+                            <skip>${skipBootRepackage}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

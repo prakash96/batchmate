@@ -1,0 +1,22 @@
+[ {
+  "name" : "postgre",
+  "type" : "postgresql",
+  "config" : {
+    "host" : "ep-lively-sunset-apq7z0ub-pooler.c-7.us-east-1.aws.neon.tech",
+    "database" : "neondb",
+    "port" : 5432,
+    "password" : "npg_7twQjiJN5GPR",
+    "username" : "neondb_owner",
+    "ssl" : true
+  },
+  "id" : "conn-1779737211864-libkc"
+}, {
+  "name" : "Test SFtp",
+  "type" : "sftp",
+  "config" : {
+    "host" : "test.rebex.net",
+    "username" : "demo",
+    "password" : "password"
+  },
+  "id" : "conn-1779979189884-vyg9t"
+} ]

@@ -1,0 +1,16 @@
+{
+  "runId" : "run-4bfef725c65c",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-28T22:57:29.4659112",
+  "status" : "success",
+  "durationMs" : 2248,
+  "resultBody" : "sftplist",
+  "steps" : [ {
+    "nodeId" : "fc9b659a-c2e5-4aec-8557-afb0ef3e3afb",
+    "nodeType" : "sftplist",
+    "nodeName" : "SFTP List",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

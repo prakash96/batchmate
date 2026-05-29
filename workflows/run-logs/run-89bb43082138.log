@@ -1,0 +1,213 @@
+[23:53:10.918] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[23:53:10.932] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-89bb43082138]
+[23:53:10.934] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
+[23:53:10.943] INFO  workflow.execution — sftplist: Listing /pub/example
+[23:53:13.261] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.269] INFO  workflow.execution — sftpread: Reading /pub/example/imap-console-client.png
+[23:53:13.374] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000003 on ExchangeId: 366CF0C989AA8EA-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2432
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.383] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.383] INFO  workflow.execution — sftpread: Reading /pub/example/KeyGenerator.png
+[23:53:13.383] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000004 on ExchangeId: 366CF0C989AA8EA-0000000000000004). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2449
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.383] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.390] INFO  workflow.execution — sftpread: Reading /pub/example/KeyGeneratorSmall.png
+[23:53:13.392] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000005 on ExchangeId: 366CF0C989AA8EA-0000000000000005). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2458
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.392] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.399] INFO  workflow.execution — sftpread: Reading /pub/example/mail-editor.png
+[23:53:13.404] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000006 on ExchangeId: 366CF0C989AA8EA-0000000000000006). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2467
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.406] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.483] INFO  workflow.execution — sftpread: Reading /pub/example/mail-send-winforms.png
+[23:53:13.483] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000007 on ExchangeId: 366CF0C989AA8EA-0000000000000007). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2549
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.490] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.490] INFO  workflow.execution — sftpread: Reading /pub/example/mime-explorer.png
+[23:53:13.512] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000008 on ExchangeId: 366CF0C989AA8EA-0000000000000008). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2568
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.512] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.512] INFO  workflow.execution — sftpread: Reading /pub/example/pocketftp.png
+[23:53:13.521] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000009 on ExchangeId: 366CF0C989AA8EA-0000000000000009). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2578
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.524] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.526] INFO  workflow.execution — sftpread: Reading /pub/example/pocketftpSmall.png
+[23:53:13.528] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-000000000000000A on ExchangeId: 366CF0C989AA8EA-000000000000000A). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2594
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.528] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.528] INFO  workflow.execution — sftpread: Reading /pub/example/pop3-browser.png
+[23:53:13.538] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-000000000000000B on ExchangeId: 366CF0C989AA8EA-000000000000000B). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2601
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.538] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.542] INFO  workflow.execution — sftpread: Reading /pub/example/pop3-console-client.png
+[23:53:13.544] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-000000000000000C on ExchangeId: 366CF0C989AA8EA-000000000000000C). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2610
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.544] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.549] INFO  workflow.execution — sftpread: Reading /pub/example/readme.txt
+[23:53:13.552] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-000000000000000D on ExchangeId: 366CF0C989AA8EA-000000000000000D). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2615
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.552] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.552] INFO  workflow.execution — sftpread: Reading /pub/example/ResumableTransfer.png
+[23:53:13.561] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-000000000000000E on ExchangeId: 366CF0C989AA8EA-000000000000000E). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2618
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.561] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.561] INFO  workflow.execution — sftpread: Reading /pub/example/winceclient.png
+[23:53:13.569] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-000000000000000F on ExchangeId: 366CF0C989AA8EA-000000000000000F). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2627
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.569] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.569] INFO  workflow.execution — sftpread: Reading /pub/example/winceclientSmall.png
+[23:53:13.577] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000010 on ExchangeId: 366CF0C989AA8EA-0000000000000010). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2640
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.577] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.577] INFO  workflow.execution — sftpread: Reading /pub/example/WinFormClient.png
+[23:53:13.585] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000011 on ExchangeId: 366CF0C989AA8EA-0000000000000011). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2643
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.585] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
+[23:53:13.585] INFO  workflow.execution — sftpread: Reading /pub/example/WinFormClientSmall.png
+[23:53:13.593] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 366CF0C989AA8EA-0000000000000012 on ExchangeId: 366CF0C989AA8EA-0000000000000012). Exhausted after delivery attempt: 1 caught: org.apache.camel.FailedToCreateConsumerException: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3         2651
+	...
+camel-route.yaml:68                      20fce9c9-b4c2-49e8-86a3-b9780b pollEnrich[constant{sftp://demo:xxxxxx@test.rebex.            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:53:13.593] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Failed to create Consumer for endpoint: sftp://demo:xxxxxx@test.rebex.net:22$%7Bbody%7D?disconnect=true&idempotent=false&noop=true. Reason: java.lang.IllegalArgumentException: host must be specified and not empty

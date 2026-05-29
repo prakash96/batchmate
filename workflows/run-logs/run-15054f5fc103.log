@@ -1,0 +1,14 @@
+[01:44:02.639] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[01:44:02.649] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-15054f5fc103]
+[01:44:03.237] INFO  workflow.execution — result: [{"id":1,"message":"sample message"}]
+[01:44:03.270] INFO  workflow.execution — -----BEGIN PGP MESSAGE-----
+Version: BCPG v1.70
+
+hF4DgB7o3PpLlgQSAQdAVowijiZFhDWOjpDjrPaLmquVCDp8TQmwPe0uGVQz/iAw
+4zxTB8osG6saTChJTaZL84OUYWrOXGa9vNC9hKmxqZF3+rEYBHYVINaT/utMzQfC
+0lwB0tVIPntrS08xjDRGMKedW64MKaSI48gE7ve+e4QgMnSAKh4uTCLlewAEk85k
+YCoHeC7zWOaSEglX5AqKhcnahQr4SNy3eq15Djd6AnkNPsg6pb1FBZSlOYMNCw==
+=O4Mh
+-----END PGP MESSAGE-----
+
+[01:44:03.418] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 779ms

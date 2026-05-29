@@ -1,0 +1,21 @@
+{
+  "runId" : "run-1942ed922dcc",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-28T19:42:27.4008852",
+  "status" : "success",
+  "durationMs" : 386,
+  "resultBody" : "filewrite",
+  "steps" : [ {
+    "nodeId" : "0a3caadf-be65-49c1-a1d1-110ad6140ea2",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  }, {
+    "nodeId" : "ea51ddd9-ac71-4561-872b-eb52bed13ae5",
+    "nodeType" : "filewrite",
+    "nodeName" : "File Write",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

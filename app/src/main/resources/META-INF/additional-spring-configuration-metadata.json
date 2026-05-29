@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "plugins.dir",
+      "type": "java.lang.String",
+      "description": "Directory from which plugin JARs are loaded at startup. Relative paths are resolved against the working directory.",
+      "defaultValue": "../plugins"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "runId" : "run-8ec3ed191cf8",
+  "workflowId" : "20fce9c9-b4c2-49e8-86a3-b9780b4357f3",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-05-29T00:53:00.8349916",
+  "status" : "failed",
+  "durationMs" : 3095,
+  "error" : "Failed to invoke method: fileName on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: fileName not found on bean: {\"filePath\":\"/pub/example/WinFormClientSmall.png\",\"fileName\":\"WinFormClientSmall.png\"} of type: com.fasterxml.jackson.databind.node.ObjectNode on the exchange: Exchange[D7C74EDDE17B923-0000000000000054]",
+  "resultBody" : "[{\"filePath\":\"/pub/example/imap-console-client.png\",\"fileName\":\"imap-console-client.png\"},{\"filePath\":\"/pub/example/KeyGenerator.png\",\"fileName\":\"KeyGenerator.png\"},{\"filePath\":\"/pub/example/KeyGeneratorSmall.png\",\"fileName\":\"KeyGeneratorSmall.png\"},{\"filePath\":\"/pub/example/mail-editor.png\",\"fileName\":\"mail-editor.png\"},{\"filePath\":\"/pub/example/mail-send-winforms.png\",\"fileName\":\"mail-send-winforms.png\"},{\"filePath\":\"/pub/example/mime-explorer.png\",\"fileName\":\"mime-explorer.png\"},{\"filePath\":\"/pub/example/pocketftp.png\",\"fileName\":\"pocketftp.png\"},{\"filePath\":\"/pub/example/pocketftpSmall.png\",\"fileName\":\"pocketftpSmall.png\"},{\"filePath\":\"/pub/example/pop3-browser.png\",\"fileName\":\"pop3-browser.png\"},{\"filePath\":\"/pub/example/pop3-console-client.png\",\"fileName\":\"pop3-console-client.png\"},{\"filePath\":\"/pub/example/readme.txt\",\"fileName\":\"readme.txt\"},{\"filePath\":\"/pub/example/ResumableTransfer.png\",\"fileName\":\"ResumableTransfer.png\"},{\"filePath\":\"/pub/example/winceclient.png\",\"fileName\":\"winceclient.png\"},{\"filePath\":\"/pub/example/winceclientSmall.png\",\"fileName\":\"winceclientSmall.png\"},{\"filePath\":\"/pub/example/WinFormClient.png\",\"fileName\":\"WinFormClient.png\"},{\"filePath\":\"/pub/example/WinFormClientSmall.png\",\"fileName\":\"WinFormClientSmall.png\"}]",
+  "steps" : [ {
+    "nodeId" : "fc9b659a-c2e5-4aec-8557-afb0ef3e3afb",
+    "nodeType" : "sftplist",
+    "nodeName" : "SFTP List",
+    "section" : "processing"
+  }, {
+    "nodeId" : "338e8199-fe1c-45ba-a92b-9eb96f04f78d",
+    "nodeType" : "iteration",
+    "nodeName" : "Iteration",
+    "section" : "processing"
+  }, {
+    "nodeId" : "c7321e10-acc0-4679-acbb-7af4aca63bd2",
+    "nodeType" : "sftpread",
+    "nodeName" : "SFTP Read",
+    "section" : "processing"
+  }, {
+    "nodeId" : "d37e5b16-b672-489e-abb5-e9240c9b28a7",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

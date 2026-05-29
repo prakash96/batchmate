@@ -1,0 +1,14 @@
+[20:54:58.324] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[20:54:58.324] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-e411483ec0f7]
+[20:55:00.406] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 304FAAEF86FDB8E-0000000000000000 on ExchangeId: 304FAAEF86FDB8E-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: id on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: id not found on bean: 91 of type: java.lang.Byte on the exchange: Exchange[304FAAEF86FDB8E-0000000000000000]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       05bbf73f-05ae-43b7-8808-e1873d from[direct://05bbf73f-05ae-43b7-8808-e1873d255a26         2050
+	...
+camel-route.yaml:16                      05bbf73f-05ae-43b7-8808-e1873d log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[20:55:00.407] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Failed to invoke method: id on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: id not found on bean: 91 of type: java.lang.Byte on the exchange: Exchange[304FAAEF86FDB8E-0000000000000000]

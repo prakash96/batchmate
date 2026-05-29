@@ -1,0 +1,41 @@
+[00:48:51.773] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:48:51.777] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-43ea0aa25307]
+[00:48:52.564] INFO  workflow.execution — respStatus: 200 resp: [
+  {
+    "id": 1,
+    "title": "Create an endpoint at Beeceptor.",
+    "completed": true
+  },
+  {
+    "id": 2,
+    "title": "Send a request to your new Beeceptor endpoint.",
+    "completed": true
+  },
+  {
+    "id": 3,
+    "title": "Create a mocking rule to send dummy data.",
+    "completed": false
+  },
+  {
+    "id": 4,
+    "title": "Try out a failure response by sending 500 HTTP status code.",
+    "completed": false
+  },
+  {
+    "id": 5,
+    "title": "Use the proxy feature to send a request to a real API. Intercept traffic using Beeceptor.",
+    "completed": false
+  }
+]
+[00:48:52.661] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: B9C65301C8B3A39-0000000000000004 on ExchangeId: B9C65301C8B3A39-0000000000000004). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: JSON cannot be fully parsed at position 2
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ca84eb35-13f0-480e-b79a-f4007e from[direct://ca84eb35-13f0-480e-b79a-f4007e328b14          856
+	...
+camel-route.yaml:17                      ca84eb35-13f0-480e-b79a-f4007e script[js{if (!(JSON.stringify(JSON.parse(String(e            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:48:52.665] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Exception occurred during execution on the exchange: Exchange[B9C65301C8B3A39-0000000000000004]

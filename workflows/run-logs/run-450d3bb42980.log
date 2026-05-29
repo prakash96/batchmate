@@ -1,0 +1,16 @@
+[22:18:05.866] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[22:18:05.869] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-450d3bb42980]
+[22:18:06.316] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: CEEFE3C12E8FA60-0000000000000001 on ExchangeId: CEEFE3C12E8FA60-0000000000000001). Exhausted after delivery attempt: 1 caught: org.postgresql.util.PSQLException: ERROR: relation "APP_LOG2" does not exist
+  Position: 15
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       20fce9c9-b4c2-49e8-86a3-b9780b from[direct://20fce9c9-b4c2-49e8-86a3-b9780b4357f3          443
+	...
+camel-route.yaml:12                      20fce9c9-b4c2-49e8-86a3-b9780b jdbc:ds-conn-1779737211864-libkc?resetAutoCommit=f            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[22:18:06.374] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: ERROR: relation "APP_LOG2" does not exist
+  Position: 15

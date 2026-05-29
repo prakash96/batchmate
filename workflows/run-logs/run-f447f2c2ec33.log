@@ -1,0 +1,5 @@
+[22:53:27.656] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[22:53:27.657] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-f447f2c2ec33]
+[22:53:28.467] INFO  workflow.execution — body: [{test: "abc"}]
+[22:53:28.479] INFO  workflow.execution — body: [{"test": "abc"}]
+[22:53:28.479] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 823ms

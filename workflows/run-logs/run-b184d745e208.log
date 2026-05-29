@@ -1,0 +1,30 @@
+[23:54:15.911] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[23:54:15.928] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-b184d745e208]
+[23:54:17.596] INFO  workflow.execution — resp: [
+  {
+    "id": 1,
+    "title": "Create an endpoint at Beeceptor.",
+    "completed": true
+  },
+  {
+    "id": 2,
+    "title": "Send a request to your new Beeceptor endpoint.",
+    "completed": true
+  },
+  {
+    "id": 3,
+    "title": "Create a mocking rule to send dummy data.",
+    "completed": false
+  },
+  {
+    "id": 4,
+    "title": "Try out a failure response by sending 500 HTTP status code.",
+    "completed": false
+  },
+  {
+    "id": 5,
+    "title": "Use the proxy feature to send a request to a real API. Intercept traffic using Beeceptor.",
+    "completed": false
+  }
+]
+[23:54:17.664] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1753ms
