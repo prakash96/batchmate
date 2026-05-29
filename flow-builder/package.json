@@ -1,0 +1,48 @@
+{
+  "name": "flow-builder",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "homepage": "https://prakash96.github.io/checkorix",
+  "scripts": {
+    "start": "react-scripts start",
+    "electron": "electron .",
+    "dev": "concurrently \"vite\" \"electron .\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "@handsontable/react": "^16.2.0",
+    "@handsontable/react-wrapper": "^17.0.1",
+    "@xyflow/react": "^12.10.2",
+    "ag-grid-community": "^35.2.1",
+    "ag-grid-react": "^35.2.1",
+    "curlconverter": "^4.12.0",
+    "handsontable": "^17.0.1",
+    "p-limit": "^7.3.0",
+    "pako": "^2.1.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.5.0",
+    "concurrently": "^9.2.1",
+    "electron": "^41.2.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "gh-pages": "^6.3.0",
+    "globals": "^17.4.0",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^4.2.4",
+    "vite": "^8.0.4"
+  },
+  "main": "main.cjs"
+}

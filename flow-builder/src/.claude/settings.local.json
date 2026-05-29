@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/React/flow-builder/**)",
+      "Bash(npm run *)",
+      "Bash(node -e ' *)",
+      "Bash(Remove-Item \"c:\\\\React\\\\flow-builder\\\\src\\\\engine\\\\executors\\\\httpInboundExecutor.js\", \"c:\\\\React\\\\flow-builder\\\\src\\\\engine\\\\executors\\\\schedulerExecutor.js\", \"c:\\\\React\\\\flow-builder\\\\src\\\\engine\\\\executors\\\\fileWatcherExecutor.js\", \"c:\\\\React\\\\flow-builder\\\\src\\\\components\\\\nodes\\\\config\\\\HttpInboundConfig.jsx\", \"c:\\\\React\\\\flow-builder\\\\src\\\\components\\\\nodes\\\\config\\\\SchedulerConfig.jsx\", \"c:\\\\React\\\\flow-builder\\\\src\\\\components\\\\nodes\\\\config\\\\FileWatcherConfig.jsx\", \"c:\\\\React\\\\flow-builder\\\\src\\\\components\\\\nodes\\\\HttpInboundNode.jsx\", \"c:\\\\React\\\\flow-builder\\\\src\\\\components\\\\nodes\\\\SchedulerNode.jsx\", \"c:\\\\React\\\\flow-builder\\\\src\\\\components\\\\nodes\\\\FileWatcherNode.jsx\")",
+      "Bash(rm \"c:/React/flow-builder/src/engine/executors/httpInboundExecutor.js\" \"c:/React/flow-builder/src/engine/executors/schedulerExecutor.js\" \"c:/React/flow-builder/src/engine/executors/fileWatcherExecutor.js\" \"c:/React/flow-builder/src/components/nodes/config/HttpInboundConfig.jsx\" \"c:/React/flow-builder/src/components/nodes/config/SchedulerConfig.jsx\" \"c:/React/flow-builder/src/components/nodes/config/FileWatcherConfig.jsx\" \"c:/React/flow-builder/src/components/nodes/HttpInboundNode.jsx\" \"c:/React/flow-builder/src/components/nodes/SchedulerNode.jsx\" \"c:/React/flow-builder/src/components/nodes/FileWatcherNode.jsx\")"
+    ],
+    "additionalDirectories": [
+      "c:\\React\\flow-builder\\src\\engine\\executors"
+    ]
+  }
+}

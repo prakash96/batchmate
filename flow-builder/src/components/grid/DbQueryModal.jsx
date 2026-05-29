@@ -1,0 +1,262 @@
+import { useState, useRef } from "react";
+import { AgGridReact } from "ag-grid-react";
+import { createPortal } from "react-dom";
+import { persistentStore } from "../../store/persistentStore";
+import { BASE_URL } from "../../config";
+import { evalTemplate } from "../../engine/expression/simple";
+
+
+export default function DbQueryModal({ onClose }) {
+  const jdbcUrlInputRef = useRef(null);
+  const [jdbcUrl, setJdbcUrl] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [connected, setConnected] = useState(false);
+  const [status, setStatus] = useState("");
+
+  const [query, setQuery] = useState("SELECT * FROM APP_LOGS ORDER BY CREATED_AT DESC LIMIT 100");
+
+  const [rowData, setRowData] = useState([]);
+  const [columnDefs, setColumnDefs] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const {globalVariables} = persistentStore();
+  
+
+  const applyVariables = (input) => evalTemplate(input, { vars: globalVariables });
+
+  //  CONNECT
+  const focusJdbcUrl = () => {
+    setTimeout(() => {
+      jdbcUrlInputRef.current?.focus();
+    }, 0);
+  };
+
+  const connectDb = async () => {
+    try {
+      setStatus("Connecting...");
+      setConnected(false);
+
+      const resolvedJdbcUrl = applyVariables(jdbcUrl);
+      const resolvedUsername = applyVariables(username);
+      const resolvedPassword = applyVariables(password);
+      const res = await fetch(BASE_URL + "/db/tables", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jdbcUrl: resolvedJdbcUrl, username: resolvedUsername, password: resolvedPassword }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || data?.message || "Connection failed");
+      }
+
+      setConnected(true);
+      setStatus("Connected");
+    } catch (err) {
+      setStatus(`Error: ${err?.message || "Failed to connect"}`);
+      setConnected(false);
+      focusJdbcUrl();
+    }
+  };
+
+  //  RUN QUERY
+  const runQuery = async () => {
+    try {
+      setLoading(true);
+
+      const resolvedJdbcUrl = applyVariables(jdbcUrl);
+      const resolvedUsername = applyVariables(username);
+      const resolvedPassword = applyVariables(password);
+      const resolvedQuery = applyVariables(query);
+      const res = await fetch(BASE_URL + "/db/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jdbcUrl: resolvedJdbcUrl,
+          username: resolvedUsername,
+          password: resolvedPassword,
+          query: resolvedQuery,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || data?.message || "Query failed");
+      }
+
+      if (!data.length) {
+        setRowData([]);
+        return;
+      }
+
+      // dynamic columns
+      setColumnDefs(
+        Object.keys(data[0]).map(k => ({
+          field: k,
+          sortable: true,
+          filter: true,
+          flex: 1,
+        }))
+      );
+
+      setRowData(data);
+    } catch (err) {
+      alert(err?.message || "Query failed");
+      focusJdbcUrl();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const portalRoot = document.getElementById("modal-root") || document.body;
+
+  return createPortal(
+    <div style={styles.overlay}>
+      <div style={styles.modal}>
+
+        {/* HEADER */}
+        <div style={styles.header}>
+          <div>DB Query</div>
+          <button onClick={onClose} style={styles.close}></button>
+        </div>
+
+        {/* CONNECTION */}
+        <div style={styles.row}>
+          <input
+            ref={jdbcUrlInputRef}
+            placeholder="JDBC URL"
+            value={jdbcUrl}
+            onChange={e => setJdbcUrl(e.target.value)}
+            style={styles.input}
+          />
+          <input
+            placeholder="User"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            style={styles.input}
+          />
+          <input
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            style={styles.input}
+          />
+          <button style={styles.btn} onClick={connectDb}>
+            Connect
+          </button>
+        </div>
+
+        {/* STATUS */}
+        <div style={{
+          fontSize: "12px",
+          color: connected ? "green" : "red"
+        }}>
+          {status}
+        </div>
+
+        {/* QUERY */}
+        <div style={styles.queryRow}>
+          <textarea
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            style={styles.textarea}
+          />
+
+          <button
+            style={styles.runBtn}
+            onClick={runQuery}
+            disabled={!connected || loading}
+          >
+            {loading ? "Running..." : "Run"}
+          </button>
+        </div>
+
+        {/* GRID */}
+        <div className="ag-theme-alpine" style={{ height: "420px" }}>
+          <AgGridReact
+            columnDefs={columnDefs}
+            rowData={rowData}
+            animateRows
+          />
+        </div>
+
+      </div>
+    </div>,
+    portalRoot
+  );
+}
+
+const styles = {
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.4)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+  },
+  modal: {
+    width: "950px",
+    background: "#fff",
+    borderRadius: "10px",
+    padding: "12px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    fontWeight: "bold",
+  },
+  close: {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+  },
+  row: {
+    display: "flex",
+    gap: "6px",
+  },
+  input: {
+    flex: 1,
+    padding: "6px",
+    border: "1px solid #ddd",
+    borderRadius: "6px",
+    fontSize: "12px",
+  },
+  btn: {
+    background: "#3b82f6",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    padding: "6px 10px",
+    cursor: "pointer",
+  },
+  queryRow: {
+    display: "flex",
+    gap: "6px",
+  },
+  textarea: {
+    flex: 1,
+    height: "80px",
+    fontFamily: "monospace",
+    fontSize: "12px",
+    border: "1px solid #ddd",
+    borderRadius: "6px",
+    padding: "6px",
+  },
+  runBtn: {
+    background: "#22c55e",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    padding: "10px",
+    cursor: "pointer",
+  },
+};
