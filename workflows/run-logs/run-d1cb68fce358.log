@@ -1,6 +1,0 @@
-[02:20:51.542] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[02:20:51.542] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-d1cb68fce358]
-[02:20:51.648] INFO  file.FileEndpoint — Endpoint is configured with noop=true so forcing endpoint to be idempotent as well
-[02:20:51.657] INFO  file.FileEndpoint — Using default memory based idempotent repository with cache max size: 1000
-[02:20:55.421] INFO  workflow.execution — result: GenericFile[C:\Users\Admin\Downloads\Infometry_BELK_Timesheet_May26.xlsx]
-[02:20:55.429] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 3887ms

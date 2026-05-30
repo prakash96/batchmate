@@ -1,3 +1,0 @@
-[00:32:42.636] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[00:32:42.642] INFO  controller.WorkflowController — Workflow 'PGP Decrypt Test' run started [runId=run-2afc4bc28a79]
-[00:33:12.652] ERROR controller.WorkflowController — Workflow 'PGP Decrypt Test' run failed: No consumers available on endpoint: direct://bcc4d5a2-c54c-445b-baa1-f18046410a6b. Exchange[]

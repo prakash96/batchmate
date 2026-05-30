@@ -1,3 +1,0 @@
-[15:46:37.533] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[15:46:37.539] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-d106c4007878]
-[15:46:39.406] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1873ms

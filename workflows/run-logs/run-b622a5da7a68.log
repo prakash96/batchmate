@@ -1,5 +1,0 @@
-[22:41:31.297] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[22:41:31.307] INFO  controller.WorkflowController — Workflow 'Common' run started [runId=run-b622a5da7a68]
-[22:41:31.310] INFO  workflow.execution — incoming body: 
-[22:41:31.633] INFO  workflow.execution — respStatus: 200 resp: H4sIAAAAAAAAAKvmUgACpcwUJSsFQx0IpySzJCcVyFdyLkpNLElVSMxTSM1LKcjPzCtRSCxRcEpNTU4tKMkv0lOCakjOzy3ISS1JBRlSUlSaylULAFG2qkNXAAAA
-[22:41:31.635] INFO  controller.WorkflowController — Workflow 'Common' run completed successfully in 338ms

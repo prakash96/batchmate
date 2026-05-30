@@ -1,5 +1,0 @@
-[22:39:33.356] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[22:39:33.363] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-89be7e25a41a]
-[22:39:33.416] INFO  workflow.execution — incoming body: {"abc": "pqr"}
-[22:39:35.826] INFO  workflow.execution — respStatus: 200 resp: H4sIAAAAAAAAAKvmUgACpcwUJSsFQx0IpySzJCcVyFdyLkpNLElVSMxTSM1LKcjPzCtRSCxRcEpNTU4tKMkv0lOCakjOzy3ISS1JBRlSUlSaylULAFG2qkNXAAAA
-[22:39:35.883] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 2527ms

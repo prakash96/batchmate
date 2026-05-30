@@ -1,6 +1,0 @@
-[14:19:15.058] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[14:19:15.075] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-d6a6df1aaf01]
-[14:19:15.137] INFO  file.FileEndpoint — Endpoint is configured with noop=true so forcing endpoint to be idempotent as well
-[14:19:15.139] INFO  file.FileEndpoint — Using default memory based idempotent repository with cache max size: 1000
-[14:19:17.666] INFO  workflow.execution — result: GenericFile[C:\Users\Admin\Downloads\test-grid.json]
-[14:19:17.670] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 2612ms

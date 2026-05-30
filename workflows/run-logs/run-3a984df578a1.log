@@ -1,8 +1,0 @@
-[14:32:03.552] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[14:32:03.601] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-3a984df578a1]
-[14:32:05.116] INFO  workflow.execution — respStatus: 200 resp: {
-    "id": 1,
-    "title": "Create an endpoint at Beeceptor.",
-    "completed": true
-}
-[14:32:05.134] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1582ms

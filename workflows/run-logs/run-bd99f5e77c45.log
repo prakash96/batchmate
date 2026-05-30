@@ -1,8 +1,0 @@
-[23:53:35.495] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[23:53:35.497] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-bd99f5e77c45]
-[23:53:36.383] INFO  workflow.execution — respStatus: 200 resp: {
-    "id": 1,
-    "title": "Create an endpoint at Beeceptor.",
-    "completed": true
-}
-[23:53:36.425] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Exception occurred during execution on the exchange: Exchange[35A9A9DF86477C7-0000000000000004]

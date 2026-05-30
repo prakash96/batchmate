@@ -1,4 +1,0 @@
-[21:22:45.803] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[21:22:45.805] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-019a8d6eb28a]
-[21:22:46.285] INFO  workflow.execution — body - [{"id":1,"message":"sample message"}]
-[21:22:46.285] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 482ms

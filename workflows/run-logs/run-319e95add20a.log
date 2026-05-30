@@ -1,6 +1,0 @@
-[15:10:09.109] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[15:10:09.109] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-319e95add20a]
-[15:10:09.229] INFO  file.FileEndpoint — Endpoint is configured with noop=true so forcing endpoint to be idempotent as well
-[15:10:09.229] INFO  file.FileEndpoint — Using default memory based idempotent repository with cache max size: 1000
-[15:10:10.524] INFO  workflow.execution — result: [object Object]
-[15:10:10.587] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1478ms

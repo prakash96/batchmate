@@ -1,3 +1,0 @@
-[22:41:42.590] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[22:41:42.590] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-99a23e8d11d3]
-[22:42:12.607] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: Exception occurred during execution on the exchange: Exchange[]

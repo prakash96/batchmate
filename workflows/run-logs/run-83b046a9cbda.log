@@ -1,5 +1,0 @@
-[20:04:29.559] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[20:04:29.560] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-83b046a9cbda]
-[20:04:29.588] INFO  workflow.execution — fileread: Reading file C:\Users\Admin\Downloads\test-report.xml
-[20:04:29.740] INFO  workflow.execution — filewrite: Writing to file C:/Users/Admin/Downloads/result.xml
-[20:04:29.752] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 192ms

@@ -1,9 +1,0 @@
-[01:26:35.789] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[01:26:35.794] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-ac8815b37144]
-[01:26:35.794] INFO  workflow.execution — sftplist: Connecting to test.rebex.net:22
-[01:26:35.794] INFO  workflow.execution — sftplist: Listing /pub/example
-[01:26:39.488] INFO  workflow.execution — sftpread: Connecting to test.rebex.net:22
-[01:26:39.495] INFO  workflow.execution — sftpread: Reading /pub/example/readme.txt
-[01:26:39.551] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
-[01:26:48.077] INFO  workflow.execution — filewrite: Writing to C:/files/<original name>
-[01:26:48.093] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 12305ms

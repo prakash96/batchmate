@@ -1,4 +1,0 @@
-[15:47:07.922] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[15:47:07.934] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-748be7f27de6]
-[15:47:08.101] INFO  workflow.execution — body: {"abc": "pqr"}
-[15:47:08.139] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 217ms
