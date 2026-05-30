@@ -1,4 +1,5 @@
 import { useMetadataStore } from '../store/metadataStore';
+import { EH_HEADER_H, EH_BODY_H } from '../components/nodes/WorkflowContainerNode';
 
 export function getAbsolutePosition(node, nodes) {
     let x = node.position.x;
@@ -16,7 +17,7 @@ export function getAbsolutePosition(node, nodes) {
 
 const SECTION_INFO = {
     processing:       { sectionType: "processing",       label: "Processing" },
-    processingFailed: { sectionType: "processingFailed", label: "Processing Failed" },
+    processingFailed: { sectionType: "processingFailed", label: "Error Handler" },
 };
 
 // Legacy single-container uses top 65% = processing, bottom 35% = processingFailed
@@ -51,6 +52,18 @@ export function getSectionForPosition(position, nodes) {
             position.y >= c.position.y && position.y <= c.position.y + h
         ) {
             const ctype = c.data?.containerType || "processing";
+
+            // Processing containers always have an error handler zone at the bottom.
+            // The zone height = EH_HEADER_H (collapsed) or EH_HEADER_H + EH_BODY_H (expanded).
+            if (ctype === "processing") {
+                const zoneH = c.data?.errorHandlerExpanded
+                    ? EH_HEADER_H + EH_BODY_H
+                    : EH_HEADER_H;
+                if (position.y >= c.position.y + h - zoneH) {
+                    return { ...c, data: { ...c.data, ...SECTION_INFO.processingFailed } };
+                }
+            }
+
             const info = SECTION_INFO[ctype] ?? SECTION_INFO.processing;
             return { ...c, data: { ...c.data, ...info } };
         }

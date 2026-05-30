@@ -72,6 +72,7 @@ public class FilePlugin implements NodeConverterPlugin {
                 "{throw new Error('File not found: " + safePath + "');}"));
             steps.addAll(ConversionUtils.pollEnrich(uri, resultVar));
         }
+        steps.add(ConversionUtils.stripCamelHeaders());
         return steps;
     }
 

@@ -1,0 +1,27 @@
+{
+  "runId" : "run-41ce3632865b",
+  "workflowId" : "e75a283a-c5f0-4c59-b579-8604e00c93e8",
+  "workflowName" : "Copy of PGP Decrypt Test",
+  "runDateTime" : "2026-05-30T00:37:21.2761708",
+  "status" : "failed",
+  "durationMs" : 157,
+  "error" : "No PGPEncryptedDataList found — data may not be a PGP encrypted message (first packet: none)",
+  "resultBody" : "filewrite",
+  "steps" : [ {
+    "nodeId" : "fdc5d78a-d39d-45bc-ba1e-7e859d4e8eb0",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  }, {
+    "nodeId" : "ffc6ca86-a8a3-4837-9327-de3e7ac8765f",
+    "nodeType" : "filewrite",
+    "nodeName" : "File Write",
+    "section" : "processing"
+  }, {
+    "nodeId" : "5ded3a81-edd7-4198-aa5e-1f01db603fdc",
+    "nodeType" : "pgpdecrypt",
+    "nodeName" : "PGP Decrypt",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

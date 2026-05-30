@@ -15,6 +15,69 @@
     <packaging>jar</packaging>
     <name>workflow-app</name>
 
+    <profiles>
+        <!-- Unix / Mac: run npm directly -->
+        <profile>
+            <id>npm-unix</id>
+            <activation><os><family>unix</family></os></activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <id>npm-build-frontend</id>
+                                <phase>generate-resources</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>npm</executable>
+                                    <arguments>
+                                        <argument>run</argument>
+                                        <argument>build</argument>
+                                    </arguments>
+                                    <workingDirectory>${project.basedir}/../flow-builder</workingDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- Windows: .cmd files must be launched through cmd.exe -->
+        <profile>
+            <id>npm-windows</id>
+            <activation><os><family>windows</family></os></activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <id>npm-build-frontend</id>
+                                <phase>generate-resources</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>cmd</executable>
+                                    <arguments>
+                                        <argument>/c</argument>
+                                        <argument>npm</argument>
+                                        <argument>run</argument>
+                                        <argument>build</argument>
+                                    </arguments>
+                                    <workingDirectory>${project.basedir}/../flow-builder</workingDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
 
         <!-- API module (NodeConverter, NodeConverterPlugin, ConversionUtils) — bundled in fat JAR -->
@@ -57,13 +120,6 @@
             <groupId>org.graalvm.js</groupId>
             <artifactId>js</artifactId>
             <version>${graalvm.version}</version>
-            <exclusions>
-                <!-- 13 MB Unicode library — not needed for the scripts used in this app -->
-                <exclusion>
-                    <groupId>com.ibm.icu</groupId>
-                    <artifactId>icu4j</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.graalvm.js</groupId>
@@ -101,6 +157,28 @@
 
     <build>
         <plugins>
+
+            <!-- 2. Sync dist → src/main/resources/static (clean stale assets, copy fresh build) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sync-frontend-dist</id>
+                        <phase>process-resources</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <target>
+                                <delete dir="${project.basedir}/src/main/resources/static/assets"/>
+                                <delete file="${project.basedir}/src/main/resources/static/index.html"/>
+                                <copy todir="${project.basedir}/src/main/resources/static" overwrite="true">
+                                    <fileset dir="${project.basedir}/../flow-builder/dist"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <!-- Fat JAR — plugins and JDBC drivers are NOT bundled (plugins load separately) -->
             <plugin>

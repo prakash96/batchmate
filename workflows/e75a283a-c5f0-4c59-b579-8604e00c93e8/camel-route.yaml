@@ -1,0 +1,42 @@
+# Camel YAML DSL — generated from workflow: PGP Decrypt Test
+# ID: e75a283a-c5f0-4c59-b579-8604e00c93e8
+
+  - route:
+      id: e75a283a-c5f0-4c59-b579-8604e00c93e8-processing
+      from:
+        uri: direct:e75a283a-c5f0-4c59-b579-8604e00c93e8
+      steps:
+        - log:
+            message: 'fileread: Reading file C:\files\readme.txt.pgp'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - script:
+            expression:
+              js: 'var Files=Java.type(''java.nio.file.Files'');var Paths=Java.type(''java.nio.file.Paths'');if(!Files.exists(Paths.get(''C:/files/readme.txt.pgp''))){throw
+                new Error(''File not found: C:/files/readme.txt.pgp'');}'
+        - pollEnrich:
+            expression:
+              constant: file:C:/files?fileName=readme.txt.pgp&noop=true&idempotent=false
+            timeout: 5000
+        - script:
+            expression:
+              js: var _b=exchange.getMessage().getBody();if(_b!==null&&String(_b.getClass().getName()).contains('GenericFile')){var
+                Files=Java.type('java.nio.file.Files');var Paths=Java.type('java.nio.file.Paths');exchange.getMessage().setBody(Files.readString(Paths.get(String(_b.getAbsoluteFilePath()))));}
+        - script:
+            expression:
+              js: var ArrayList=Java.type('java.util.ArrayList');var _ks=new ArrayList(exchange.getMessage().getHeaders().keySet());for(var
+                _i=0;_i<_ks.size();_i++){var _k=String(_ks.get(_i));if(_k.startsWith('Camel')&&_k.length>5){var
+                _nk=_k.charAt(5).toLowerCase()+_k.substring(6);exchange.getMessage().setHeader(_nk,exchange.getMessage().getHeader(_k));exchange.getMessage().removeHeader(_k);}}
+        - setProperty:
+            name: _pgp_config
+            expression:
+              constant: eyJrZXlTb3VyY2UiOiJpbmxpbmUiLCJrZXlGaWxlIjoiIiwia2V5SW5saW5lIjoiLS0tLS1CRUdJTiBQR1AgUFJJVkFURSBLRVkgQkxPQ0stLS0tLVxuXG5sSVlFYWhkSTF4WUpLd1lCQkFIYVJ3OEJBUWRBY3VsTnAwTlNtaVhPckdYaUpDVEZ4NlM0Q3ZMb0ZjTzl5b1JSXG5ycTdjSCszK0J3TUNIRDNWMXZseGdRdi91MS9lTVRtRHlaNUM3bHNLN1R1UExScnNMQ2lpOFVaT091eGtlN0w0XG42aEc1enl1U01iNnhSRE9uUDBKOEJBUUdZdWc2MFV5cFRSNUlBVlVYQ0JVL1BjaTMwQ1JJc3JRRlFXUnRhVzZJXG50UVFURmdvQVhSWWhCRGxwNnczc21qOHV2SkVTVmc5c1JWMmhyUmZ4QlFKcUYwalhHeFNBQUFBQUFBUUFEbTFoXG5iblV5TERJdU5Tc3hMakV5TERJc01RSWJBd1VKQmFXRUVRVUxDUWdIQWdJaUFnWVZDZ2tJQ3dJRUZnSURBUUllXG5Cd0lYZ0FBS0NSQVBiRVZkb2EwWDhTYWZBUUNnbjJwRlFDcUZ2cklJNEFkeHNvYVhkTkJadWFydjlqMk0yZmNTXG44c3VOT1FFQXhncmxFdllJMlVraVJiUFJtQU1mSU96b3c1cGMrL3MyNGYyblBWVjhqUVdjaXdScUYwalhFZ29yXG5CZ0VFQVpkVkFRVUJBUWRBenNKK1BWeldJalNnVTRFanI4QVQrUUNzV2xPUy8yTnlwUHpYTUJWeDFINERBUWdIXG4vZ2NEQWwvaGVySVVaYm9aLytpMHRMZmIyOEl4dDI4cjVFdWlBeU11TklMV3ptQTRtOUw3eWw4N1AvVG1RalhsXG5tZVNUZWxra3NsQ2tIV3NxK080bGxWN0ZzZ01CdlBJTFRJVXpUMDZvMHdNQlRXdUltZ1FZRmdvQVFoWWhCRGxwXG42dzNzbWo4dXZKRVNWZzlzUlYyaHJSZnhCUUpxRjBqWEd4U0FBQUFBQUFRQURtMWhiblV5TERJdU5Tc3hMakV5XG5MRElzTVFJYkRBVUpCYVdFRVFBS0NSQVBiRVZkb2EwWDhkYm1BUUNXdCtua0hGUWhNalpwY0xvS1p2YmZWMGFSXG5EcGZsTVc4ckJKOEJJaUtOTlFFQTdDT1Vjd0pXOEJtRlhJT3BoMkhoR2FoRXpJL1grYlc0VUR3MmYzb1czUXc9XG49WTNQN1xuLS0tLS1FTkQgUEdQIFBSSVZBVEUgS0VZIEJMT0NLLS0tLS1cbiIsImtleVZhciI6IiIsInBhc3NwaHJhc2UiOiJiYXRjaG1hdGUiLCJjb250ZW50U291cmNlIjoiYm9keSIsImNvbnRlbnRWYXIiOiIiLCJyZXN1bHRWYXIiOiIiLCJzZXRBc0JvZHkiOnRydWV9
+        - bean:
+            ref: pgpHelper
+            method: decrypt
+        - log:
+            message: 'filewrite: Writing to c:/files/${header.fileName}.txt'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - toD:
+            uri: file:c:/files?fileName=${header.fileName}.txt&autoCreate=true&fileExist=Override

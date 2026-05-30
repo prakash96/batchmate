@@ -49,14 +49,22 @@ public class WorkflowToCamelAdapter {
         List<JsonNode> allNodes = toList(wf.path("nodes"));
         List<JsonNode> allEdges = toList(wf.path("edges"));
 
-        // Resolve error variable prefix from the errorscope node (default "error")
-        String errorVarPrefix = allNodes.stream()
-            .filter(n -> "errorscope".equals(n.path("type").asText()))
-            .map(n -> {
+        // Resolve error handler config — from processing workflowcontainer or legacy errorscope
+        String  errorVarPrefix = "error";
+        boolean rethrowError   = true;   // default: rethrow so the run is still marked as failed
+        for (JsonNode n : allNodes) {
+            String t = n.path("type").asText();
+            if ("workflowcontainer".equals(t)
+                    && "processing".equals(n.path("data").path("containerType").asText(""))) {
                 String p = n.path("data").path("errorVarPrefix").asText("").trim();
-                return p.isEmpty() ? "error" : p;
-            })
-            .findFirst().orElse("error");
+                if (!p.isEmpty()) errorVarPrefix = p;
+                // rethrowError defaults to true when the field is absent
+                rethrowError = n.path("data").path("rethrowError").asBoolean(true);
+            } else if ("errorscope".equals(t)) {
+                String p = n.path("data").path("errorVarPrefix").asText("").trim();
+                if (!p.isEmpty()) errorVarPrefix = p;
+            }
+        }
 
         // Only executable nodes (have a section annotation from annotateNodesWithSection)
         List<JsonNode> execNodes = allNodes.stream()
@@ -110,6 +118,8 @@ public class WorkflowToCamelAdapter {
 
                 Map<String, Object> catchClause = new LinkedHashMap<>();
                 catchClause.put("exception", List.of("java.lang.Exception"));
+                // handled(false) = run catch steps then rethrow; handled(true/default) = swallow
+                if (rethrowError) catchClause.put("handled", Map.of("simple", "false"));
                 catchClause.put("steps", catchSteps);
 
                 Map<String, Object> doTryBody = new LinkedHashMap<>();

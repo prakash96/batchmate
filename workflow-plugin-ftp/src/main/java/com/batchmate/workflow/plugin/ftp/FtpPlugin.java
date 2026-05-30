@@ -89,6 +89,7 @@ public class FtpPlugin implements NodeConverterPlugin {
         steps.add(ConversionUtils.logMsg("ftpread: Connecting to " + host + ":" + port));
         steps.add(ConversionUtils.logMsg("ftpread: Reading " + dir + (pattern.isEmpty() ? "" : "/" + pattern)));
         steps.addAll(ConversionUtils.pollEnrich(uri, resultVar));
+        steps.add(ConversionUtils.stripCamelHeaders());
         return steps;
     }
 

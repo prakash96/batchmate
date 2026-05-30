@@ -1,0 +1,16 @@
+[00:14:01.809] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:14:01.814] INFO  controller.WorkflowController — Workflow 'Copy of PGP Encrypt Test' run started [runId=run-d45b86207421]
+[00:14:01.815] INFO  workflow.execution — fileread: Reading file C:\files\readme.txt.pgp
+[00:14:01.942] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 66A859CB11EF311-0000000000000000 on ExchangeId: 66A859CB11EF311-0000000000000000). Exhausted after delivery attempt: 1 caught: java.lang.NullPointerException
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       bcc4d5a2-c54c-445b-baa1-f18046 from[direct://bcc4d5a2-c54c-445b-baa1-f18046410a6b          112
+	...
+camel-route.yaml:30                      bcc4d5a2-c54c-445b-baa1-f18046 bean[ref:pgpHelper method:decrypt]                            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:14:01.996] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@104deab for file: GenericFile[C:\files\readme.txt.pgp]
+[00:14:02.007] ERROR controller.WorkflowController — Workflow 'Copy of PGP Encrypt Test' run failed: null

@@ -1,0 +1,43 @@
+# Camel YAML DSL — generated from workflow: File to Sftp
+# ID: d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf
+
+  - route:
+      id: d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf-processing
+      from:
+        uri: direct:d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf
+      steps:
+        - log:
+            message: 'filelist: Listing directory C:\files'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - script:
+            expression:
+              js: var Files=Java.type('java.nio.file.Files');var Paths=Java.type('java.nio.file.Paths');var
+                Collectors=Java.type('java.util.stream.Collectors');var LinkedHashMap=Java.type('java.util.LinkedHashMap');var
+                ArrayList=Java.type('java.util.ArrayList');var _dir=Paths.get('C:/files');var
+                _stream=Files.list(_dir);var _paths=_stream.filter(function(p){return
+                Files.isRegularFile(p);}).collect(Collectors.toList());_stream.close();var
+                _arr=new ArrayList();for(var _i=0;_i<_paths.size();_i++){var _p=_paths.get(_i);var
+                _node=new LinkedHashMap();_node.put('filePath',_p.toString());_node.put('fileName',_p.getFileName().toString());_arr.add(_node);}exchange.getMessage().setBody(_arr);
+        - split:
+            expression:
+              js: body
+            steps:
+              - log:
+                  message: 'fileread: Reading file ${body.filePath}'
+                  logName: com.batchmate.workflow.execution
+                  loggingLevel: INFO
+              - script:
+                  expression:
+                    js: 'var Files=Java.type(''java.nio.file.Files'');var Paths=Java.type(''java.nio.file.Paths'');var
+                      _path=String((function(){var _b=exchange.getMessage().getBody();if(_b==null)return
+                      null;if(_b instanceof java.util.Map)return _b.get(''filePath'');try{var
+                      _s=_b instanceof java.lang.String?_b:new java.lang.String(_b);return
+                      JSON.parse(_s)[''filePath''];}catch(e){return null;}})());if(!Files.exists(Paths.get(_path))){throw
+                      new Error(''File not found: ''+_path);}var _content=Files.readString(Paths.get(_path));exchange.getMessage().setBody(_content);'
+              - script:
+                  expression:
+                    js: var ArrayList=Java.type('java.util.ArrayList');var _ks=new
+                      ArrayList(exchange.getMessage().getHeaders().keySet());for(var
+                      _i=0;_i<_ks.size();_i++){var _k=String(_ks.get(_i));if(_k.startsWith('Camel')&&_k.length>5){var
+                      _nk=_k.charAt(5).toLowerCase()+_k.substring(6);exchange.getMessage().setHeader(_nk,exchange.getMessage().getHeader(_k));exchange.getMessage().removeHeader(_k);}}

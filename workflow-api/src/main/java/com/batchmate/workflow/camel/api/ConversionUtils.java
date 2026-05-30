@@ -68,6 +68,24 @@ public final class ConversionUtils {
                   .replaceAll("\\$\\{headers\\.([\\w]+)\\}", "\\${header.$1}");
     }
 
+    /**
+     * Renames all Camel-prefixed headers to camelCase.
+     * e.g. CamelFileName → fileName, CamelFileLength → fileLength
+     */
+    public static Map<String, Object> stripCamelHeaders() {
+        String script =
+            "var ArrayList=Java.type('java.util.ArrayList');" +
+            "var _ks=new ArrayList(exchange.getMessage().getHeaders().keySet());" +
+            "for(var _i=0;_i<_ks.size();_i++){" +
+            "var _k=String(_ks.get(_i));" +
+            "if(_k.startsWith('Camel')&&_k.length>5){" +
+            "var _nk=_k.charAt(5).toLowerCase()+_k.substring(6);" +
+            "exchange.getMessage().setHeader(_nk,exchange.getMessage().getHeader(_k));" +
+            "exchange.getMessage().removeHeader(_k);" +
+            "}}";
+        return scriptStep("js", script);
+    }
+
     /** Generic script step — pass "js" for GraalVM JavaScript. */
     public static Map<String, Object> scriptStep(String lang, String script) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -151,8 +169,21 @@ public final class ConversionUtils {
         pollBody.put("timeout", 5000L);
         Map<String, Object> poll = new LinkedHashMap<>();
         poll.put("pollEnrich", pollBody);
+
+        // Camel file/ftp/sftp components deliver a GenericFile wrapper as the body.
+        // convertBodyTo(String) only calls toString() on it, printing "GenericFile[path]".
+        // This script detects GenericFile and reads the actual content via Files.readString().
+        Map<String, Object> readContent = scriptStep("js",
+            "var _b=exchange.getMessage().getBody();" +
+            "if(_b!==null&&String(_b.getClass().getName()).contains('GenericFile')){" +
+            "var Files=Java.type('java.nio.file.Files');" +
+            "var Paths=Java.type('java.nio.file.Paths');" +
+            "exchange.getMessage().setBody(Files.readString(Paths.get(String(_b.getAbsoluteFilePath()))));" +
+            "}");
+
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(poll);
+        steps.add(readContent);
         if (resultVar != null && !resultVar.isEmpty())
             steps.add(setVarExpr(resultVar, Map.of("simple", "${body}")));
         return steps;
@@ -393,12 +424,31 @@ public final class ConversionUtils {
      */
     public static String replaceVars(String js) {
         if (js == null) return null;
-        String result = js
-            .replaceAll("vars\\.([\\w]+)", "exchange.getProperties().get('$1')")
-            .replaceAll("headers\\.([\\w]+)", "exchange.getMessage().getHeaders().get('$1')");
-        // Replace bare 'body' with an IIFE that parses the exchange body as JSON.
-        // After a marshal step the body is byte[] — new java.lang.String converts it to text,
-        // then JSON.parse turns it into a proper JS object so body[0] / body.field work.
+        String result = js;
+
+        // 1. body.property — Map-aware access (must come BEFORE bare-body replacement)
+        //    Handles LinkedHashMap items from File/FTP/SFTP List and JSON body fields
+        result = result.replaceAll("\\bbody\\.([\\w]+)\\b",
+            "(function(){var _b=exchange.getMessage().getBody();"
+            + "if(_b==null)return null;"
+            + "if(_b instanceof java.util.Map)return _b.get('$1');"
+            + "try{var _s=_b instanceof java.lang.String?_b:new java.lang.String(_b);"
+            + "return JSON.parse(_s)['$1'];}catch(e){return null;}})()");
+
+        // 2. vars.name.property — nested Map/JSON property access (must come BEFORE single-level vars)
+        result = result.replaceAll("vars\\.([\\w]+)\\.([\\w]+)",
+            "(function(){var _v=exchange.getProperties().get('$1');"
+            + "if(_v==null)return null;"
+            + "if(_v instanceof java.util.Map)return _v.get('$2');"
+            + "try{return JSON.parse(String(_v))['$2'];}catch(e){return null;}})()");
+
+        // 3. vars.name — single-level variable
+        result = result.replaceAll("vars\\.([\\w]+)", "exchange.getProperties().get('$1')");
+
+        // 4. headers.name
+        result = result.replaceAll("headers\\.([\\w]+)", "exchange.getMessage().getHeaders().get('$1')");
+
+        // 5. Remaining bare 'body' — full body with JSON-parse fallback
         if (result.matches("(?s).*\\bbody\\b.*")) {
             result = result.replaceAll("\\bbody\\b",
                 "(function(){var _b=exchange.getMessage().getBody();"

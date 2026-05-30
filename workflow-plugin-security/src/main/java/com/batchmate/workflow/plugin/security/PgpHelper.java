@@ -193,13 +193,24 @@ public class PgpHelper {
         InputStream in = PGPUtil.getDecoderStream(new ByteArrayInputStream(encData));
 
         PGPObjectFactory factory = new PGPObjectFactory(in, fpCalc);
-        Object first = factory.nextObject();
 
-        PGPEncryptedDataList encList;
-        if (first instanceof PGPEncryptedDataList) {
-            encList = (PGPEncryptedDataList) first;
-        } else {
-            encList = (PGPEncryptedDataList) factory.nextObject();
+        // Scan forward through leading packets (e.g. PGPMarker, version headers)
+        // until we find the PGPEncryptedDataList — usually the 1st or 2nd packet
+        PGPEncryptedDataList encList = null;
+        String firstPacketType = "none";
+        for (int i = 0; i < 8; i++) {
+            Object obj = factory.nextObject();
+            if (obj == null) break;
+            if (i == 0) firstPacketType = obj.getClass().getSimpleName();
+            if (obj instanceof PGPEncryptedDataList) {
+                encList = (PGPEncryptedDataList) obj;
+                break;
+            }
+        }
+        if (encList == null) {
+            throw new IllegalStateException(
+                "No PGPEncryptedDataList found — data may not be a PGP encrypted message " +
+                "(first packet: " + firstPacketType + ")");
         }
 
         PGPSecretKeyRingCollection secRings = new PGPSecretKeyRingCollection(
@@ -237,7 +248,8 @@ public class PgpHelper {
         if (message instanceof PGPLiteralData) {
             return ((PGPLiteralData) message).getInputStream().readAllBytes();
         }
-        throw new IllegalStateException("Unexpected PGP message: " + message.getClass().getName());
+        throw new IllegalStateException("Unexpected PGP message type: "
+            + (message == null ? "null" : message.getClass().getSimpleName()));
     }
 
     private PGPSecretKey findSecretKey(byte[] keyData) throws Exception {

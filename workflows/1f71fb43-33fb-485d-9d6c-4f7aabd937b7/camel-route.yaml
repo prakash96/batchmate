@@ -1,0 +1,87 @@
+# Camel YAML DSL — generated from workflow: Sftp to File
+# ID: 1f71fb43-33fb-485d-9d6c-4f7aabd937b7
+
+  - route:
+      id: 1f71fb43-33fb-485d-9d6c-4f7aabd937b7-processing
+      from:
+        uri: direct:1f71fb43-33fb-485d-9d6c-4f7aabd937b7
+      steps:
+        - log:
+            message: 'sftplist: Connecting to test.rebex.net:22'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - log:
+            message: 'sftplist: Listing ${exchangeProperty.testSftpPath}'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - setProperty:
+            name: _op_host
+            expression:
+              constant: test.rebex.net
+        - setProperty:
+            name: _op_port
+            expression:
+              constant: '22'
+        - setProperty:
+            name: _op_user
+            expression:
+              constant: demo
+        - setProperty:
+            name: _op_pass
+            expression:
+              constant: '{{conn.conn-1779979189884-vyg9t.password}}'
+        - setProperty:
+            name: _op_path
+            expression:
+              simple: ${exchangeProperty.testSftpPath}
+        - setProperty:
+            name: _op_filter
+            expression:
+              constant: '*.txt'
+        - setProperty:
+            name: _op_recursive
+            expression:
+              constant: 'false'
+        - setProperty:
+            name: _op_var
+            expression:
+              constant: ''
+        - setProperty:
+            name: _op_onNotFound
+            expression:
+              constant: continue
+        - bean:
+            ref: sftpHelper
+            method: list
+        - split:
+            expression:
+              simple: ${body}
+            steps:
+              - log:
+                  message: 'sftpread: Connecting to test.rebex.net:22'
+                  logName: com.batchmate.workflow.execution
+                  loggingLevel: INFO
+              - log:
+                  message: 'sftpread: Reading ${exchangeProperty.testSftpPath}/${body[fileName]}'
+                  logName: com.batchmate.workflow.execution
+                  loggingLevel: INFO
+              - pollEnrich:
+                  expression:
+                    simple: sftp://demo:{{conn.conn-1779979189884-vyg9t.password}}@test.rebex.net:22${exchangeProperty.testSftpPath}?fileName=${body[fileName]}&noop=true&idempotent=false&disconnect=true
+                  timeout: 5000
+              - script:
+                  expression:
+                    js: var _b=exchange.getMessage().getBody();if(_b!==null&&String(_b.getClass().getName()).contains('GenericFile')){var
+                      Files=Java.type('java.nio.file.Files');var Paths=Java.type('java.nio.file.Paths');exchange.getMessage().setBody(Files.readString(Paths.get(String(_b.getAbsoluteFilePath()))));}
+              - script:
+                  expression:
+                    js: var ArrayList=Java.type('java.util.ArrayList');var _ks=new
+                      ArrayList(exchange.getMessage().getHeaders().keySet());for(var
+                      _i=0;_i<_ks.size();_i++){var _k=String(_ks.get(_i));if(_k.startsWith('Camel')&&_k.length>5){var
+                      _nk=_k.charAt(5).toLowerCase()+_k.substring(6);exchange.getMessage().setHeader(_nk,exchange.getMessage().getHeader(_k));exchange.getMessage().removeHeader(_k);}}
+              - log:
+                  message: 'filewrite: Writing to C:/files/<original name>'
+                  logName: com.batchmate.workflow.execution
+                  loggingLevel: INFO
+              - to:
+                  uri: file:C:/files?autoCreate=true&fileExist=Override

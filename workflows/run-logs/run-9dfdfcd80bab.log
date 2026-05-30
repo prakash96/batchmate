@@ -1,0 +1,37 @@
+[01:11:20.767] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[01:11:20.767] INFO  controller.WorkflowController — Workflow 'File to Sftp' run started [runId=run-9dfdfcd80bab]
+[01:11:20.789] INFO  workflow.execution — filelist: Listing directory C:\files
+[01:11:22.235] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: BD2B0C199881ACF-0000000000000001 on ExchangeId: BD2B0C199881ACF-0000000000000001). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: filePath on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: filePath not found on bean: {filePath=C:\files\readme.txt, fileName=readme.txt} of type: java.util.LinkedHashMap on the exchange: Exchange[BD2B0C199881ACF-0000000000000001]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf         1449
+	...
+camel-route.yaml:26                      d32c3289-fa0f-4ba6-b7d5-ecddad log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[01:11:22.235] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: BD2B0C199881ACF-0000000000000002 on ExchangeId: BD2B0C199881ACF-0000000000000002). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: filePath on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: filePath not found on bean: {filePath=C:\files\readme.txt.pgp, fileName=readme.txt.pgp} of type: java.util.LinkedHashMap on the exchange: Exchange[BD2B0C199881ACF-0000000000000002]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf         1465
+	...
+camel-route.yaml:26                      d32c3289-fa0f-4ba6-b7d5-ecddad log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[01:11:22.247] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: BD2B0C199881ACF-0000000000000003 on ExchangeId: BD2B0C199881ACF-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.language.bean.RuntimeBeanExpressionException: Failed to invoke method: filePath on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: filePath not found on bean: {filePath=C:\files\readme.txt.pgp.txt, fileName=readme.txt.pgp.txt} of type: java.util.LinkedHashMap on the exchange: Exchange[BD2B0C199881ACF-0000000000000003]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf         1465
+	...
+camel-route.yaml:26                      d32c3289-fa0f-4ba6-b7d5-ecddad log                                                           0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[01:11:22.252] ERROR controller.WorkflowController — Workflow 'File to Sftp' run failed: Failed to invoke method: filePath on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: filePath not found on bean: {filePath=C:\files\readme.txt.pgp.txt, fileName=readme.txt.pgp.txt} of type: java.util.LinkedHashMap on the exchange: Exchange[BD2B0C199881ACF-0000000000000003]

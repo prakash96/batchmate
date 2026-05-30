@@ -1,0 +1,127 @@
+{
+  "id" : "d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf",
+  "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
+  "name" : "File to Sftp",
+  "description" : "",
+  "inputBody" : { },
+  "inputHeaders" : { },
+  "workflow" : {
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 0
+      },
+      "data" : {
+        "containerType" : "processing",
+        "errorHandlerExpanded" : false
+      },
+      "style" : {
+        "width" : 528,
+        "height" : 313
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 528,
+        "height" : 313
+      },
+      "selected" : false
+    }, {
+      "id" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
+      "type" : "filelist",
+      "position" : {
+        "x" : 62,
+        "y" : 115
+      },
+      "data" : {
+        "name" : "File List",
+        "recursive" : false,
+        "dirPath" : "C:\\files",
+        "filter" : ""
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "type" : "iteration",
+      "position" : {
+        "x" : 149,
+        "y" : 108
+      },
+      "data" : {
+        "name" : "Iteration",
+        "collection" : "body",
+        "concurrency" : 1,
+        "placeholder" : "",
+        "depth" : 1
+      },
+      "style" : {
+        "width" : 240,
+        "height" : 120
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 240,
+        "height" : 120
+      },
+      "selected" : true,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "09e78c0d-0d3e-4b6c-9b64-88311af718ba",
+      "type" : "fileread",
+      "position" : {
+        "x" : 24,
+        "y" : 47
+      },
+      "data" : {
+        "name" : "File Read",
+        "encoding" : "utf8",
+        "filePath" : "${body.filePath}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "section" : "processing"
+    } ],
+    "edges" : [ {
+      "source" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
+      "target" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__7885cec1-f9b9-47af-8c98-efe865e8e3a0-a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb"
+    } ]
+  }
+}
