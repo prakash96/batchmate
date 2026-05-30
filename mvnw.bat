@@ -7,6 +7,24 @@ REM Works on Windows 10+ where curl and tar are built-in
 set "SCRIPT_DIR=%~dp0"
 set "WRAPPER_PROPS=%SCRIPT_DIR%.mvn\wrapper\maven-wrapper.properties"
 
+REM -- 0. Use system Maven if already available in MAVEN_HOME or PATH ----------
+if defined MAVEN_HOME (
+    if exist "%MAVEN_HOME%\bin\mvn.cmd" (
+        set "MVN_CMD=%MAVEN_HOME%\bin\mvn.cmd"
+        goto :run
+    )
+)
+if defined M2_HOME (
+    if exist "%M2_HOME%\bin\mvn.cmd" (
+        set "MVN_CMD=%M2_HOME%\bin\mvn.cmd"
+        goto :run
+    )
+)
+for /f "usebackq delims=" %%M in (`where mvn.cmd 2^>nul`) do (
+    set "MVN_CMD=%%M"
+    goto :run
+)
+
 REM -- 1. Read distributionUrl from maven-wrapper.properties --------------------
 set "DIST_URL="
 for /f "usebackq tokens=1,* delims==" %%A in ("%WRAPPER_PROPS%") do (
