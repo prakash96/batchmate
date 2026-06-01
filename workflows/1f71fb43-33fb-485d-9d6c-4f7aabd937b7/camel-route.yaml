@@ -6,6 +6,14 @@
       from:
         uri: direct:1f71fb43-33fb-485d-9d6c-4f7aabd937b7
       steps:
+        - setProperty:
+            name: workflowId
+            expression:
+              constant: 1f71fb43-33fb-485d-9d6c-4f7aabd937b7
+        - setProperty:
+            name: workflowName
+            expression:
+              constant: Sftp to File
         - log:
             message: 'sftplist: Connecting to test.rebex.net:22'
             logName: com.batchmate.workflow.execution
@@ -62,17 +70,18 @@
                   logName: com.batchmate.workflow.execution
                   loggingLevel: INFO
               - log:
-                  message: 'sftpread: Reading ${exchangeProperty.testSftpPath}/${body[fileName]}'
+                  message: 'sftpread: Reading ${exchangeProperty.testSftpPath}/${body.fileName}'
                   logName: com.batchmate.workflow.execution
                   loggingLevel: INFO
               - pollEnrich:
                   expression:
-                    simple: sftp://demo:{{conn.conn-1779979189884-vyg9t.password}}@test.rebex.net:22${exchangeProperty.testSftpPath}?fileName=${body[fileName]}&noop=true&idempotent=false&disconnect=true
+                    simple: sftp://demo:{{conn.conn-1779979189884-vyg9t.password}}@test.rebex.net:22${exchangeProperty.testSftpPath}?fileName=${body.fileName}&noop=true&idempotent=false&disconnect=true
                   timeout: 5000
               - script:
                   expression:
-                    js: var _b=exchange.getMessage().getBody();if(_b!==null&&String(_b.getClass().getName()).contains('GenericFile')){var
-                      Files=Java.type('java.nio.file.Files');var Paths=Java.type('java.nio.file.Paths');exchange.getMessage().setBody(Files.readString(Paths.get(String(_b.getAbsoluteFilePath()))));}
+                    js: var _b=exchange.getMessage().getBody();if(_b!==null&&String(_b.getClass().getName()).includes('GenericFile')){var
+                      Files=Java.type('java.nio.file.Files');var Paths=Java.type('java.nio.file.Paths');var
+                      _gf=_b.getFile();var _path=_gf!=null?String(_gf.getAbsolutePath()):String(_b.getAbsoluteFilePath());exchange.getMessage().setBody(Files.readString(Paths.get(_path)));}
               - script:
                   expression:
                     js: var ArrayList=Java.type('java.util.ArrayList');var _ks=new
@@ -80,8 +89,8 @@
                       _i=0;_i<_ks.size();_i++){var _k=String(_ks.get(_i));if(_k.startsWith('Camel')&&_k.length>5){var
                       _nk=_k.charAt(5).toLowerCase()+_k.substring(6);exchange.getMessage().setHeader(_nk,exchange.getMessage().getHeader(_k));exchange.getMessage().removeHeader(_k);}}
               - log:
-                  message: 'filewrite: Writing to C:/files/<original name>'
+                  message: 'filewrite: Writing to C:/files/${header.fileName}'
                   logName: com.batchmate.workflow.execution
                   loggingLevel: INFO
-              - to:
-                  uri: file:C:/files?autoCreate=true&fileExist=Override
+              - toD:
+                  uri: file:C:/files?fileName=${header.fileName}&autoCreate=true&fileExist=Override

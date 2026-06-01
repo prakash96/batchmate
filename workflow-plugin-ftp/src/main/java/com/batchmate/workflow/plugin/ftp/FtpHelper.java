@@ -55,15 +55,12 @@ public class FtpHelper {
         client.logout();
         client.disconnect();
 
-        java.util.List<java.util.Map<String, String>> arrayNode = new java.util.ArrayList<>();
+        java.util.List<com.batchmate.workflow.camel.api.FileEntry> arrayNode = new java.util.ArrayList<>();
         for (String filePath : files) {
             String fileName = filePath.contains("/")
                 ? filePath.substring(filePath.lastIndexOf('/') + 1)
                 : filePath;
-            java.util.Map<String, String> item = new java.util.LinkedHashMap<>();
-            item.put("filePath", filePath);
-            item.put("fileName", fileName);
-            arrayNode.add(item);
+            arrayNode.add(new com.batchmate.workflow.camel.api.FileEntry(filePath, fileName));
         }
         if (!resultVar.isEmpty()) {
             exchange.setProperty(resultVar, arrayNode);

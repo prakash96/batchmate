@@ -1,0 +1,27 @@
+{
+  "runId" : "run-6f7fef624149",
+  "workflowId" : "d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf",
+  "workflowName" : "File to Sftp",
+  "runDateTime" : "2026-05-31T01:01:07.4078468",
+  "status" : "failed",
+  "durationMs" : 50,
+  "error" : "Failed to invoke method: filePath on null due to: org.apache.camel.component.bean.MethodNotFoundException: Method with name: filePath not found on bean: {filePath=C:\\files\\readme.txt, fileName=readme.txt} of type: java.util.LinkedHashMap on the exchange: Exchange[C38225497E1CF1F-0000000000000009]",
+  "resultBody" : "[{filePath=C:\\files\\readme.txt, fileName=readme.txt}]",
+  "steps" : [ {
+    "nodeId" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
+    "nodeType" : "filelist",
+    "nodeName" : "File List",
+    "section" : "processing"
+  }, {
+    "nodeId" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+    "nodeType" : "iteration",
+    "nodeName" : "Iteration",
+    "section" : "processing"
+  }, {
+    "nodeId" : "09e78c0d-0d3e-4b6c-9b64-88311af718ba",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

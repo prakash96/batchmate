@@ -98,7 +98,7 @@ public class WorkflowToCamelAdapter {
             String routeId = id + "-" + section;
             String fromUri = "direct:" + id + ("processing".equals(section) ? "" : "-" + section);
 
-            Map<String, Object> route = buildRoute(routeId, fromUri, nodes, allNodes, allEdges);
+            Map<String, Object> route = buildRoute(routeId, fromUri, nodes, allNodes, allEdges, id, name);
 
             // Wrap processing steps in doTry/doCatch to invoke the error handler on any exception
             if ("processing".equals(section) && hasErrorHandler) {
@@ -106,6 +106,11 @@ public class WorkflowToCamelAdapter {
                     (List<Map<String, Object>>) route.get("steps");
 
                 List<Map<String, Object>> catchSteps = new ArrayList<>();
+                // Flag that an error was caught — read after doTry to decide whether to rethrow
+                if (rethrowError) {
+                    catchSteps.add(ConversionUtils.setVarExpr("_processingFailed",
+                        Map.of("constant", "true")));
+                }
                 catchSteps.add(ConversionUtils.setVarExpr(errorVarPrefix + "Message",
                     Map.of("simple", "${exception.message}")));
                 catchSteps.add(ConversionUtils.setVarExpr(errorVarPrefix + "Type",
@@ -116,10 +121,11 @@ public class WorkflowToCamelAdapter {
                     Map.of("simple", "${exchangeProperty._errorCode}")));
                 catchSteps.add(ConversionUtils.toStep("direct:" + id + "-processingFailed", null));
 
+                // "handled" is not supported in Camel 3.x YAML DSL — omit it; the exception
+                // is swallowed by default (handled=true). Rethrow is done via a script step
+                // placed after the doTry block, which re-raises using the captured message.
                 Map<String, Object> catchClause = new LinkedHashMap<>();
                 catchClause.put("exception", List.of("java.lang.Exception"));
-                // handled(false) = run catch steps then rethrow; handled(true/default) = swallow
-                if (rethrowError) catchClause.put("handled", Map.of("simple", "false"));
                 catchClause.put("steps", catchSteps);
 
                 Map<String, Object> doTryBody = new LinkedHashMap<>();
@@ -129,7 +135,16 @@ public class WorkflowToCamelAdapter {
                 Map<String, Object> doTryStep = new LinkedHashMap<>();
                 doTryStep.put("doTry", doTryBody);
 
-                route.put("steps", List.of(doTryStep));
+                List<Map<String, Object>> outerSteps = new ArrayList<>();
+                outerSteps.add(doTryStep);
+                if (rethrowError) {
+                    String msgVar = ConversionUtils.escapeJs(errorVarPrefix + "Message");
+                    outerSteps.add(ConversionUtils.scriptStep("js",
+                        "if(exchange.getProperties().get('_processingFailed')){" +
+                        "var _m=String(exchange.getProperties().get('" + msgVar + "')||'Processing failed');" +
+                        "throw new java.lang.RuntimeException(_m);}"));
+                }
+                route.put("steps", outerSteps);
             }
 
             Map<String, Object> wrapper = new LinkedHashMap<>();
@@ -147,7 +162,9 @@ public class WorkflowToCamelAdapter {
     private Map<String, Object> buildRoute(String routeId, String fromUri,
                                             List<JsonNode> sectionTopNodes,
                                             List<JsonNode> allNodes,
-                                            List<JsonNode> allEdges) {
+                                            List<JsonNode> allEdges,
+                                            String workflowId,
+                                            String workflowName) {
         Set<String> scopeIds = sectionTopNodes.stream()
             .map(n -> n.path("id").asText())
             .collect(Collectors.toSet());
@@ -166,6 +183,8 @@ public class WorkflowToCamelAdapter {
         from.put("uri", fromUri);
 
         List<Map<String, Object>> steps = new ArrayList<>();
+        steps.add(ConversionUtils.setVarExpr("workflowId",   Map.of("constant", workflowId)));
+        steps.add(ConversionUtils.setVarExpr("workflowName", Map.of("constant", workflowName)));
         start.ifPresent(s ->
             buildSteps(s.path("id").asText(), allNodes, allEdges, scopeIds, new HashSet<>(), steps));
 
@@ -281,6 +300,7 @@ public class WorkflowToCamelAdapter {
                     buildSteps(cs.path("id").asText(), allNodes, allEdges, childIds, new HashSet<>(), childSteps));
 
                 int concurrency = data.path("concurrency").asInt(1);
+                boolean stopOnError = "stop".equals(data.path("onError").asText("continue"));
 
                 Map<String, Object> splitBody = new LinkedHashMap<>();
                 splitBody.put("expression", splitExpr);
@@ -288,6 +308,7 @@ public class WorkflowToCamelAdapter {
                     splitBody.put("parallelProcessing", true);
                     splitBody.put("executorService", "splitPool-" + concurrency);
                 }
+                if (stopOnError) splitBody.put("stopOnException", true);
                 splitBody.put("steps", childSteps);
 
                 Map<String, Object> splitStep = new LinkedHashMap<>();

@@ -41,7 +41,7 @@ const VALIDATORS = {
     smtp: (data) => {
         const e = [];
         if (!data.to?.trim()) e.push("'To' address is required");
-        if (!data.smtpHost?.trim()) e.push("SMTP host is required");
+        if (!data.connectionId && !data.smtpHost?.trim()) e.push("SMTP host is required");
         if (!data.subject?.trim()) e.push("Subject is required");
         return e;
     },
@@ -62,7 +62,12 @@ const VALIDATORS = {
         if (!data.webhookUrl?.trim()) e.push("Webhook URL is required");
         return e;
     },
-    fileread: (data) => (!data.filePath?.trim() ? ["File path is required"] : []),
+    fileread: (data) => {
+        // Accept new directory+fileName fields or legacy filePath
+        if (data.filePath?.trim()) return [];
+        if (!data.directory?.trim()) return ["Directory is required"];
+        return [];
+    },
     filewrite: (data) => {
         const e = [];
         if (!data.directory?.trim()) e.push("Directory is required");

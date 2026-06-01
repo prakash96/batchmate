@@ -1,0 +1,25 @@
+# Camel YAML DSL — generated from workflow: Email Test
+# ID: edea824b-dd5b-49a6-b580-8c860453d478
+
+  - route:
+      id: edea824b-dd5b-49a6-b580-8c860453d478-processing
+      from:
+        uri: direct:edea824b-dd5b-49a6-b580-8c860453d478
+      steps:
+        - setProperty:
+            name: workflowId
+            expression:
+              constant: edea824b-dd5b-49a6-b580-8c860453d478
+        - setProperty:
+            name: workflowName
+            expression:
+              constant: Email Test
+        - setBody:
+            expression:
+              constant: test message
+        - log:
+            message: 'smtp: Sending email to bhanuprksh96@gmail.com'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - to:
+            uri: smtp://smtp.gmail.com:587?to=bhanuprksh96%40gmail.com&subject=Test&from=bhanuprksh96%40gmail.com&username=bhanuprksh96%40gmail.com&password=dnim%20iwdz%20aptv%20uvgw&contentType=text%2Fhtml&mail.smtp.starttls.enable=true

@@ -1,0 +1,15 @@
+[23:48:04.534] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[23:48:04.542] INFO  controller.WorkflowController — Workflow 'Compression Test' run started [runId=run-9cd32b449de0]
+[23:48:04.580] INFO  workflow.execution — H4sIAAAAAAAAAAvJyCxWAKLixNyCnFSFktTiEgA9vkC4EwAAAA==
+[23:48:04.851] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 20690DC2B753173-0000000000000005 on ExchangeId: 20690DC2B753173-0000000000000005). Exhausted after delivery attempt: 1 caught: java.util.zip.ZipException: Not in GZIP format
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       a40bf72f-49e6-4770-bb22-14a19e from[direct://a40bf72f-49e6-4770-bb22-14a19e5c52bc          296
+	...
+camel-route.yaml:81                      a40bf72f-49e6-4770-bb22-14a19e bean[ref:gzipHelper method:decompress]                        0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:48:04.913] ERROR controller.WorkflowController — Workflow 'Compression Test' run failed: Not in GZIP format

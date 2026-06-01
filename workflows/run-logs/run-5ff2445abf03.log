@@ -1,0 +1,4 @@
+[22:42:57.896] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[22:42:57.900] INFO  controller.WorkflowController — Workflow 'Email Test' run started [runId=run-5ff2445abf03]
+[22:42:57.913] INFO  workflow.execution — [TODO] Unsupported: smtp
+[22:42:57.922] INFO  controller.WorkflowController — Workflow 'Email Test' run completed successfully in 26ms

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +27,8 @@ public class VaultService {
     @Value("${vault.file:${metadata.dir:../metadata}/vault.json}")
     private String vaultFile;
 
-    private Path resolvedFile;
+    private Path       resolvedFile;
+    private SecretKey  vaultKey;
 
     private final ObjectMapper objectMapper;
 
@@ -43,6 +45,20 @@ public class VaultService {
         );
         resolvedFile = resolvedDir.resolve(configured.getFileName().toString()).normalize();
         log.info("Vault file → {}", resolvedFile.toAbsolutePath());
+
+        Path keyFile = resolvedFile.getParent().resolve(".vault.key");
+        try {
+            vaultKey = VaultEncryption.loadOrGenerateKey(keyFile);
+            if (!Files.exists(keyFile) || System.getenv("VAULT_MASTER_KEY") != null) {
+                log.info("Vault encryption key loaded from environment variable");
+            } else {
+                log.info("Vault encryption key loaded from {}", keyFile.toAbsolutePath());
+                log.warn("Back up {} — losing it makes all vault entries unrecoverable", keyFile.toAbsolutePath());
+            }
+        } catch (Exception e) {
+            log.error("Failed to initialize vault encryption key: {}", e.getMessage());
+            throw new RuntimeException("Cannot start: vault encryption key unavailable", e);
+        }
     }
 
     public List<JsonNode> list() throws IOException {
@@ -83,11 +99,53 @@ public class VaultService {
 
     private List<JsonNode> readAll() throws IOException {
         if (!Files.exists(resolvedFile)) return new ArrayList<>();
-        return objectMapper.readValue(resolvedFile.toFile(), new TypeReference<List<JsonNode>>() {});
+        List<JsonNode> raw = objectMapper.readValue(resolvedFile.toFile(), new TypeReference<List<JsonNode>>() {});
+        return raw.stream().map(this::decryptEntry).collect(Collectors.toList());
     }
 
     private void writeAll(List<JsonNode> entries) throws IOException {
         Files.createDirectories(resolvedFile.getParent());
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(resolvedFile.toFile(), entries);
+        List<JsonNode> encrypted = entries.stream().map(this::encryptEntry).collect(Collectors.toList());
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(resolvedFile.toFile(), encrypted);
+    }
+
+    /** Encrypts the config object to a single "enc:..." string before persisting. */
+    private JsonNode encryptEntry(JsonNode entry) {
+        if (!(entry instanceof com.fasterxml.jackson.databind.node.ObjectNode)) return entry;
+        com.fasterxml.jackson.databind.node.ObjectNode obj = (com.fasterxml.jackson.databind.node.ObjectNode) entry;
+        JsonNode config = obj.path("config");
+        if (config.isObject()) {
+            try {
+                String json      = objectMapper.writeValueAsString(config);
+                String encrypted = VaultEncryption.encrypt(json, vaultKey);
+                obj = obj.deepCopy();
+                obj.put("config", encrypted);
+            } catch (Exception e) {
+                log.error("Failed to encrypt vault entry {}: {}", obj.path("id").asText(), e.getMessage());
+            }
+        }
+        return obj;
+    }
+
+    /** Decrypts the "enc:..." config string back to an object node after loading. */
+    private JsonNode decryptEntry(JsonNode entry) {
+        if (!(entry instanceof com.fasterxml.jackson.databind.node.ObjectNode)) return entry;
+        com.fasterxml.jackson.databind.node.ObjectNode obj = (com.fasterxml.jackson.databind.node.ObjectNode) entry;
+        JsonNode config = obj.path("config");
+        if (config.isTextual()) {
+            String text = config.asText();
+            if (VaultEncryption.isEncrypted(text)) {
+                try {
+                    String json      = VaultEncryption.decrypt(text, vaultKey);
+                    JsonNode decoded = objectMapper.readTree(json);
+                    obj = obj.deepCopy();
+                    obj.set("config", decoded);
+                } catch (Exception e) {
+                    log.error("Failed to decrypt vault entry {}: {}", obj.path("id").asText(), e.getMessage());
+                }
+            }
+            // If not "enc:" prefixed, it's a legacy plain-text entry — leave as-is
+        }
+        return obj;
     }
 }

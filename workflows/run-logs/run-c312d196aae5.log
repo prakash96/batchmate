@@ -1,0 +1,17 @@
+[13:58:04.488] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[13:58:04.505] INFO  controller.WorkflowController — Workflow 'File to Sftp' run started [runId=run-c312d196aae5]
+[13:58:04.505] INFO  workflow.execution — filelist: Listing directory C:/files
+[13:58:04.581] INFO  workflow.execution — null
+[13:58:04.584] INFO  workflow.execution — fileread: Reading file C:\files\readme.txt
+[13:58:04.606] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: B1BE45190D2EB2F-000000000000000F on ExchangeId: B1BE45190D2EB2F-000000000000000F). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: File not found: null
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf           99
+	...
+camel-route.yaml:41                      d32c3289-fa0f-4ba6-b7d5-ecddad script[js{var Files=Java.type('java.nio.file.Files            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[13:58:04.612] ERROR controller.WorkflowController — Workflow 'File to Sftp' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: File not found: null

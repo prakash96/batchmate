@@ -9,8 +9,7 @@
     "width": 40,
     "height": 40,
     "defaultData": {
-      "name": "File Read",
-      "encoding": "utf8"
+      "name": "File Read"
     },
     "zones": [
       "processing",
@@ -18,37 +17,20 @@
     ],
     "sections": [
       {
-        "title": "File",
+        "title": "File Location",
         "open": true,
         "fields": [
           {
-            "key": "filePath",
-            "label": "File Path",
+            "key": "directory",
+            "label": "Directory",
             "type": "text",
-            "placeholder": "/path/to/file.txt  or  ${vars.filePath}"
+            "placeholder": "C:/files  or  /data/input  or  ${vars.inputDir}"
           },
           {
-            "key": "encoding",
-            "label": "Encoding",
-            "type": "select",
-            "options": [
-              {
-                "value": "utf8",
-                "label": "UTF-8"
-              },
-              {
-                "value": "ascii",
-                "label": "ASCII"
-              },
-              {
-                "value": "base64",
-                "label": "Base64"
-              },
-              {
-                "value": "binary",
-                "label": "Binary"
-              }
-            ]
+            "key": "fileName",
+            "label": "File Name",
+            "type": "text",
+            "placeholder": "report.csv  or  ${vars.fileName}  or  ${body.fileName}"
           }
         ]
       },
@@ -61,6 +43,37 @@
             "label": "Store Result In Variable",
             "type": "text",
             "placeholder": "fileContent"
+          }
+        ]
+      },
+      {
+        "title": "After Read",
+        "open": false,
+        "fields": [
+          {
+            "key": "onSuccess",
+            "label": "On Successful Read",
+            "type": "select",
+            "options": [
+              { "value": "none", "label": "Do nothing" },
+              { "value": "move", "label": "Move file" },
+              { "value": "delete", "label": "Delete file" }
+            ],
+            "defaultValue": "none"
+          },
+          {
+            "key": "moveDirectory",
+            "label": "Move To Directory",
+            "type": "text",
+            "placeholder": "/data/processed  or  ${vars.archiveDir}",
+            "showWhen": { "key": "onSuccess", "value": "move" }
+          },
+          {
+            "key": "moveFileName",
+            "label": "Move To File Name",
+            "type": "text",
+            "placeholder": "Leave empty to keep original name",
+            "showWhen": { "key": "onSuccess", "value": "move" }
           }
         ]
       }

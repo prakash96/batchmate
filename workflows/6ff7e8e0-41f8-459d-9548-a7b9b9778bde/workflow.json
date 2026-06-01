@@ -1,0 +1,172 @@
+{
+  "id" : "6ff7e8e0-41f8-459d-9548-a7b9b9778bde",
+  "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
+  "name" : "Ftp to File",
+  "description" : "",
+  "inputBody" : { },
+  "inputHeaders" : { },
+  "workflow" : {
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 0
+      },
+      "data" : {
+        "containerType" : "processing",
+        "errorHandlerExpanded" : false
+      },
+      "style" : {
+        "width" : 528,
+        "height" : 382.5
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 528,
+        "height" : 383
+      },
+      "selected" : true
+    }, {
+      "id" : "de1c9694-8a7d-4c81-b491-9687a74de97a",
+      "type" : "iteration",
+      "position" : {
+        "x" : 110,
+        "y" : 202.5
+      },
+      "data" : {
+        "name" : "Iteration",
+        "collection" : "",
+        "concurrency" : 1,
+        "placeholder" : "",
+        "depth" : 1
+      },
+      "style" : {
+        "width" : 220,
+        "height" : 120
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 220,
+        "height" : 120
+      },
+      "section" : "processing",
+      "selected" : false
+    }, {
+      "id" : "9e2f9e14-1093-4cb8-adad-d2e90ec82684",
+      "type" : "filewrite",
+      "position" : {
+        "x" : 110,
+        "y" : 34
+      },
+      "data" : {
+        "name" : "Write",
+        "encoding" : "utf8",
+        "directory" : "C:/files/ftp",
+        "overwriteExisting" : true,
+        "createDirs" : true,
+        "fileName" : "${headers.fileName}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "de1c9694-8a7d-4c81-b491-9687a74de97a",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    }, {
+      "id" : "ede1c6b8-4bc9-45f8-b65b-e336abeeceb9",
+      "type" : "ftplist",
+      "position" : {
+        "x" : 24,
+        "y" : 202.5
+      },
+      "data" : {
+        "name" : "FTP List",
+        "port" : 21,
+        "securityMode" : "none",
+        "transferMode" : "passive",
+        "recursive" : false,
+        "connectionId" : "conn-1780248351634-h3h2x",
+        "remotePath" : "${vars.testSftpPath}",
+        "filter" : "*.txt"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "5290900d-27f7-4edc-979d-e4b479a0430b",
+      "type" : "ftpread",
+      "position" : {
+        "x" : 24,
+        "y" : 34
+      },
+      "data" : {
+        "name" : "FTP Read",
+        "port" : 21,
+        "securityMode" : "none",
+        "transferMode" : "passive",
+        "textEncoding" : "UTF-8",
+        "setAsBody" : true,
+        "connectionId" : "conn-1780248351634-h3h2x",
+        "remoteDirectory" : "${vars.testSftpPath}",
+        "filePattern" : "${body.fileName}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "de1c9694-8a7d-4c81-b491-9687a74de97a",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "de1c9694-8a7d-4c81-b491-9687a74de97a",
+      "section" : "processing"
+    } ],
+    "edges" : [ {
+      "source" : "ede1c6b8-4bc9-45f8-b65b-e336abeeceb9",
+      "target" : "de1c9694-8a7d-4c81-b491-9687a74de97a",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__ede1c6b8-4bc9-45f8-b65b-e336abeeceb9-de1c9694-8a7d-4c81-b491-9687a74de97a"
+    }, {
+      "source" : "5290900d-27f7-4edc-979d-e4b479a0430b",
+      "target" : "9e2f9e14-1093-4cb8-adad-d2e90ec82684",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__5290900d-27f7-4edc-979d-e4b479a0430b-9e2f9e14-1093-4cb8-adad-d2e90ec82684"
+    } ]
+  }
+}

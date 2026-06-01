@@ -1,0 +1,31 @@
+{
+  "runId" : "run-c8d3a835855f",
+  "workflowId" : "a40bf72f-49e6-4770-bb22-14a19e5c52bc",
+  "workflowName" : "Compression Test",
+  "runDateTime" : "2026-05-31T23:49:25.2145048",
+  "status" : "success",
+  "durationMs" : 156,
+  "resultBody" : "This is sample test",
+  "steps" : [ {
+    "nodeId" : "be8c31ac-423f-4ee3-939b-95418d5a0f18",
+    "nodeType" : "setbody",
+    "nodeName" : "Set Body",
+    "section" : "processing"
+  }, {
+    "nodeId" : "f397c971-10e0-4a9e-8496-5c3aeaa71249",
+    "nodeType" : "gzipcompress",
+    "nodeName" : "GZIP Compress",
+    "section" : "processing"
+  }, {
+    "nodeId" : "67c9a311-9b49-487a-9c0f-c6af6bb12175",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  }, {
+    "nodeId" : "ffdd3308-9840-42ad-b6c2-ba830393889a",
+    "nodeType" : "gzipextract",
+    "nodeName" : "GZIP Extract",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

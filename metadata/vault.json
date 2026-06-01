@@ -1,45 +1,19 @@
 [ {
-  "name" : "Sample Pub",
-  "type" : "pgp-key",
-  "config" : {
-    "keyContent" : "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQINBGhKExampleBEAC7Qw1R3K0dJfV8Jv4uXK8fW9Y6y5Q2xV\n8W0nX1mN7X2dL0Jj9V8K1K9v3L6m8Q==\n=AbCd\n-----END PGP PUBLIC KEY BLOCK-----"
-  },
-  "packageId" : "a033ede8-84c9-421c-a824-42346ecb5533",
-  "id" : "vault-1779816096520-htuba"
-}, {
-  "name" : "Sample Private",
-  "type" : "pgp-key",
-  "config" : {
-    "keyType" : "private",
-    "keyContent" : "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nlQPGBGhKExampleBCAC7Qw1R3K0dJfV8Jv4uXK8fW9Y6y5Q2xV\n8W0nX1mN7X2dL0Jj9V8K1K9v3L6m8QAA==\n=EfGh\n-----END PGP PRIVATE KEY BLOCK-----",
-    "passphrase" : "sample"
-  },
-  "packageId" : "a033ede8-84c9-421c-a824-42346ecb5533",
-  "id" : "vault-1779816144095-9zkya"
-}, {
   "name" : "batchmate_pub",
   "type" : "pgp-key",
-  "config" : {
-    "keyContent" : "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmDMEahdI1xYJKwYBBAHaRw8BAQdAculNp0NSmiXOrGXiJCTFx6S4CvLoFcO9yoRR\nrq7cH+20BUFkbWluiLUEExYKAF0WIQQ5aesN7Jo/LryRElYPbEVdoa0X8QUCahdI\n1xsUgAAAAAAEAA5tYW51MiwyLjUrMS4xMiwyLDECGwMFCQWlhBEFCwkIBwICIgIG\nFQoJCAsCBBYCAwECHgcCF4AACgkQD2xFXaGtF/EmnwEAoJ9qRUAqhb6yCOAHcbKG\nl3TQWbmq7/Y9jNn3EvLLjTkBAMYK5RL2CNlJIkWz0ZgDHyDs6MOaXPv7NuH9pz1V\nfI0FuDgEahdI1xIKKwYBBAGXVQEFAQEHQM7Cfj1c1iI0oFOBI6/AE/kArFpTkv9j\ncqT81zAVcdR+AwEIB4iaBBgWCgBCFiEEOWnrDeyaPy68kRJWD2xFXaGtF/EFAmoX\nSNcbFIAAAAAABAAObWFudTIsMi41KzEuMTIsMiwxAhsMBQkFpYQRAAoJEA9sRV2h\nrRfx1uYBAJa36eQcVCEyNmlwugpm9t9XRpEOl+UxbysEnwEiIo01AQDsI5RzAlbw\nGYVcg6mHYeEZqETMj9f5tbhQPDZ/ehbdDA==\n=OrXw\n-----END PGP PUBLIC KEY BLOCK-----\n"
-  },
+  "config" : "enc:mcHYHH9ad2duTrvuRHRCknJHAGWmLnpzvlprLIWavthwbeNESWq9dE6dRfEOo6H0oWVD9Sr+r1a7aP6iBuAQ9KTvY3T9UQoN+dUy/4RZdASWO+rxjy+yENhUnCDVRE+iDfSdP3mq6oQ08xPbjEhTkr8OGL8u06XngOErBgKD4JXbhL3myfNXhxkyb5BLln6SX64pZvGmjiUJBebXoUG13l9eys6WMi9/9gDCOf/f5Nj2KLk8MOanqPdtz8VLljhHU9T+iF8iozJLB2eHmuN1T4C4AbDREtYV90yuAU23QPV1q/zmOf3yOQfAgy6m9OwAk0ps7j+oLEetjuqhIJxenk622VWsZcowo4/mEIN/iVt4+7d4Byf9Bv4rQv7tqDmlSi4XguQ0Q+OXSmf3G2TOA4qrjtjQfM3dVCjJOzppYuse15iqqviq38TLP8UGwayDzOtzPQKKJwDBepoGadyuOBXY/7vyaWNiMLXp8fIptRSxPy8fyFG4/9R+eTtg3elHkJET9rvLM+OuNO5fhTuTLjhPjf0ah3FfDsX4kYgBRUrDa6Q7EZAf/yUXoDMoIRbpl/Brqp3yhPNcq5SSjbxcMrzk14HpFVtqNF9IZgtWuRDvzo2hrhDpFZjIEuw1IjCBbJq5XWV08JFkqR0QUe/v5ohgK8eGNGqXydjVyjqYV6nTRFImpwBNjZenRJKQ4gweNtcWBoRM0YZN+6l5Ok/5iRr3meJhPVXiUMnz3VqD0uGTIXMls5erWIdaeB6xmIkflKaiJ8CwYoeJodu843GRIdUDrDIyWYGFsr+n+iLUNp7qoqpvbovwxmne3xvZ+l5/CVk48dMZDp6rNLg942yQoramEf6EMfdI3qni5KnecQHN23yERyhY3ZNS/ji5vD3Zp26HoNw/sMIAJbRt/TNr018STf6iVDmAHG1YLv8zjkF/y6OnNNzHbZSEGXCEkOO4G7zs6vNHIlAM80c+X8QnPC1324gegIwuPoTFRANB8kAliUwChOQg7A==",
   "packageId" : "a033ede8-84c9-421c-a824-42346ecb5533",
   "id" : "vault-1779911014288-zak6v"
 }, {
   "name" : "batchmate_private",
   "type" : "pgp-key",
-  "config" : {
-    "keyType" : "private",
-    "passphrase" : "batchmate",
-    "keyContent" : "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nlIYEahdI1xYJKwYBBAHaRw8BAQdAculNp0NSmiXOrGXiJCTFx6S4CvLoFcO9yoRR\nrq7cH+3+BwMCHD3V1vlxgQv/u1/eMTmDyZ5C7lsK7TuPLRrsLCii8UZOOuxke7L4\n6hG5zyuSMb6xRDOnP0J8BAQGYug60UypTR5IAVUXCBU/Pci30CRIsrQFQWRtaW6I\ntQQTFgoAXRYhBDlp6w3smj8uvJESVg9sRV2hrRfxBQJqF0jXGxSAAAAAAAQADm1h\nbnUyLDIuNSsxLjEyLDIsMQIbAwUJBaWEEQULCQgHAgIiAgYVCgkICwIEFgIDAQIe\nBwIXgAAKCRAPbEVdoa0X8SafAQCgn2pFQCqFvrII4AdxsoaXdNBZuarv9j2M2fcS\n8suNOQEAxgrlEvYI2UkiRbPRmAMfIOzow5pc+/s24f2nPVV8jQWciwRqF0jXEgor\nBgEEAZdVAQUBAQdAzsJ+PVzWIjSgU4Ejr8AT+QCsWlOS/2NypPzXMBVx1H4DAQgH\n/gcDAl/herIUZboZ/+i0tLfb28Ixt28r5EuiAyMuNILWzmA4m9L7yl87P/TmQjXl\nmeSTelkkslCkHWsq+O4llV7FsgMBvPILTIUzT06o0wMBTWuImgQYFgoAQhYhBDlp\n6w3smj8uvJESVg9sRV2hrRfxBQJqF0jXGxSAAAAAAAQADm1hbnUyLDIuNSsxLjEy\nLDIsMQIbDAUJBaWEEQAKCRAPbEVdoa0X8dbmAQCWt+nkHFQhMjZpcLoKZvbfV0aR\nDpflMW8rBJ8BIiKNNQEA7COUcwJW8BmFXIOph2HhGahEzI/X+bW4UDw2f3oW3Qw=\n=Y3P7\n-----END PGP PRIVATE KEY BLOCK-----\n"
-  },
+  "config" : "enc:7KSUAUhbc1C1RWmP87ZsnGumCevNOMPHp0tzk3ltAatX7aL2YflYrxQC2O7oqlb7qAC+w9G/9couHaSeRrlGrPlU1Kwk05d7kM3PgIgF9kgEhbMBqngp2RYOt2blmBe2cTUawZOxOKoznzd0DLfbStYYSo+IYE6Xho4K2UplC7ZOZBb242nQC7z+xNnvfMAwIjQe0i+kN2nzzsXycdSLPhXKMuePT/iTD2JW+NMUD18cc6OhvSLq+CsfGbJzHHOEq9sQGAwJawQvxlHLPv1mRGqmvnal3ls5u8I4hHF2Nf6L7iPj0NjjWv9pDD2PBkCuQmTvPtjDOPXj0ezXaZn4DzvtDw3w5j94t6kytxDvJ8qu7ObCW72MPGQmnLNCqUxzUkLM2lfo//BhiIaIp9Q+XYKl8h3NPCWg1/4jAazstGPVzBNCfUZ+L4v8iQkV7GqXR4yrzZfALs4rWS1dtgZHxzNjb3s75pa6S2eq9I0Cb5Oj0KvwB6mSkzK8Xbnhex1r0OwNNuHuPin/E61ssavNiwBF+0SDbh++ZPg39N0IoDIUtMqcrUAvjvqLgcqb0voe49crbQUCxDmQ9RsRLiJgcR+soglrUfwoVCUYmYbMgraZSHtZlvDdNlj0ZKvGy8Gw4NuxOIxzLmaQkTFFO+XB9oaQ4Agcel3mPIVXTHUmM6aibaUSJakBKMyh39EyJA5gprqEv4nwoo/cMBSv/G780AjIysEFek4U1LrgIzRfrvRu/pCqQS3TGfQR1s6/uEjdSA0OtwTd9lkanA4jdtZ/N0X5lOoUNA3QJrPOEexbF6rZ1tmWQcDGnD5ycpjRA3Teu9aoBY/sJMmyPSmH4uAGtyEZUC/45sku0hKyHfRhCXRscfeEsZvxjAyb+0dqYys3NFLj5c+TmjTZS+o4HuZi8IN8tpp1znvvkHepoqD8k6n0+CX2t7irlBBPQcNRUess7kgl/e3u39tDeo547neGp+T9ei2z76VNgQo5ZEh5qSotSk7OtKm2mSxKNgjlygbgOr4Jb3A/TWB5d7YcrO3kUraEKzwCr9Cx1gwTpJPb5zTEh0+6S+KEt9GEVIjvVriVR6wn8d72PNu+AlE2EY5Mk0mncZGhOHdmNCL3qEvSm/hPYy/hECBsmODm+INMA8eV913xXIbQO+XPDbZaRsik7DOMIHRugdSXggH3wB9NWD9UOjE3awmYEDk1xBN0i0PBqcp52uVNiJwdqb2Vv4JyNCLBM3nx5k4iQbDPRr4k3dYIFkkHQfLGnc64uuxyiEFUHFs2dRRLUR7eXdLh5FBgc5RTIHnDO4z7H8zebw/LnWEidV94HbkNWJZxcx3LRARJniDVZekEAj5Nb45wPBOjjXgGHsNb/dD8pA==",
   "packageId" : "a033ede8-84c9-421c-a824-42346ecb5533",
   "id" : "vault-1779912991051-8g59j"
 }, {
   "name" : "sftpPassword",
   "type" : "password",
-  "config" : {
-    "value" : "password"
-  },
+  "config" : "enc:qpbQ3L01e4zAqmQl4oh3juBcSbvzbE0uVh/lUeTxm7QGM5dDDiK/E7rKkBGXTfn9",
   "packageId" : "b5778327-7c7e-46df-91ac-41d6cdaf48c1",
   "id" : "vault-1780081115165-g977o"
 } ]

@@ -290,13 +290,20 @@ public class PgpHelper {
     private byte[] getContent(Exchange exchange, ObjectNode cfg) {
         String contentSource = cfg.path("contentSource").asText("body");
         String contentVar    = cfg.path("contentVar").asText("").trim();
-        Object raw = "variable".equals(contentSource) && !contentVar.isEmpty()
-            ? exchange.getProperty(contentVar)
-            : exchange.getMessage().getBody();
-        if (raw == null) return new byte[0];
-        if (raw instanceof byte[]) return (byte[]) raw;
-        if (raw instanceof String)  return ((String) raw).getBytes(StandardCharsets.UTF_8);
-        return raw.toString().getBytes(StandardCharsets.UTF_8);
+
+        if ("variable".equals(contentSource) && !contentVar.isEmpty()) {
+            Object var = exchange.getProperty(contentVar);
+            if (var == null) return new byte[0];
+            if (var instanceof byte[]) return (byte[]) var;
+            if (var instanceof String) return ((String) var).getBytes(StandardCharsets.UTF_8);
+            return var.toString().getBytes(StandardCharsets.UTF_8);
+        }
+
+        // Use Camel's type-converter chain: getBody(byte[].class) handles
+        // GenericFile (via GenericFileConverter), InputStream, String, and byte[]
+        // without needing any custom body-unwrap code here.
+        byte[] bytes = exchange.getMessage().getBody(byte[].class);
+        return bytes != null ? bytes : new byte[0];
     }
 
     private void storeResult(Exchange exchange, byte[] result, ObjectNode cfg) {

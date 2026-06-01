@@ -9,8 +9,15 @@ import java.util.*;
 
 public class FilePlugin implements NodeConverterPlugin {
 
+    private final FileHelper fileHelper = new FileHelper();
+
     @Override
     public String pluginId() { return "file"; }
+
+    @Override
+    public Map<String, Object> beans() {
+        return Collections.singletonMap("fileHelper", fileHelper);
+    }
 
     @Override
     public Map<String, NodeConverter> converters() {
@@ -40,38 +47,105 @@ public class FilePlugin implements NodeConverterPlugin {
     // ── Read ──────────────────────────────────────────────────────────────────
 
     private List<Map<String, Object>> convertFileRead(JsonNode data) {
-        String filePath  = data.path("filePath").asText("./file.txt").trim();
-        String resultVar = data.path("resultVar").asText("").trim();
-        if (filePath.isEmpty()) filePath = "./file.txt";
+        // New fields: directory + fileName (mirrors SFTP/FTP read).
+        // Falls back to legacy filePath for existing saved workflows.
+        String legacyPath = data.path("filePath").asText("").trim();
+        String directory  = data.path("directory").asText("").trim();
+        String fileName   = data.path("fileName").asText("").trim();
+        String resultVar  = data.path("resultVar").asText("").trim();
 
-        List<Map<String, Object>> steps = new ArrayList<>();
-        steps.add(ConversionUtils.logMsg("fileread: Reading file " + filePath));
-
-        if (filePath.contains("${")) {
-            String jsPathExpr = ConversionUtils.simpleToJs(filePath);
-            String safeResultVar = ConversionUtils.escapeJs(resultVar);
-            String storeExpr = resultVar.isEmpty()
-                ? "exchange.getMessage().setBody(_content);"
-                : "exchange.setProperty('" + safeResultVar + "',_content);exchange.getMessage().setBody(_content);";
-            String script =
-                "var Files=Java.type('java.nio.file.Files');" +
-                "var Paths=Java.type('java.nio.file.Paths');" +
-                "var _path=String(" + jsPathExpr + ");" +
-                "if(!Files.exists(Paths.get(_path))){throw new Error('File not found: '+_path);}" +
-                "var _content=Files.readString(Paths.get(_path));" +
-                storeExpr;
-            steps.add(ConversionUtils.scriptStep("js", script));
+        // Build effective directory and filename
+        String dir;
+        String file;
+        if (!legacyPath.isEmpty()) {
+            String[] parts = ConversionUtils.splitPath(legacyPath);
+            dir  = parts[0];
+            file = parts[1];
         } else {
-            String safePath = ConversionUtils.escapeJs(filePath.replace('\\', '/'));
-            String[] parts = ConversionUtils.splitPath(filePath);
-            String uri = "file:" + parts[0] + "?fileName=" + parts[1] + "&noop=true&idempotent=false";
+            dir  = directory.isEmpty() ? "." : directory.replace('\\', '/');
+            file = fileName.isEmpty() ? "" : fileName;
+        }
+
+        boolean dynamic = dir.contains("${") || file.contains("${");
+        String logPath = (dir.equals(".") && !file.isEmpty()) ? file
+                       : dir + (file.isEmpty() ? "" : "/" + file);
+
+        // Build the Camel file: URI — uiToSimple converts ${vars.x} → ${exchangeProperty.x};
+        // ${body.fileName} is kept as-is and Camel Simple OGNL resolves it at runtime.
+        List<Map<String, Object>> steps = new ArrayList<>();
+        steps.add(ConversionUtils.logMsg("fileread: Reading " + logPath));
+
+        String uri;
+        if (dynamic) {
+            // Resolve dir/file expressions into _fr_dir/_fr_file properties using
+            // Camel Simple (so ${body.filePath} → FileEntry.getFilePath() etc.), then
+            // normalizeReadPath splits absolute filenames into dir + name:
+            //   _fr_dir=C:/files, _fr_file=C:\files\readme.txt
+            //   → _fr_dir=C:/files, _fr_file=readme.txt
+            steps.add(ConversionUtils.setVarExpr("_fr_dir",
+                ConversionUtils.simpleOrConstant(dir)));
+            steps.add(ConversionUtils.setVarExpr("_fr_file",
+                file.isEmpty() ? Map.of("constant", "") : ConversionUtils.simpleOrConstant(file)));
+            steps.add(beanStep("fileHelper", "normalizeReadPath"));
+            uri = "file:${exchangeProperty._fr_dir}"
+                + "?fileName=${exchangeProperty._fr_file}&noop=true&idempotent=false";
+        } else {
+            // Static: pre-check for a clear error, then build constant URI
+            String safePath = ConversionUtils.escapeJs(
+                (file.isEmpty() ? dir : dir + "/" + file).replace('\\', '/'));
             steps.add(ConversionUtils.scriptStep("js",
                 "var Files=Java.type('java.nio.file.Files');" +
                 "var Paths=Java.type('java.nio.file.Paths');" +
                 "if(!Files.exists(Paths.get('" + safePath + "')))" +
                 "{throw new Error('File not found: " + safePath + "');}"));
-            steps.addAll(ConversionUtils.pollEnrich(uri, resultVar));
+            uri = "file:" + dir.replace('\\', '/')
+                + (file.isEmpty() ? "?" : "?fileName=" + file + "&")
+                + "noop=true&idempotent=false";
         }
+
+        Map<String, Object> pollBody = new LinkedHashMap<>();
+        pollBody.put("expression", dynamic ? Map.of("simple", uri) : Map.of("constant", uri));
+        pollBody.put("timeout", 5000L);
+        Map<String, Object> pollStep = new LinkedHashMap<>();
+        pollStep.put("pollEnrich", pollBody);
+
+        steps.add(pollStep);
+        if (!resultVar.isEmpty())
+            steps.add(ConversionUtils.setVarExpr(resultVar, Map.of("simple", "${body}")));
+
+        String onSuccess = data.path("onSuccess").asText("none").trim();
+        if ("delete".equals(onSuccess)) {
+            steps.add(ConversionUtils.scriptStep("js",
+                "var Files=Java.type('java.nio.file.Files');" +
+                "var Paths=Java.type('java.nio.file.Paths');" +
+                "var _absPath=String(exchange.getMessage().getHeader('CamelFileAbsolutePath'));" +
+                "Files.deleteIfExists(Paths.get(_absPath));"));
+        } else if ("move".equals(onSuccess)) {
+            String moveDir  = data.path("moveDirectory").asText("").trim();
+            String moveName = data.path("moveFileName").asText("").trim();
+            String moveDirJs = moveDir.isEmpty()
+                ? "'./processed'"
+                : moveDir.contains("${")
+                    ? "String(" + ConversionUtils.simpleToJs(moveDir) + ")"
+                    : "'" + ConversionUtils.escapeJs(moveDir.replace('\\', '/')) + "'";
+            String moveNameJs = moveName.isEmpty()
+                ? "String(exchange.getMessage().getHeader('CamelFileName'))"
+                : moveName.contains("${")
+                    ? "String(" + ConversionUtils.simpleToJs(moveName) + ")"
+                    : "'" + ConversionUtils.escapeJs(moveName) + "'";
+            steps.add(ConversionUtils.scriptStep("js",
+                "var Files=Java.type('java.nio.file.Files');" +
+                "var Paths=Java.type('java.nio.file.Paths');" +
+                "var CopyOption=Java.type('java.nio.file.StandardCopyOption');" +
+                "var _absPath=String(exchange.getMessage().getHeader('CamelFileAbsolutePath'));" +
+                "var _moveDir=" + moveDirJs + ";" +
+                "var _moveName=" + moveNameJs + ";" +
+                "var _src=Paths.get(_absPath);" +
+                "var _dst=Paths.get(_moveDir+'/'+_moveName);" +
+                "if(_dst.getParent()!=null)Files.createDirectories(_dst.getParent());" +
+                "Files.move(_src,_dst,CopyOption.REPLACE_EXISTING);"));
+        }
+
         steps.add(ConversionUtils.stripCamelHeaders());
         return steps;
     }
@@ -246,45 +320,32 @@ public class FilePlugin implements NodeConverterPlugin {
         return steps;
     }
 
-    // ── List ──────────────────────────────────────────────────────────────────
+    // ── List (via FileHelper Java bean — same pattern as SftpHelper / FtpHelper) ──
 
     private List<Map<String, Object>> convertFileList(JsonNode data) {
         String dirPath    = data.path("dirPath").asText(".").trim();
         String filter     = data.path("filter").asText("").trim();
         boolean recursive = data.path("recursive").asBoolean(false);
         String resultVar  = data.path("resultVar").asText("").trim();
-        String dExpr      = pathExpr(dirPath);
-        String safeFilter = ConversionUtils.escapeJs(filter);
-        String walkMethod = recursive ? "walk" : "list";
-        String filterExpr = filter.isEmpty() ? ""
-            : ".filter(function(p){var n=p.getFileName().toString();"
-            + "return n.matches('" + safeFilter.replace("*", ".*").replace("?", ".") + "');})";
-        String storeExpr = resultVar.isEmpty()
-            ? "exchange.getMessage().setBody(_arr);"
-            : "exchange.setProperty('" + ConversionUtils.escapeJs(resultVar) + "',_arr);";
-        String script =
-            "var Files=Java.type('java.nio.file.Files');" +
-            "var Paths=Java.type('java.nio.file.Paths');" +
-            "var Collectors=Java.type('java.util.stream.Collectors');" +
-            "var LinkedHashMap=Java.type('java.util.LinkedHashMap');" +
-            "var ArrayList=Java.type('java.util.ArrayList');" +
-            "var _dir=Paths.get(" + dExpr + ");" +
-            "var _stream=Files." + walkMethod + "(_dir);" +
-            "var _paths=_stream.filter(function(p){return Files.isRegularFile(p);})" +
-            filterExpr +
-            ".collect(Collectors.toList());" +
-            "_stream.close();" +
-            "var _arr=new ArrayList();" +
-            "for(var _i=0;_i<_paths.size();_i++){" +
-            "var _p=_paths.get(_i);" +
-            "var _node=new LinkedHashMap();" +
-            "_node.put('filePath',_p.toString());" +
-            "_node.put('fileName',_p.getFileName().toString());" +
-            "_arr.add(_node);}" +
-            storeExpr;
+
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(ConversionUtils.logMsg("filelist: Listing directory " + dirPath));
-        steps.add(ConversionUtils.scriptStep("js", script));
+        steps.add(ConversionUtils.setVarExpr("_op_dir",       ConversionUtils.simpleOrConstant(dirPath)));
+        steps.add(ConversionUtils.setVarExpr("_op_filter",    Map.of("constant", filter)));
+        steps.add(ConversionUtils.setVarExpr("_op_recursive", Map.of("constant", String.valueOf(recursive))));
+        steps.add(ConversionUtils.setVarExpr("_op_var",       Map.of("constant", resultVar)));
+        steps.add(beanStep("fileHelper", "list"));
         return steps;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static Map<String, Object> beanStep(String ref, String method) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("ref", ref);
+        body.put("method", method);
+        Map<String, Object> step = new LinkedHashMap<>();
+        step.put("bean", body);
+        return step;
     }
 }

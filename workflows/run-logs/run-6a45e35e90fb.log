@@ -1,0 +1,8 @@
+[23:12:07.118] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[23:12:07.121] INFO  controller.WorkflowController — Workflow 'Ftp to File' run started [runId=run-6a45e35e90fb]
+[23:12:07.141] INFO  workflow.execution — ftplist: Connecting to test.rebex.net:21
+[23:12:07.141] INFO  workflow.execution — ftplist: Listing /pub/example
+[23:12:08.991] INFO  workflow.execution — ftpread: Connecting to test.rebex.net:21
+[23:12:09.007] INFO  workflow.execution — ftpread: Reading /pub/example/readme.txt
+[23:12:15.176] INFO  workflow.execution — filewrite: Writing to C:/files/ftp/readme.txt
+[23:12:15.217] INFO  controller.WorkflowController — Workflow 'Ftp to File' run completed successfully in 8099ms

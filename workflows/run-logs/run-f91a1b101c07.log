@@ -1,0 +1,15 @@
+[15:54:18.846] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[15:54:18.851] INFO  controller.WorkflowController — Workflow 'PGP Decrypt Test' run started [runId=run-f91a1b101c07]
+[15:54:18.855] INFO  workflow.execution — fileread: Reading C:/files/readme.txt.pgp
+[15:54:18.921] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: BB2B864B4CA3B2F-0000000000000004 on ExchangeId: BB2B864B4CA3B2F-0000000000000004). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: File not found: C:/files/readme.txt.pgp
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       e75a283a-c5f0-4c59-b579-8604e0 from[direct://e75a283a-c5f0-4c59-b579-8604e00c93e8           52
+	...
+camel-route.yaml:13                      e75a283a-c5f0-4c59-b579-8604e0 script[js{var Files=Java.type('java.nio.file.Files            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[15:54:18.947] ERROR controller.WorkflowController — Workflow 'PGP Decrypt Test' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: File not found: C:/files/readme.txt.pgp

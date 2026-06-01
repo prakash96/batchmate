@@ -1,0 +1,28 @@
+[16:44:45.352] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[16:44:45.359] INFO  controller.WorkflowController — Workflow 'File to Sftp' run started [runId=run-0f8ce10c8153]
+[16:44:45.375] INFO  workflow.execution — filelist: Listing directory C:/files
+[16:44:45.442] INFO  workflow.execution — fileread: Reading C:\files\readme.txt
+[16:44:50.498] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 7BAAFA39C1EAF12-000000000000000E on ExchangeId: 7BAAFA39C1EAF12-000000000000000E). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: ReferenceError: headers is not defined
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf         5106
+	...
+camel-route.yaml:50                      d32c3289-fa0f-4ba6-b7d5-ecddad setProperty[_logMsg]                                          0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[16:44:50.512] INFO  workflow.execution — fileread: Reading C:\files\readme.txt.pgp.txt
+[16:44:55.570] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 7BAAFA39C1EAF12-000000000000000F on ExchangeId: 7BAAFA39C1EAF12-000000000000000F). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: ReferenceError: headers is not defined
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf        10195
+	...
+camel-route.yaml:50                      d32c3289-fa0f-4ba6-b7d5-ecddad setProperty[_logMsg]                                          0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[16:44:55.585] ERROR controller.WorkflowController — Workflow 'File to Sftp' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: ReferenceError: headers is not defined

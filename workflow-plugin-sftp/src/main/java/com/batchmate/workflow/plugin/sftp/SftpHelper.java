@@ -7,9 +7,7 @@ import com.jcraft.jsch.SftpException;
 import org.apache.camel.Exchange;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 public class SftpHelper {
@@ -70,15 +68,12 @@ public class SftpHelper {
             sftp.disconnect();
             session.disconnect();
         }
-        List<Map<String, String>> arrayNode = new ArrayList<>();
+        List<com.batchmate.workflow.camel.api.FileEntry> arrayNode = new ArrayList<>();
         for (String filePath : files) {
             String fileName = filePath.contains("/")
                 ? filePath.substring(filePath.lastIndexOf('/') + 1)
                 : filePath;
-            Map<String, String> item = new LinkedHashMap<>();
-            item.put("filePath", filePath);
-            item.put("fileName", fileName);
-            arrayNode.add(item);
+            arrayNode.add(new com.batchmate.workflow.camel.api.FileEntry(filePath, fileName));
         }
         if (!resultVar.isEmpty()) {
             exchange.setProperty(resultVar, arrayNode);

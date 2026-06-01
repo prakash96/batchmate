@@ -32,10 +32,13 @@ public class Base64Helper {
         String raw = resolveString(exchange, source, sourceVar, sourceLit).trim();
         byte[] decoded = Base64.getDecoder().decode(raw);
 
-        Object result = "binary".equals(outputEnc) ? decoded : new String(decoded, StandardCharsets.UTF_8);
-
-        if (!resultVar.isEmpty()) exchange.setProperty(resultVar, result);
-        if (setAsBody) exchange.getMessage().setBody(result);
+        // Body is always byte[] so binary downstream processors (e.g. gzip) receive raw bytes
+        // without charset corruption. outputEncoding only controls the resultVar representation.
+        if (setAsBody) exchange.getMessage().setBody(decoded);
+        if (!resultVar.isEmpty()) {
+            Object varResult = "binary".equals(outputEnc) ? decoded : new String(decoded, StandardCharsets.UTF_8);
+            exchange.setProperty(resultVar, varResult);
+        }
     }
 
     private byte[] resolveBytes(Exchange exchange, String source, String varName, String literal) {

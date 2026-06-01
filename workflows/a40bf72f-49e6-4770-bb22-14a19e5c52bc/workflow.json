@@ -1,0 +1,232 @@
+{
+  "id" : "a40bf72f-49e6-4770-bb22-14a19e5c52bc",
+  "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
+  "name" : "Compression Test",
+  "description" : "",
+  "inputBody" : { },
+  "inputHeaders" : { },
+  "workflow" : {
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 0
+      },
+      "data" : {
+        "containerType" : "processing"
+      },
+      "style" : {
+        "width" : 592,
+        "height" : 389
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 592,
+        "height" : 389
+      },
+      "selected" : true
+    }, {
+      "id" : "be8c31ac-423f-4ee3-939b-95418d5a0f18",
+      "type" : "setbody",
+      "position" : {
+        "x" : 24,
+        "y" : 180.5
+      },
+      "data" : {
+        "name" : "Set Body",
+        "expression" : "This is sample test"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    }, {
+      "id" : "f397c971-10e0-4a9e-8496-5c3aeaa71249",
+      "type" : "gzipcompress",
+      "position" : {
+        "x" : 110,
+        "y" : 180.5
+      },
+      "data" : {
+        "name" : "GZIP Compress",
+        "sourceType" : "body",
+        "compressionLevel" : 6,
+        "setAsBody" : true
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    }, {
+      "id" : "67c9a311-9b49-487a-9c0f-c6af6bb12175",
+      "type" : "log",
+      "position" : {
+        "x" : 454,
+        "y" : 180.5
+      },
+      "data" : {
+        "name" : "Log Message",
+        "script" : "${body}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "ffdd3308-9840-42ad-b6c2-ba830393889a",
+      "type" : "gzipextract",
+      "position" : {
+        "x" : 368,
+        "y" : 180.5
+      },
+      "data" : {
+        "name" : "GZIP Extract",
+        "sourceType" : "body",
+        "setFirstFileAsBody" : true
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    }, {
+      "id" : "c0b055e2-e3de-4da1-914d-93fa7ed391b2",
+      "type" : "base64encode",
+      "position" : {
+        "x" : 196,
+        "y" : 180.5
+      },
+      "data" : {
+        "name" : "Base64 Encode",
+        "source" : "body",
+        "setAsBody" : true
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "5c5a5486-dd47-4290-8599-55cd9b82d29a",
+      "type" : "base64decode",
+      "position" : {
+        "x" : 282,
+        "y" : 180.5
+      },
+      "data" : {
+        "name" : "Base64 Decode",
+        "source" : "body",
+        "outputEncoding" : "utf8",
+        "setAsBody" : true
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "section" : "processing"
+    } ],
+    "edges" : [ {
+      "source" : "be8c31ac-423f-4ee3-939b-95418d5a0f18",
+      "target" : "f397c971-10e0-4a9e-8496-5c3aeaa71249",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__be8c31ac-423f-4ee3-939b-95418d5a0f18-f397c971-10e0-4a9e-8496-5c3aeaa71249"
+    }, {
+      "source" : "ffdd3308-9840-42ad-b6c2-ba830393889a",
+      "target" : "67c9a311-9b49-487a-9c0f-c6af6bb12175",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__ffdd3308-9840-42ad-b6c2-ba830393889a-67c9a311-9b49-487a-9c0f-c6af6bb12175"
+    }, {
+      "source" : "f397c971-10e0-4a9e-8496-5c3aeaa71249",
+      "target" : "c0b055e2-e3de-4da1-914d-93fa7ed391b2",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__f397c971-10e0-4a9e-8496-5c3aeaa71249-c0b055e2-e3de-4da1-914d-93fa7ed391b2"
+    }, {
+      "source" : "c0b055e2-e3de-4da1-914d-93fa7ed391b2",
+      "target" : "5c5a5486-dd47-4290-8599-55cd9b82d29a",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__c0b055e2-e3de-4da1-914d-93fa7ed391b2-5c5a5486-dd47-4290-8599-55cd9b82d29a"
+    }, {
+      "source" : "5c5a5486-dd47-4290-8599-55cd9b82d29a",
+      "target" : "ffdd3308-9840-42ad-b6c2-ba830393889a",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__5c5a5486-dd47-4290-8599-55cd9b82d29a-ffdd3308-9840-42ad-b6c2-ba830393889a"
+    } ]
+  }
+}

@@ -175,10 +175,12 @@ public final class ConversionUtils {
         // This script detects GenericFile and reads the actual content via Files.readString().
         Map<String, Object> readContent = scriptStep("js",
             "var _b=exchange.getMessage().getBody();" +
-            "if(_b!==null&&String(_b.getClass().getName()).contains('GenericFile')){" +
+            "if(_b!==null&&String(_b.getClass().getName()).includes('GenericFile')){" +
             "var Files=Java.type('java.nio.file.Files');" +
             "var Paths=Java.type('java.nio.file.Paths');" +
-            "exchange.getMessage().setBody(Files.readString(Paths.get(String(_b.getAbsoluteFilePath()))));" +
+            "var _gf=_b.getFile();" +
+            "var _path=_gf!=null?String(_gf.getAbsolutePath()):String(_b.getAbsoluteFilePath());" +
+            "exchange.getMessage().setBody(Files.readString(Paths.get(_path)));" +
             "}");
 
         List<Map<String, Object>> steps = new ArrayList<>();
@@ -426,20 +428,32 @@ public final class ConversionUtils {
         if (js == null) return null;
         String result = js;
 
-        // 1. body.property — Map-aware access (must come BEFORE bare-body replacement)
-        //    Handles LinkedHashMap items from File/FTP/SFTP List and JSON body fields
-        result = result.replaceAll("\\bbody\\.([\\w]+)\\b",
+        // 1. body.property — Map / POJO bean-getter / JSON-aware access.
+        //    Resolution order:
+        //      a) Map.get(key)                       — LinkedHashMap items
+        //      b) explicit getter call (getFileName) — Java POJOs (FileEntry etc.)
+        //         GraalVM HostAccess.ALL exposes methods by name but does NOT auto-map
+        //         bean getters as JS properties, so _b['fileName'] returns undefined.
+        //         We construct 'get' + capitalise(key) and call it directly.
+        //      c) JSON.parse(body)[key]              — JSON string body
+        //    Negative lookahead excludes method calls like body.contains(...).
+        result = result.replaceAll("\\bbody\\.([\\w]+)(?!\\s*\\()",
             "(function(){var _b=exchange.getMessage().getBody();"
             + "if(_b==null)return null;"
             + "if(_b instanceof java.util.Map)return _b.get('$1');"
+            + "try{var _gn='get'+'$1'[0].toUpperCase()+'$1'.slice(1);"
+            + "if(typeof _b[_gn]==='function')return _b[_gn]();}catch(_ge){}"
             + "try{var _s=_b instanceof java.lang.String?_b:new java.lang.String(_b);"
             + "return JSON.parse(_s)['$1'];}catch(e){return null;}})()");
 
-        // 2. vars.name.property — nested Map/JSON property access (must come BEFORE single-level vars)
-        result = result.replaceAll("vars\\.([\\w]+)\\.([\\w]+)",
+        // 2. vars.name.property — same three-tier resolution on the stored variable.
+        //    Negative lookahead excludes vars.item.contains(...) etc.
+        result = result.replaceAll("vars\\.([\\w]+)\\.([\\w]+)(?!\\s*\\()",
             "(function(){var _v=exchange.getProperties().get('$1');"
             + "if(_v==null)return null;"
             + "if(_v instanceof java.util.Map)return _v.get('$2');"
+            + "try{var _gn='get'+'$2'[0].toUpperCase()+'$2'.slice(1);"
+            + "if(typeof _v[_gn]==='function')return _v[_gn]();}catch(_ge){}"
             + "try{return JSON.parse(String(_v))['$2'];}catch(e){return null;}})()");
 
         // 3. vars.name — single-level variable
@@ -448,12 +462,11 @@ public final class ConversionUtils {
         // 4. headers.name
         result = result.replaceAll("headers\\.([\\w]+)", "exchange.getMessage().getHeaders().get('$1')");
 
-        // 5. Remaining bare 'body' — full body with JSON-parse fallback
+        // 5. Remaining bare 'body' — return the raw body without JSON-parsing.
+        //    JSON parsing breaks when the body is a GenericFile (after pollEnrich file read).
+        //    Callers that need JSON access use body.property (handled by step 1 above).
         if (result.matches("(?s).*\\bbody\\b.*")) {
-            result = result.replaceAll("\\bbody\\b",
-                "(function(){var _b=exchange.getMessage().getBody();"
-                + "if(_b==null)return null;"
-                + "try{return JSON.parse(new java.lang.String(_b));}catch(e){return _b;}})()");
+            result = result.replaceAll("\\bbody\\b", "exchange.getMessage().getBody()");
         }
         return result;
     }

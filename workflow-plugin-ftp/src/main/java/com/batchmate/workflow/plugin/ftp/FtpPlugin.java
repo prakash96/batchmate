@@ -82,7 +82,7 @@ public class FtpPlugin implements NodeConverterPlugin {
         } else {
             uri += sep + "noop=true";
         }
-        uri += "&idempotent=false&passiveMode=true";
+        uri += "&idempotent=false";
         String host = data.path("host").asText("localhost");
         int    port = data.path("port").asInt(21);
         List<Map<String, Object>> steps = new ArrayList<>();
@@ -107,7 +107,6 @@ public class FtpPlugin implements NodeConverterPlugin {
         String uri = ConversionUtils.ftpUri(scheme, data, dir);
         String sep = uri.contains("?") ? "&" : "?";
         uri += sep + "fileName=" + fileName; sep = "&";
-        uri += "&passiveMode=true";
         if ("implicit".equals(security)) uri += "&implicit=true";
         if (autoCreate)            uri += "&autoCreate=true";
         if (overwrite)             uri += "&fileExist=Override";

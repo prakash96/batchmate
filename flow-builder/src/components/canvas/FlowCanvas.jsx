@@ -442,7 +442,7 @@ export default function FlowCanvas({ expandedRowId, layoutKey }) {
             id: crypto.randomUUID(),
             type,
             position: relativePosition,
-            data: { ...(reg.data || {}), name: reg.data?.name || type },
+            data: { ...(reg.data || {}), name: reg.data?.name || type, section: section?.data?.sectionType },
             style: { width: Math.max(reg.width || 58, 58), height: Math.max(reg.height || 58, 58) },
             parentId: parent?.id,
             extent: parent ? "parent" : undefined
@@ -483,16 +483,13 @@ export default function FlowCanvas({ expandedRowId, layoutKey }) {
         // Section validation for top-level nodes only
         if (isAtContainerLevel && containerIds.size > 0) {
             const section = getSectionForPosition(dragAbsPos, nodes);
-            const pre = preDragNodeRef.current;
-            const movedToWrongSection =
-                pre?.sectionType && section?.data?.sectionType !== pre.sectionType;
             const invalid =
                 !section ||
-                !isAllowedInSection(draggedNode.type, section.data?.sectionType) ||
-                movedToWrongSection;
+                !isAllowedInSection(draggedNode.type, section.data?.sectionType);
 
             if (invalid) {
                 preDragStateRef.current = null;
+                const pre = preDragNodeRef.current;
                 if (pre) {
                     setNodes(prev => layoutAll(prev.map(n =>
                         n.id === draggedNode.id
@@ -537,7 +534,8 @@ export default function FlowCanvas({ expandedRowId, layoutKey }) {
                 parentId: newParent?.id,
                 parentNode: newParent?.id,
                 extent: newParent ? "parent" : undefined,
-                position: newPosition
+                position: newPosition,
+                data: { ...n.data, section: dropSection?.data?.sectionType ?? n.data?.section }
             };
         });
 

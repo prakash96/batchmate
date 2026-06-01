@@ -118,11 +118,15 @@ export const CORE_NODE_METADATA = [
         ],
     },
     {
-        type: "iteration", label: "Iteration", icon: "", nodeClass: "http", group: "Core", sidebarLabel: "Iteration", width: 240, height: 130, defaultData: { name: "Iteration", collection: "", concurrency: 1, placeholder: "" }, zones: ["processing", "processingFailed"], sections: [
+        type: "iteration", label: "Iteration", icon: "", nodeClass: "http", group: "Core", sidebarLabel: "Iteration", width: 240, height: 130, defaultData: { name: "Iteration", collection: "", concurrency: 1, placeholder: "", onError: "continue" }, zones: ["processing", "processingFailed"], sections: [
             { title: "Iteration", open: true, fields: [
                 { key: "collection", label: "Collection Expression", type: "expression", rows: 2, placeholder: "${body}  or  body.items  or  $[*]" },
                 { key: "placeholder", label: "Item Variable Name", type: "text", placeholder: "item  (stores current item in exchangeProperty)" },
                 { key: "concurrency", label: "Concurrency", type: "number", placeholder: "1", min: 1 },
+                { key: "onError", label: "On Item Error", type: "select", options: [
+                    { value: "continue", label: "Continue — skip failed item, process rest" },
+                    { value: "stop",     label: "Stop — throw and halt the workflow" },
+                ]},
             ]},
         ],
     },

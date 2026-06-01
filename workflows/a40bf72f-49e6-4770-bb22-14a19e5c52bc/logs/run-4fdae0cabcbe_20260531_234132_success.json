@@ -1,0 +1,21 @@
+{
+  "runId" : "run-4fdae0cabcbe",
+  "workflowId" : "a40bf72f-49e6-4770-bb22-14a19e5c52bc",
+  "workflowName" : "Compression Test",
+  "runDateTime" : "2026-05-31T23:41:31.7097883",
+  "status" : "success",
+  "durationMs" : 245,
+  "resultBody" : "This is sample test",
+  "steps" : [ {
+    "nodeId" : "be8c31ac-423f-4ee3-939b-95418d5a0f18",
+    "nodeType" : "setbody",
+    "nodeName" : "Set Body",
+    "section" : "processing"
+  }, {
+    "nodeId" : "68092c87-e365-4119-a349-2195b18e0099",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

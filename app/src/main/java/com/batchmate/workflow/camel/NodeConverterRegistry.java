@@ -142,7 +142,9 @@ public class NodeConverterRegistry {
                       if (className == null) return;
                       Class<? extends Component> compClass =
                           (Class<? extends Component>) cl.loadClass(className);
-                      camelContext.addComponent(scheme, compClass.getDeclaredConstructor().newInstance());
+                      Component comp = compClass.getDeclaredConstructor().newInstance();
+                      configureComponent(scheme, comp, cl);
+                      camelContext.addComponent(scheme, comp);
                       log.info("Registered Camel component '{}' from plugin: {}", scheme, jar.getFileName());
                       pluginStatus.add("INFO  Camel component '" + scheme + "' registered from " + jar.getFileName());
                   } catch (Exception e) {
@@ -151,6 +153,24 @@ public class NodeConverterRegistry {
               });
         } catch (IOException e) {
             log.debug("Could not scan {} for Camel components: {}", jar.getFileName(), e.getMessage());
+        }
+    }
+
+    /**
+     * Post-instantiation configuration for specific component types.
+     * Uses reflection so the app module has no compile-time dependency on plugin classes.
+     */
+    private void configureComponent(String scheme, Component comp, URLClassLoader cl) {
+        if ("ftp".equals(scheme) || "ftps".equals(scheme)) {
+            try {
+                java.lang.reflect.Method getConf = comp.getClass().getMethod("getConfiguration");
+                Object conf = getConf.invoke(comp);
+                java.lang.reflect.Method setPassive = conf.getClass().getMethod("setPassiveMode", boolean.class);
+                setPassive.invoke(conf, true);
+                log.debug("Configured passive mode for {} component", scheme);
+            } catch (Exception e) {
+                log.debug("Could not configure passive mode for {} component: {}", scheme, e.getMessage());
+            }
         }
     }
 

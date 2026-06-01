@@ -1,0 +1,13 @@
+[00:42:12.256] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:42:12.260] INFO  controller.WorkflowController — Workflow 'File to Sftp' run started [runId=run-c2f93d86173c]
+[00:42:12.281] INFO  workflow.execution — filelist: Listing directory C:/files
+[00:42:12.290] INFO  workflow.execution — fileread: Reading C:\files\readme.txt
+[00:42:12.309] INFO  workflow.execution — sftpwrite: Connecting to eu-central-1.sftpcloud.io:22
+[00:42:12.369] INFO  workflow.execution — sftpwrite: Writing /pub/example/readme.txt
+[00:42:12.375] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:42:15.738] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:42:19.014] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[00:42:21.286] WARN  remote.RemoteFileProducer — Writing file failed with: Cannot connect to sftp://3654d12d2d2241fa891e2b57924f1c2b@eu-central-1.sftpcloud.io:22
+[00:42:21.317] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@776ca51d for file: GenericFile[C:\files\readme.txt]
+[00:42:21.368] INFO  workflow.execution — Error Logger: null
+[00:42:21.400] INFO  controller.WorkflowController — Workflow 'File to Sftp' run completed successfully in 9144ms

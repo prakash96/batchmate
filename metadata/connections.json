@@ -19,4 +19,35 @@
     "password" : "password"
   },
   "id" : "conn-1779979189884-vyg9t"
+}, {
+  "name" : "Gmail",
+  "type" : "smtp",
+  "config" : {
+    "smtpHost" : "smtp.gmail.com",
+    "smtpPort" : 587,
+    "smtpUser" : "bhanuprksh96@gmail.com",
+    "smtpPassword" : "dnim iwdz aptv uvgw",
+    "smtpTls" : true
+  },
+  "id" : "conn-1780246147011-26t5h"
+}, {
+  "name" : "sftpcloud",
+  "type" : "sftp",
+  "config" : {
+    "host" : "eu-central-1.sftpcloud.io",
+    "username" : "3654d12d2d2241fa891e2b57924f1c2b",
+    "password" : "pqyrIChCcTEdOLB5411CNJaNlwJCQE44",
+    "port" : 22
+  },
+  "id" : "conn-1780246967136-0klan"
+}, {
+  "name" : "FTP Test",
+  "type" : "ftp",
+  "config" : {
+    "host" : "test.rebex.net",
+    "username" : "demo",
+    "password" : "password",
+    "port" : 21
+  },
+  "id" : "conn-1780248351634-h3h2x"
 } ]

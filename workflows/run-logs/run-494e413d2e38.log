@@ -1,0 +1,16 @@
+[00:37:26.917] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:37:26.967] INFO  controller.WorkflowController — Workflow 'PGP Decrypt Test' run started [runId=run-494e413d2e38]
+[00:37:26.977] INFO  workflow.execution — fileread: Reading file C:\files\readme.txt.pgp
+[00:37:27.053] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 164D9064F038EBF-0000000000000002 on ExchangeId: 164D9064F038EBF-0000000000000002). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: TypeError: (intermediate value)(...).contains is not a function
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       e75a283a-c5f0-4c59-b579-8604e0 from[direct://e75a283a-c5f0-4c59-b579-8604e00c93e8           77
+	...
+camel-route.yaml:21                      e75a283a-c5f0-4c59-b579-8604e0 script[js{var _b=exchange.getMessage().getBody();i            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:37:27.067] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@3345f32e for file: GenericFile[C:\files\readme.txt.pgp]
+[00:37:27.067] ERROR controller.WorkflowController — Workflow 'PGP Decrypt Test' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: TypeError: (intermediate value)(...).contains is not a function

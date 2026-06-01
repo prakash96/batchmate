@@ -82,7 +82,8 @@
         "width" : 220,
         "height" : 120
       },
-      "section" : "processing"
+      "section" : "processing",
+      "selected" : false
     }, {
       "id" : "80cf5d35-e76c-4b4c-a433-dbf0105948e6",
       "type" : "sftpread",
@@ -100,7 +101,7 @@
         "setAsBody" : true,
         "connectionId" : "conn-1779979189884-vyg9t",
         "remoteDirectory" : "${vars.testSftpPath}",
-        "filePattern" : "${body[fileName]}"
+        "filePattern" : "${body.fileName}"
       },
       "style" : {
         "width" : 58,
@@ -126,7 +127,8 @@
         "encoding" : "utf8",
         "directory" : "C:/files",
         "overwriteExisting" : true,
-        "createDirs" : true
+        "createDirs" : true,
+        "fileName" : "${headers.fileName}"
       },
       "style" : {
         "width" : 58,

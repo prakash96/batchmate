@@ -82,20 +82,28 @@ export default function WorkflowContainerNode({ id, data, selected }) {
         e.stopPropagation();
         const me = nodes.find(n => n.id === id);
         const curH = me?.style?.height ?? 340;
+
+        // Use the section marker stamped at drop/drag time for reliable EH node identification
+        const ehRoots = nodes.filter(n => n.parentId === id && n.data?.section === "processingFailed");
+        const ehNodeIds = new Set([
+            ...ehRoots.map(n => n.id),
+            ...ehRoots.flatMap(root => getDescendants(root.id, nodes).map(n => n.id)),
+        ]);
+
         if (ehExpanded) {
-            // collapse — shrink by body height
-            setNodes(nds => nds.map(n =>
-                n.id === id
-                    ? { ...n, style: { ...n.style, height: Math.max(curH - EH_BODY_H, HEADER_H + EH_HEADER_H + 40) }, data: { ...n.data, errorHandlerExpanded: false } }
-                    : n
-            ));
+            // collapse — shrink container and hide EH body nodes
+            setNodes(nds => nds.map(n => {
+                if (n.id === id)          return { ...n, style: { ...n.style, height: Math.max(curH - EH_BODY_H, HEADER_H + EH_HEADER_H + 40) }, data: { ...n.data, errorHandlerExpanded: false } };
+                if (ehNodeIds.has(n.id)) return { ...n, hidden: true };
+                return n;
+            }));
         } else {
-            // expand — grow by body height
-            setNodes(nds => nds.map(n =>
-                n.id === id
-                    ? { ...n, style: { ...n.style, height: curH + EH_BODY_H }, data: { ...n.data, errorHandlerExpanded: true } }
-                    : n
-            ));
+            // expand — grow container and restore EH body nodes
+            setNodes(nds => nds.map(n => {
+                if (n.id === id)          return { ...n, style: { ...n.style, height: curH + EH_BODY_H }, data: { ...n.data, errorHandlerExpanded: true } };
+                if (ehNodeIds.has(n.id)) return { ...n, hidden: false };
+                return n;
+            }));
         }
     };
 

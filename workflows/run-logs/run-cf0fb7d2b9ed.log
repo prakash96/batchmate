@@ -1,0 +1,16 @@
+[17:29:15.171] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[17:29:15.183] INFO  controller.WorkflowController — Workflow 'PGP Decrypt Test' run started [runId=run-cf0fb7d2b9ed]
+[17:29:15.184] INFO  workflow.execution — fileread: Reading c:/files/readme.txt
+[17:29:15.233] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 1E006360D7D634A-0000000000000006 on ExchangeId: 1E006360D7D634A-0000000000000006). Exhausted after delivery attempt: 1 caught: java.lang.IllegalStateException: No PGPEncryptedDataList found — data may not be a PGP encrypted message (first packet: none)
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       e75a283a-c5f0-4c59-b579-8604e0 from[direct://e75a283a-c5f0-4c59-b579-8604e00c93e8           40
+	...
+camel-route.yaml:30                      e75a283a-c5f0-4c59-b579-8604e0 bean[ref:pgpHelper method:decrypt]                            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[17:29:15.271] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@55137cc3 for file: GenericFile[c:\files\readme.txt]
+[17:29:15.273] ERROR controller.WorkflowController — Workflow 'PGP Decrypt Test' run failed: No PGPEncryptedDataList found — data may not be a PGP encrypted message (first packet: none)

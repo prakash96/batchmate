@@ -1,0 +1,31 @@
+{
+  "runId" : "run-d0f4d6ae7041",
+  "workflowId" : "d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf",
+  "workflowName" : "File to Sftp",
+  "runDateTime" : "2026-05-31T16:39:53.0367523",
+  "status" : "success",
+  "durationMs" : 17777,
+  "resultBody" : "[{filePath=C:\\files\\readme.txt, fileName=readme.txt}, {filePath=C:\\files\\readme.txt.pgp, fileName=readme.txt.pgp}, {filePath=C:\\files\\readme.txt.pgp.txt, fileName=readme.txt.pgp.txt}]",
+  "steps" : [ {
+    "nodeId" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
+    "nodeType" : "filelist",
+    "nodeName" : "File List",
+    "section" : "processing"
+  }, {
+    "nodeId" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+    "nodeType" : "iteration",
+    "nodeName" : "Iteration",
+    "section" : "processing"
+  }, {
+    "nodeId" : "9bd36fa6-1f83-4280-8ebd-0aa7bdc588ea",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  }, {
+    "nodeId" : "d46200cc-5984-4a36-babc-ee06b2e98a90",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

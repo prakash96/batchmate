@@ -1,0 +1,27 @@
+{
+  "runId" : "run-2e6274f294ed",
+  "workflowId" : "e75a283a-c5f0-4c59-b579-8604e00c93e8",
+  "workflowName" : "PGP Decrypt Test",
+  "runDateTime" : "2026-05-31T00:25:23.0752947",
+  "status" : "failed",
+  "durationMs" : 130,
+  "error" : "JS evaluation failed: org.graalvm.polyglot.PolyglotException: TypeError: (intermediate value)(...).contains is not a function",
+  "resultBody" : "filewrite",
+  "steps" : [ {
+    "nodeId" : "fdc5d78a-d39d-45bc-ba1e-7e859d4e8eb0",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  }, {
+    "nodeId" : "ffc6ca86-a8a3-4837-9327-de3e7ac8765f",
+    "nodeType" : "filewrite",
+    "nodeName" : "File Write",
+    "section" : "processing"
+  }, {
+    "nodeId" : "5ded3a81-edd7-4198-aa5e-1f01db603fdc",
+    "nodeType" : "pgpdecrypt",
+    "nodeName" : "PGP Decrypt",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

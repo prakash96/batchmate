@@ -9,6 +9,7 @@ import ConnectionsPanel from "./components/connections/ConnectionsPanel";
 import VaultPanel from "./components/vault/VaultPanel";
 import ConfigPanel from "./components/panels/ConfigPanel";
 import DocsPanel from "./components/docs/DocsPanel";
+import ReportingPanel from "./components/panels/ReportingPanel";
 import GlobalVarsPanel from "./components/GlobalVarsPanel";
 import { persistentStore } from "./store/persistentStore";
 import TreeView from "./components/tree/TreeView";
@@ -56,6 +57,7 @@ export default function App() {
   const [showConnections, setShowConnections] = useState(false);
   const [showVault, setShowVault] = useState(false);
   const [showDocs, setShowDocs] = useState(false);
+  const [showReporting, setShowReporting] = useState(false);
   const [showGlobalVars, setShowGlobalVars] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [runResult, setRunResult] = useState(null); // { status, error, runId }
@@ -294,6 +296,14 @@ export default function App() {
                 <rect x="1.5" y="6" width="10" height="7.5" rx="1.5"/>
                 <path d="M4 6 V4 A2.5 2.5 0 0 1 9 4 V6"/>
                 <circle cx="6.5" cy="9.5" r="1.2" fill="currentColor" stroke="none"/>
+              </svg>
+            </NavIcon>
+            <NavIcon title="Analytics" active={showReporting} onClick={() => setShowReporting(v => !v)}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+                <line x1="2" y1="20" x2="22" y2="20"/>
               </svg>
             </NavIcon>
 
@@ -588,6 +598,13 @@ export default function App() {
               {showDocs && (
                 <div style={{ position: "absolute", inset: 0, zIndex: 200, background: t.bgApp }}>
                   <DocsPanel onClose={() => setShowDocs(false)} />
+                </div>
+              )}
+
+              {/* Analytics / Reporting full-screen overlay */}
+              {showReporting && (
+                <div style={{ position: "absolute", inset: 0, zIndex: 200 }}>
+                  <ReportingPanel onClose={() => setShowReporting(false)} />
                 </div>
               )}
 

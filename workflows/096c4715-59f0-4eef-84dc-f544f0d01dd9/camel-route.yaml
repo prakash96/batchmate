@@ -6,8 +6,16 @@
       from:
         uri: direct:096c4715-59f0-4eef-84dc-f544f0d01dd9
       steps:
+        - setProperty:
+            name: workflowId
+            expression:
+              constant: 096c4715-59f0-4eef-84dc-f544f0d01dd9
+        - setProperty:
+            name: workflowName
+            expression:
+              constant: PGP Encrypt Test
         - log:
-            message: 'fileread: Reading file C:\files\readme.txt'
+            message: 'fileread: Reading C:/files/readme.txt'
             logName: com.batchmate.workflow.execution
             loggingLevel: INFO
         - script:
@@ -18,10 +26,6 @@
             expression:
               constant: file:C:/files?fileName=readme.txt&noop=true&idempotent=false
             timeout: 5000
-        - script:
-            expression:
-              js: var _b=exchange.getMessage().getBody();if(_b!==null&&String(_b.getClass().getName()).contains('GenericFile')){var
-                Files=Java.type('java.nio.file.Files');var Paths=Java.type('java.nio.file.Paths');exchange.getMessage().setBody(Files.readString(Paths.get(String(_b.getAbsoluteFilePath()))));}
         - script:
             expression:
               js: var ArrayList=Java.type('java.util.ArrayList');var _ks=new ArrayList(exchange.getMessage().getHeaders().keySet());for(var

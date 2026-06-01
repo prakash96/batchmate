@@ -1,0 +1,26 @@
+{
+  "runId" : "run-880792ebf35f",
+  "workflowId" : "e75a283a-c5f0-4c59-b579-8604e00c93e8",
+  "workflowName" : "PGP Decrypt Test",
+  "runDateTime" : "2026-05-31T17:30:23.2919506",
+  "status" : "success",
+  "durationMs" : 1642,
+  "resultBody" : "filewrite",
+  "steps" : [ {
+    "nodeId" : "ffc6ca86-a8a3-4837-9327-de3e7ac8765f",
+    "nodeType" : "filewrite",
+    "nodeName" : "File Write",
+    "section" : "processing"
+  }, {
+    "nodeId" : "5ded3a81-edd7-4198-aa5e-1f01db603fdc",
+    "nodeType" : "pgpdecrypt",
+    "nodeName" : "PGP Decrypt",
+    "section" : "processing"
+  }, {
+    "nodeId" : "92a98997-fc21-4228-83ea-58bf45a0125e",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

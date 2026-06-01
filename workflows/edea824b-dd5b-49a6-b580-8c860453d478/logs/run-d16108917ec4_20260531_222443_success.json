@@ -1,0 +1,16 @@
+{
+  "runId" : "run-d16108917ec4",
+  "workflowId" : "edea824b-dd5b-49a6-b580-8c860453d478",
+  "workflowName" : "Email Test",
+  "runDateTime" : "2026-05-31T22:24:43.2831759",
+  "status" : "success",
+  "durationMs" : 18,
+  "resultBody" : "",
+  "steps" : [ {
+    "nodeId" : "31edfa5e-97c9-43c3-bdf1-6d2fc4edae88",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

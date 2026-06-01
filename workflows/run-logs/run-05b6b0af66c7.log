@@ -1,0 +1,52 @@
+[16:01:39.794] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[16:01:39.802] INFO  controller.WorkflowController — Workflow 'File to Sftp' run started [runId=run-05b6b0af66c7]
+[16:01:39.803] INFO  workflow.execution — filelist: Listing directory C:/files
+[16:01:39.849] INFO  workflow.execution — fileread: Reading ./C:\files\readme.txt
+[16:01:39.915] INFO  workflow.execution — sftpwrite: Connecting to test.rebex.net:22
+[16:01:40.042] INFO  workflow.execution — sftpwrite: Writing /pub/example/
+[16:01:40.049] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[16:01:43.560] WARN  remote.RemoteFileProducer — Writing file failed with: Cannot store file: pub/example/
+[16:01:43.582] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: BB2B864B4CA3B2F-0000000000000015 on ExchangeId: BB2B864B4CA3B2F-0000000000000015). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot store file: pub/example/
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf         3772
+	...
+camel-route.yaml:67                      d32c3289-fa0f-4ba6-b7d5-ecddad sftp://demo:xxxxxx@test.rebex.net:22${exchangeProp            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[16:01:43.582] INFO  workflow.execution — fileread: Reading ./C:\files\readme.txt.pgp
+[16:01:43.605] INFO  workflow.execution — sftpwrite: Connecting to test.rebex.net:22
+[16:01:43.641] INFO  workflow.execution — sftpwrite: Writing /pub/example/
+[16:01:43.641] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[16:01:47.211] WARN  remote.RemoteFileProducer — Writing file failed with: Cannot store file: pub/example/
+[16:01:47.241] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: BB2B864B4CA3B2F-0000000000000016 on ExchangeId: BB2B864B4CA3B2F-0000000000000016). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot store file: pub/example/
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf         7425
+	...
+camel-route.yaml:67                      d32c3289-fa0f-4ba6-b7d5-ecddad sftp://demo:xxxxxx@test.rebex.net:22${exchangeProp            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[16:01:47.256] INFO  workflow.execution — fileread: Reading ./C:\files\readme.txt.pgp.txt
+[16:01:47.292] INFO  workflow.execution — sftpwrite: Connecting to test.rebex.net:22
+[16:01:47.292] INFO  workflow.execution — sftpwrite: Writing /pub/example/
+[16:01:47.307] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[16:01:50.634] WARN  remote.RemoteFileProducer — Writing file failed with: Cannot store file: pub/example/
+[16:01:50.689] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: BB2B864B4CA3B2F-0000000000000017 on ExchangeId: BB2B864B4CA3B2F-0000000000000017). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot store file: pub/example/
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf        10881
+	...
+camel-route.yaml:67                      d32c3289-fa0f-4ba6-b7d5-ecddad sftp://demo:xxxxxx@test.rebex.net:22${exchangeProp            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[16:01:50.689] ERROR controller.WorkflowController — Workflow 'File to Sftp' run failed: Cannot store file: pub/example/

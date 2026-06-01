@@ -39,8 +39,11 @@ export function autoResizeContainer(nodes) {
             const relY = n.parentId === container.id
                 ? n.position.y
                 : n.position.y - container.position.y;
-            maxRight  = Math.max(maxRight,  relX + nw);
-            maxBottom = Math.max(maxBottom, relY + nh);
+            maxRight = Math.max(maxRight, relX + nw);
+            // EH nodes are in a fixed zone at the bottom — exclude them from height growth
+            if (n.data?.section !== "processingFailed") {
+                maxBottom = Math.max(maxBottom, relY + nh);
+            }
         });
 
         const newW = Math.max(maxRight + PAD_X, MIN_W, curW);

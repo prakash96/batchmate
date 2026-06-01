@@ -1,0 +1,21 @@
+[13:53:33.279] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[13:53:33.279] INFO  controller.WorkflowController — Workflow 'File to Sftp' run started [runId=run-ca7827f26484]
+[13:53:33.279] INFO  workflow.execution — filelist: Listing directory C:/files
+[13:53:33.313] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: B1BE45190D2EB2F-0000000000000003 on ExchangeId: B1BE45190D2EB2F-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: <eval>:1:267 Expected ; but found e
+(function(){var _b=exchange.getMessage().getBody();if(_b==null)return null;if(_b instanceof java.util.Map)return _b.get('getFileNam');try{var _s=_b instanceof java.lang.String?_b:new java.lang.String(_b);return JSON.parse(_s)['getFileNam'];}catch(e){return null;}})()e()
+                                                                                                                                                                                                                                                                           ^
+
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf           17
+	...
+camel-route.yaml:26                      d32c3289-fa0f-4ba6-b7d5-ecddad setProperty[_logMsg]                                          0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[13:53:33.318] ERROR controller.WorkflowController — Workflow 'File to Sftp' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: <eval>:1:267 Expected ; but found e
+(function(){var _b=exchange.getMessage().getBody();if(_b==null)return null;if(_b instanceof java.util.Map)return _b.get('getFileNam');try{var _s=_b instanceof java.lang.String?_b:new java.lang.String(_b);return JSON.parse(_s)['getFileNam'];}catch(e){return null;}})()e()
+                                                                                                                                                                                                                                                                           ^
+

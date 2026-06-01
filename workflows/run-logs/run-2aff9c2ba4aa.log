@@ -1,0 +1,16 @@
+[00:45:06.994] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:45:06.994] INFO  controller.WorkflowController — Workflow 'PGP Decrypt Test' run started [runId=run-2aff9c2ba4aa]
+[00:45:07.010] INFO  workflow.execution — fileread: Reading file C:\files\readme.txt.pgp
+[00:45:08.568] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: A5E3604747969C4-0000000000000000 on ExchangeId: A5E3604747969C4-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: TypeError: _b.getClass(...).getName(...).contains is not a function
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       e75a283a-c5f0-4c59-b579-8604e0 from[direct://e75a283a-c5f0-4c59-b579-8604e00c93e8         1560
+	...
+camel-route.yaml:21                      e75a283a-c5f0-4c59-b579-8604e0 script[js{var _b=exchange.getMessage().getBody();i            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:45:08.635] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@650a048f for file: GenericFile[C:\files\readme.txt.pgp]
+[00:45:08.640] ERROR controller.WorkflowController — Workflow 'PGP Decrypt Test' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: TypeError: _b.getClass(...).getName(...).contains is not a function
