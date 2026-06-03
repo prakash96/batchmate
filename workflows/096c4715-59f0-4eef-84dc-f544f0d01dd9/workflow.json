@@ -1,7 +1,7 @@
 {
   "id" : "096c4715-59f0-4eef-84dc-f544f0d01dd9",
   "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
-  "name" : "PGP Encrypt Test",
+  "name" : "PGP_ENCRYPT_TEST",
   "description" : "",
   "inputBody" : { },
   "inputHeaders" : { },

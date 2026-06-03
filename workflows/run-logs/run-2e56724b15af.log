@@ -1,0 +1,14 @@
+[23:54:58.241] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[23:54:58.241] INFO  controller.WorkflowController — Workflow 'SFTP_OUTBOUND_TEST' run started [runId=run-2e56724b15af]
+[23:54:58.331] INFO  workflow.execution — filelist: Listing directory C:/files
+[23:54:58.713] INFO  workflow.execution — fileread: Reading C:\files\readme.txt
+[23:54:58.738] INFO  workflow.execution — sftpwrite: Connecting to eu-central-1.sftpcloud.io:22
+[23:54:58.746] INFO  workflow.execution — sftpwrite: Writing /pub/example/readme.txt
+[23:54:58.746] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[23:55:01.696] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[23:55:04.733] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[23:55:06.927] WARN  remote.RemoteFileProducer — Writing file failed with: Cannot connect to sftp://3654d12d2d2241fa891e2b57924f1c2b@eu-central-1.sftpcloud.io:22
+[23:55:06.942] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@3454521a for file: GenericFile[C:\files\readme.txt]
+[23:55:07.001] INFO  workflow.execution — Error Logger: SFTP_OUTBOUND_TEST - Multicast processing failed for number 0. Exchange[CB2E87E2E1AF491-0000000000000003]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot connect to sftp://3654d12d2d2241fa891e2b57924f1c2b@eu-central-1.sftpcloud.io:22]
+[23:55:07.133] INFO  workflow.execution — smtp: Sending email to bhanuprksh96@gmail.com
+[23:55:12.776] INFO  controller.WorkflowController — Workflow 'SFTP_OUTBOUND_TEST' run completed successfully in 14535ms

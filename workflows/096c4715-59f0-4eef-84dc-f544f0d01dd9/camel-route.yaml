@@ -1,4 +1,4 @@
-# Camel YAML DSL — generated from workflow: PGP Encrypt Test
+# Camel YAML DSL — generated from workflow: PGP_ENCRYPT_TEST
 # ID: 096c4715-59f0-4eef-84dc-f544f0d01dd9
 
   - route:
@@ -13,7 +13,7 @@
         - setProperty:
             name: workflowName
             expression:
-              constant: PGP Encrypt Test
+              constant: PGP_ENCRYPT_TEST
         - log:
             message: 'fileread: Reading C:/files/readme.txt'
             logName: com.batchmate.workflow.execution

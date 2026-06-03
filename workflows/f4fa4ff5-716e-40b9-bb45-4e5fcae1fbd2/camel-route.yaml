@@ -1,0 +1,49 @@
+# Camel YAML DSL — generated from workflow: HTTP_TEST
+# ID: f4fa4ff5-716e-40b9-bb45-4e5fcae1fbd2
+
+  - route:
+      id: f4fa4ff5-716e-40b9-bb45-4e5fcae1fbd2-processing
+      from:
+        uri: direct:f4fa4ff5-716e-40b9-bb45-4e5fcae1fbd2
+      steps:
+        - setProperty:
+            name: workflowId
+            expression:
+              constant: f4fa4ff5-716e-40b9-bb45-4e5fcae1fbd2
+        - setProperty:
+            name: workflowName
+            expression:
+              constant: HTTP_TEST
+        - log:
+            message: 'http: GET ${exchangeProperty.baseUrl}/${exchangeProperty.todosPath}'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('Accept-Encoding','identity');
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('CamelHttpMethod','GET');exchange.setProperty('_httpUrl',
+                String(exchange.getProperties().get('baseUrl') + '/' + exchange.getProperties().get('todosPath')));
+        - toD:
+            uri: ${exchangeProperty._httpUrl}
+        - script:
+            expression:
+              js: var _b=exchange.getMessage().getBody();if(_b instanceof java.io.InputStream){  var
+                _ce=String(exchange.getMessage().getHeader('Content-Encoding')||'');  var
+                _is=_ce.toLowerCase().indexOf('gzip')>=0    ?new java.util.zip.GZIPInputStream(_b)    :_b;  var
+                _isr=new java.io.InputStreamReader(_is,'UTF-8');  var _br=new java.io.BufferedReader(_isr);  var
+                _sb=new java.lang.StringBuilder();  var _ln;  while((_ln=_br.readLine())!==null){_sb.append(_ln).append('\n');}  _br.close();  exchange.getMessage().setBody(_sb.toString().trim());  if(_ce)exchange.getMessage().removeHeader('Content-Encoding');}
+        - script:
+            expression:
+              js: var _m=exchange.getMessage();var _ks=_m.getHeaders().keySet().toArray();for(var
+                _i=0;_i<_ks.length;_i++){  var _k=String(_ks[_i]);  if(_k.startsWith('CamelHttp')){    var
+                _nk=_k.substring(5,6).toLowerCase()+_k.substring(6);    _m.getHeaders().put(_nk,_m.getHeaders().get(_k));  }}
+        - setProperty:
+            name: _logMsg
+            expression:
+              js: exchange.getMessage().getBody()
+        - log:
+            message: ${exchangeProperty._logMsg}
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO

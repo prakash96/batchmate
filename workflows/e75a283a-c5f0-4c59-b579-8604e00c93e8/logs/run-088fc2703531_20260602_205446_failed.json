@@ -1,0 +1,27 @@
+{
+  "runId" : "run-088fc2703531",
+  "workflowId" : "e75a283a-c5f0-4c59-b579-8604e00c93e8",
+  "workflowName" : "PGP_DECRYPT_TEST",
+  "runDateTime" : "2026-06-02T20:54:45.8711805",
+  "status" : "failed",
+  "durationMs" : 623,
+  "error" : "checksum mismatch at in checksum of 20 bytes",
+  "resultBody" : "filewrite",
+  "steps" : [ {
+    "nodeId" : "ffc6ca86-a8a3-4837-9327-de3e7ac8765f",
+    "nodeType" : "filewrite",
+    "nodeName" : "File Write",
+    "section" : "processing"
+  }, {
+    "nodeId" : "5ded3a81-edd7-4198-aa5e-1f01db603fdc",
+    "nodeType" : "pgpdecrypt",
+    "nodeName" : "PGP Decrypt",
+    "section" : "processing"
+  }, {
+    "nodeId" : "92a98997-fc21-4228-83ea-58bf45a0125e",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

@@ -1,12 +1,66 @@
 {
   "id" : "2ac13d2c-2cbc-4743-a37a-4164160e0eab",
   "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
-  "name" : "New Workflow",
+  "name" : "CONFIG_TEST",
   "description" : "",
   "inputBody" : { },
   "inputHeaders" : { },
   "workflow" : {
-    "nodes" : [ ],
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 0
+      },
+      "data" : {
+        "containerType" : "processing",
+        "errorHandlerExpanded" : false
+      },
+      "style" : {
+        "width" : 694,
+        "height" : 300
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 694,
+        "height" : 300
+      },
+      "selected" : true
+    }, {
+      "id" : "f165704d-e4a5-474e-a0dd-572521c74fde",
+      "type" : "log",
+      "position" : {
+        "x" : 81,
+        "y" : 79
+      },
+      "data" : {
+        "name" : "Log Message",
+        "section" : "processing",
+        "script" : "${vars.sourcePath}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    } ],
     "edges" : [ ]
+  },
+  "config" : {
+    "sourceType" : "sftp",
+    "sourcePath" : "/pub/example"
   }
 }

@@ -1,0 +1,17 @@
+[00:53:25.696] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:53:25.712] INFO  controller.WorkflowController — Workflow 'HTTP_TEST' run started [runId=run-dca0cd93d5d3]
+[00:53:25.712] INFO  workflow.execution — http: GET https://random123.free.beeceptor.com//todos
+[00:53:26.161] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 6758FD0B4E17405-0000000000000000 on ExchangeId: 6758FD0B4E17405-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: com.fasterxml.jackson.core.JsonParseException: Unexpected character (',' (code 44)): Expected space separating root-level values
+ at [Source: (String)"91,10,32,32,123,10,32,32,32,32,34,105,100,34,58,32,49,44,10,32,32,32,32,34,116,105,116,108,101,34,58,32,34,67,114,101,97,116,101,32,97,110,32,101,110,100,112,111,105,110,116,32,97,116,32,66,101,101,99,101,112,116,111,114,46,34,44,10,32,32,32,32,34,99,111,109,112,108,101,116,101,100,34,58,32,116,114,117,101,10,32,32,125,44,10,32,32,123,10,32,32,32,32,34,105,100,34,58,32,50,44,10,32,32,32,32,34,116,105,116,108,101,34,58,32,34,83,101,110,100,32,97,32,114,101,113,117,101,115,116,32,116,111,32,121,11"[truncated 1510 chars]; line: 1, column: 4]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       f4fa4ff5-716e-40b9-bb45-4e5fca from[direct://f4fa4ff5-716e-40b9-bb45-4e5fcae1fbd2          446
+	...
+camel-route.yaml:42                      f4fa4ff5-716e-40b9-bb45-4e5fca script[js{var ObjectMapper=Java.type('com.fasterxm            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:53:26.222] ERROR controller.WorkflowController — Workflow 'HTTP_TEST' run failed: JS evaluation failed: com.fasterxml.jackson.core.JsonParseException: Unexpected character (',' (code 44)): Expected space separating root-level values
+ at [Source: (String)"91,10,32,32,123,10,32,32,32,32,34,105,100,34,58,32,49,44,10,32,32,32,32,34,116,105,116,108,101,34,58,32,34,67,114,101,97,116,101,32,97,110,32,101,110,100,112,111,105,110,116,32,97,116,32,66,101,101,99,101,112,116,111,114,46,34,44,10,32,32,32,32,34,99,111,109,112,108,101,116,101,100,34,58,32,116,114,117,101,10,32,32,125,44,10,32,32,123,10,32,32,32,32,34,105,100,34,58,32,50,44,10,32,32,32,32,34,116,105,116,108,101,34,58,32,34,83,101,110,100,32,97,32,114,101,113,117,101,115,116,32,116,111,32,121,11"[truncated 1510 chars]; line: 1, column: 4]

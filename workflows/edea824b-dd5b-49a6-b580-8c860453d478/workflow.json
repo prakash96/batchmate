@@ -1,7 +1,7 @@
 {
   "id" : "edea824b-dd5b-49a6-b580-8c860453d478",
   "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
-  "name" : "Email Test",
+  "name" : "EMAIL_TEST",
   "description" : "",
   "inputBody" : { },
   "inputHeaders" : { },
@@ -17,7 +17,7 @@
         "containerType" : "processing"
       },
       "style" : {
-        "width" : 454,
+        "width" : 694,
         "height" : 300
       },
       "draggable" : true,
@@ -25,7 +25,7 @@
       "deletable" : false,
       "zIndex" : -1,
       "measured" : {
-        "width" : 454,
+        "width" : 694,
         "height" : 300
       },
       "selected" : false

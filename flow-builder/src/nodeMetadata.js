@@ -85,9 +85,6 @@ export const CORE_NODE_METADATA = [
             { title: "Body", open: false, fields: [
                 { key: "body", label: "Body", type: "expression", rows: 6, placeholder: '{"key": "value", "id": "${vars.orderId}"}' },
             ]},
-            { title: "Mock", open: false, fields: [
-                { key: "script", label: "Mock Script (used when no URL set)", type: "textarea", rows: 5, placeholder: "{ body: body, headers: headers, vars: vars }" },
-            ]},
         ],
     },
     {

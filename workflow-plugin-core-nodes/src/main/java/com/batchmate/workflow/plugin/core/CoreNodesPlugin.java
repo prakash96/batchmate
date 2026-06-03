@@ -43,6 +43,10 @@ public class CoreNodesPlugin implements NodeConverterPlugin {
         String body    = data.path("body").asText("").trim();
         String headers = data.path("headers").asText("").trim();
 
+        boolean dynamicUrl     = url.contains("${");
+        boolean dynamicBody    = body.contains("${");
+        boolean dynamicHeaders = headers.contains("${");
+
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(ConversionUtils.logMsg("http: " + method + " " + (url.isEmpty() ? "[mock]" : url)));
 
@@ -50,25 +54,53 @@ public class CoreNodesPlugin implements NodeConverterPlugin {
         steps.add(ConversionUtils.scriptStep("js",
             "exchange.getMessage().getHeaders().put('Accept-Encoding','identity');"));
 
+        // Body — use setBody with expression evaluation so ${vars.x} is resolved
         if (!body.isEmpty()) {
-            steps.add(ConversionUtils.setBodyConstant(body));
+            if (dynamicBody) {
+                Map<String, Object> sb = new LinkedHashMap<>();
+                sb.put("expression", ConversionUtils.simpleOrConstant(body));
+                Map<String, Object> sbStep = new LinkedHashMap<>();
+                sbStep.put("setBody", sb);
+                steps.add(sbStep);
+            } else {
+                steps.add(ConversionUtils.setBodyConstant(body));
+            }
         }
+
+        // Headers — evaluate expressions inside JSON values when present
         if (!headers.isEmpty()) {
-            steps.add(ConversionUtils.scriptStep("js",
-                "var _h = JSON.parse('" + ConversionUtils.escapeJs(headers) + "');"
-                + " Object.keys(_h).forEach(function(k){"
-                + " exchange.getMessage().getHeaders().put(k, String(_h[k])); });"));
+            if (dynamicHeaders) {
+                // simpleToJs converts the entire JSON string as a template, evaluating ${vars.x} etc.
+                String headersJs = ConversionUtils.simpleToJs(headers);
+                steps.add(ConversionUtils.scriptStep("js",
+                    "var _h = JSON.parse(" + headersJs + ");"
+                    + " Object.keys(_h).forEach(function(k){"
+                    + " exchange.getMessage().getHeaders().put(k, String(_h[k])); });"));
+            } else {
+                steps.add(ConversionUtils.scriptStep("js",
+                    "var _h = JSON.parse('" + ConversionUtils.escapeJs(headers) + "');"
+                    + " Object.keys(_h).forEach(function(k){"
+                    + " exchange.getMessage().getHeaders().put(k, String(_h[k])); });"));
+            }
         }
 
         if (!url.isEmpty()) {
-            Map<String, Object> params = new LinkedHashMap<>();
-            params.put("httpMethod", method);
-            steps.add(ConversionUtils.toStep(url, params));
+            if (dynamicUrl) {
+                // Evaluate the URL expression at runtime, store in a property, use toD.
+                // CamelHttpMethod header drives the HTTP method for dynamic endpoints.
+                String urlJs = ConversionUtils.simpleToJs(url);
+                steps.add(ConversionUtils.scriptStep("js",
+                    "exchange.getMessage().getHeaders().put('CamelHttpMethod','"
+                    + ConversionUtils.escapeJs(method) + "');"
+                    + "exchange.setProperty('_httpUrl', String(" + urlJs + "));"));
+                steps.add(ConversionUtils.toDStep("${exchangeProperty._httpUrl}"));
+            } else {
+                Map<String, Object> params = new LinkedHashMap<>();
+                params.put("httpMethod", method);
+                steps.add(ConversionUtils.toStep(url, params));
+            }
             steps.add(ConversionUtils.readHttpBody());
             steps.add(ConversionUtils.mapHttpResponseHeaders());
-        } else {
-            String script = data.path("script").asText("").trim();
-            steps.add(ConversionUtils.logMsg("[mock] http " + method + (script.isEmpty() ? "" : ": " + script)));
         }
         return steps;
     }

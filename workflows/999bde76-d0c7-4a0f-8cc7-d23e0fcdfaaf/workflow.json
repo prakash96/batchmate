@@ -1,0 +1,127 @@
+{
+  "id" : "999bde76-d0c7-4a0f-8cc7-d23e0fcdfaaf",
+  "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
+  "name" : "SQL_TEST",
+  "description" : "",
+  "inputBody" : { },
+  "inputHeaders" : { },
+  "workflow" : {
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 0
+      },
+      "data" : {
+        "containerType" : "processing"
+      },
+      "style" : {
+        "width" : 550,
+        "height" : 333
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 550,
+        "height" : 333
+      },
+      "selected" : false
+    }, {
+      "id" : "3e8a4ee2-1f3d-4a34-aa37-18524123d403",
+      "type" : "dbexecute",
+      "position" : {
+        "x" : 137,
+        "y" : 105
+      },
+      "data" : {
+        "name" : "SQL Execute",
+        "queryType" : "select",
+        "section" : "processing",
+        "connectionId" : "conn-1779737211864-libkc",
+        "query" : "select * from \"APP_LOG\""
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    }, {
+      "id" : "8fbfc018-0a02-4226-8129-0bab937d6dfd",
+      "type" : "iteration",
+      "position" : {
+        "x" : 230,
+        "y" : 78
+      },
+      "data" : {
+        "name" : "Iteration",
+        "collection" : "body",
+        "concurrency" : 1,
+        "placeholder" : "",
+        "onError" : "continue",
+        "section" : "processing",
+        "depth" : 1
+      },
+      "style" : {
+        "width" : 240,
+        "height" : 120
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 240,
+        "height" : 120
+      },
+      "selected" : true,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "83d3416c-4c97-47f8-a9d0-7e4a24093b7b",
+      "type" : "log",
+      "position" : {
+        "x" : 33,
+        "y" : 42
+      },
+      "data" : {
+        "name" : "Log Message",
+        "section" : "processing",
+        "script" : "${body}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "8fbfc018-0a02-4226-8129-0bab937d6dfd",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "8fbfc018-0a02-4226-8129-0bab937d6dfd",
+      "section" : "processing"
+    } ],
+    "edges" : [ {
+      "source" : "3e8a4ee2-1f3d-4a34-aa37-18524123d403",
+      "target" : "8fbfc018-0a02-4226-8129-0bab937d6dfd",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__3e8a4ee2-1f3d-4a34-aa37-18524123d403-8fbfc018-0a02-4226-8129-0bab937d6dfd"
+    } ]
+  }
+}

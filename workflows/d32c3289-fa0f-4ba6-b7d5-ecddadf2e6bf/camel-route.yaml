@@ -1,4 +1,4 @@
-# Camel YAML DSL — generated from workflow: File to Sftp
+# Camel YAML DSL — generated from workflow: SFTP_OUTBOUND_TEST
 # ID: d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf
 
   - route:
@@ -15,7 +15,7 @@
               - setProperty:
                   name: workflowName
                   expression:
-                    constant: File to Sftp
+                    constant: SFTP_OUTBOUND_TEST
               - log:
                   message: 'filelist: Listing directory C:/files'
                   logName: com.batchmate.workflow.execution
@@ -84,6 +84,10 @@
                   - java.lang.Exception
                 steps:
                   - setProperty:
+                      name: _processingFailed
+                      expression:
+                        constant: 'true'
+                  - setProperty:
                       name: errorMessage
                       expression:
                         simple: ${exception.message}
@@ -101,6 +105,10 @@
                         simple: ${exchangeProperty._errorCode}
                   - to:
                       uri: direct:d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf-processingFailed
+        - script:
+            expression:
+              js: if(exchange.getProperties().get('_processingFailed')){var _m=String(exchange.getProperties().get('errorMessage')||'Processing
+                failed');throw new java.lang.RuntimeException(_m);}
   - route:
       id: d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf-processingFailed
       from:
@@ -113,7 +121,7 @@
         - setProperty:
             name: workflowName
             expression:
-              constant: File to Sftp
+              constant: SFTP_OUTBOUND_TEST
         - setProperty:
             name: _logMsg
             expression:
@@ -123,3 +131,24 @@
             message: ${exchangeProperty._logMsg}
             logName: com.batchmate.workflow.execution
             loggingLevel: INFO
+        - setBody:
+            expression:
+              simple: ${exchangeProperty.errorMessage}
+        - setHeader:
+            name: subject
+            expression:
+              simple: ${exchangeProperty.workflowName} Failed
+        - setHeader:
+            name: to
+            expression:
+              constant: bhanuprksh96@gmail.com
+        - setHeader:
+            name: from
+            expression:
+              constant: bhanuprksh96@gmail.com
+        - log:
+            message: 'smtp: Sending email to bhanuprksh96@gmail.com'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - to:
+            uri: smtp://smtp.gmail.com:587?to=bhanuprksh96%40gmail.com&username=bhanuprksh96%40gmail.com&password=dnim%20iwdz%20aptv%20uvgw&contentType=text%2Fhtml&mail.smtp.starttls.enable=true

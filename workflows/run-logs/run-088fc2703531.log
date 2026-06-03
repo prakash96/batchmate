@@ -1,0 +1,16 @@
+[20:54:45.900] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[20:54:45.900] INFO  controller.WorkflowController — Workflow 'PGP_DECRYPT_TEST' run started [runId=run-088fc2703531]
+[20:54:45.900] INFO  workflow.execution — fileread: Reading c:/files/readme.txt.pgp
+[20:54:46.507] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: B4149AF170DCAF0-0000000000000001 on ExchangeId: B4149AF170DCAF0-0000000000000001). Exhausted after delivery attempt: 1 caught: org.bouncycastle.openpgp.PGPException: checksum mismatch at in checksum of 20 bytes
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       e75a283a-c5f0-4c59-b579-8604e0 from[direct://e75a283a-c5f0-4c59-b579-8604e00c93e8          574
+	...
+camel-route.yaml:38                      e75a283a-c5f0-4c59-b579-8604e0 bean[ref:pgpHelper method:decrypt]                            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[20:54:46.512] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@46eb8a28 for file: GenericFile[c:\files\readme.txt.pgp]
+[20:54:46.512] ERROR controller.WorkflowController — Workflow 'PGP_DECRYPT_TEST' run failed: checksum mismatch at in checksum of 20 bytes

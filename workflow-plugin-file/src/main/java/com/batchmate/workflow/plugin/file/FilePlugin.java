@@ -269,6 +269,7 @@ public class FilePlugin implements NodeConverterPlugin {
             "var Files=Java.type('java.nio.file.Files');" +
             "var Paths=Java.type('java.nio.file.Paths');" +
             "var _exists=Files.exists(Paths.get(" + pExpr + "));" +
+            "exchange.getMessage().setBody(_exists);" +
             (resultVar.isEmpty() ? "" : "exchange.setProperty('" + ConversionUtils.escapeJs(resultVar) + "',_exists);") +
             ("stop".equals(onNotFound) ? "if(!_exists){throw new Error('File not found: '+" + pExpr + ");}" : "");
         List<Map<String, Object>> steps = new ArrayList<>();

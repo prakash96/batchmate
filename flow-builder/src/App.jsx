@@ -11,6 +11,7 @@ import ConfigPanel from "./components/panels/ConfigPanel";
 import DocsPanel from "./components/docs/DocsPanel";
 import ReportingPanel from "./components/panels/ReportingPanel";
 import GlobalVarsPanel from "./components/GlobalVarsPanel";
+import WorkflowConfigModal from "./components/nodes/config/WorkflowConfigModal";
 import { persistentStore } from "./store/persistentStore";
 import TreeView from "./components/tree/TreeView";
 import { useWorkflowStore } from "./store/workflowStore";
@@ -58,6 +59,7 @@ export default function App() {
   const [showVault, setShowVault] = useState(false);
   const [showDocs, setShowDocs] = useState(false);
   const [showReporting, setShowReporting] = useState(false);
+  const [showWorkflowConfig, setShowWorkflowConfig] = useState(false);
   const [showGlobalVars, setShowGlobalVars] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [runResult, setRunResult] = useState(null); // { status, error, runId }
@@ -90,7 +92,8 @@ export default function App() {
     setRunning(true);
     setRunResult(null);
     try {
-      const globalVariables = persistentStore.getState().globalVariables || {};
+      const workflowConfig = selectedWorkflow?.config || {};
+      const globalVariables = { ...(persistentStore.getState().globalVariables || {}), ...workflowConfig };
       const res = await fetch(`${BASE_URL}/workflows/${expandedRowId}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -171,6 +174,21 @@ export default function App() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleSaveWorkflowConfig(newConfig) {
+    if (!expandedRowId) return;
+    const row = workflows.find(t => t.id === expandedRowId);
+    if (!row) return;
+    useWorkflowStore.getState().updateWorkflow(expandedRowId, { config: newConfig });
+    try {
+      await fetch(`${BASE_URL}/workflows/${expandedRowId}/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...row, config: newConfig, workflow: { nodes: annotateNodesWithSection(nodes), edges } }),
+      });
+    } catch (e) { console.error("Config save failed:", e); }
+    setShowWorkflowConfig(false);
   }
 
   useEffect(() => {
@@ -458,6 +476,14 @@ export default function App() {
                     {infoPortal}
                   </div>
                   <div style={{ width: 1, height: 16, background: "var(--border)" }} />
+                  <ActionButton onClick={() => setShowWorkflowConfig(true)} color="#8B5CF6" glow="rgba(139,92,246,0.35)" title="Workflow configuration variables">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                      <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+                      <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+                    </svg>
+                  </ActionButton>
                   <ActionButton onClick={handleSave} disabled={saving} color="#10B981" glow="rgba(16,185,129,0.35)" title={saving ? "Saving…" : "Save (Ctrl+S)"}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M2 2h7.5L12 4.5V12H2V2z"/>
@@ -611,6 +637,15 @@ export default function App() {
               {/* Global Variables modal */}
               {showGlobalVars && (
                 <GlobalVarsPanel onClose={() => setShowGlobalVars(false)} />
+              )}
+
+              {/* Workflow Configuration modal */}
+              {showWorkflowConfig && selectedWorkflow && (
+                <WorkflowConfigModal
+                  config={selectedWorkflow.config || {}}
+                  onSave={handleSaveWorkflowConfig}
+                  onClose={() => setShowWorkflowConfig(false)}
+                />
               )}
 
               {/* Empty state */}

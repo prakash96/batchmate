@@ -1,0 +1,6 @@
+[21:09:57.284] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:09:57.484] INFO  controller.WorkflowController — Workflow 'PGP_DECRYPT_TEST' run started [runId=run-8a27977289e0]
+[21:09:57.497] INFO  workflow.execution — fileread: Reading c:/files/readme.txt.pgp
+[21:09:59.017] INFO  workflow.execution — filewrite: Writing to c:/files/readme.txt.pgp.txt
+[21:09:59.024] INFO  workflow.execution — c:/files/readme.txt.pgp.txt
+[21:09:59.078] INFO  controller.WorkflowController — Workflow 'PGP_DECRYPT_TEST' run completed successfully in 1794ms

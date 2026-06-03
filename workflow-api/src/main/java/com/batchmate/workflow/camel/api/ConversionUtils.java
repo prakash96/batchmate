@@ -256,7 +256,13 @@ public final class ConversionUtils {
 
     public static String buildConditionJs(JsonNode data) {
         JsonNode conditions = data.path("conditions");
-        if (!conditions.isArray() || conditions.size() == 0) return "true";
+        if (!conditions.isArray() || conditions.size() == 0) {
+            String exprType = data.path("expressionType").asText("").trim();
+            String fallback = jsValue(exprType.isEmpty() ? "body" : exprType,
+                                      data.path("expression").asText(""),
+                                      data.path("literal").asText(""));
+            return fallback + " === true";
+        }
         List<String> parts = new ArrayList<>();
         for (JsonNode c : conditions) {
             String left  = jsValue(c.path("leftSource").asText("body"),

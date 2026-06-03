@@ -1,4 +1,4 @@
-# Camel YAML DSL — generated from workflow: Compression Test
+# Camel YAML DSL — generated from workflow: COMPRESSION_TEST
 # ID: a40bf72f-49e6-4770-bb22-14a19e5c52bc
 
   - route:
@@ -13,7 +13,7 @@
         - setProperty:
             name: workflowName
             expression:
-              constant: Compression Test
+              constant: COMPRESSION_TEST
         - setBody:
             expression:
               constant: This is sample test

@@ -1,0 +1,4 @@
+[00:10:43.362] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:10:43.580] INFO  controller.WorkflowController — Workflow 'CONFIG_TEST' run started [runId=run-fb3099d0f042]
+[00:10:43.588] INFO  workflow.execution — sftp
+[00:10:43.599] INFO  controller.WorkflowController — Workflow 'CONFIG_TEST' run completed successfully in 237ms

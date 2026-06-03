@@ -2,9 +2,10 @@ const GAP             = 28;   // horizontal gap between nodes
 const PAD_X           = 24;   // horizontal padding inside a container
 const CONTAINER_HDR   = 30;   // workflowcontainer header height
 const ITERATION_HDR   = 22;   // iteration/errorscope header height
+const ROW_GAP         = 32;   // vertical gap between YES and NO rows
 import { EH_HEADER_H, EH_BODY_H } from '../components/nodes/WorkflowContainerNode';
 
-/* ── order siblings by following the edge chain ── */
+/* ── order siblings by following the edge chain (YES handle counts as main path) ── */
 function chainOrder(children, edges) {
     if (!children.length) return [];
     const ids      = new Set(children.map(n => n.id));
@@ -17,7 +18,8 @@ function chainOrder(children, edges) {
         seen.add(cur.id);
         out.push(cur);
         const nx = edges.find(e =>
-            e.source === cur.id && !e.sourceHandle &&
+            e.source === cur.id &&
+            (!e.sourceHandle || e.sourceHandle === "true") &&
             ids.has(e.target) && !seen.has(e.target)
         );
         cur = nx ? children.find(n => n.id === nx.target) : null;
@@ -26,9 +28,26 @@ function chainOrder(children, edges) {
     return out;
 }
 
+/* ── collect nodes reachable from NO-branch edges within a sibling set ── */
+function noRouteSet(children, edges) {
+    const ids = new Set(children.map(n => n.id));
+    const entries = edges
+        .filter(e => e.sourceHandle === "false" && ids.has(e.source) && ids.has(e.target))
+        .map(e => e.target);
+    const result = new Set(entries);
+    const queue  = [...entries];
+    while (queue.length) {
+        const nodeId = queue.shift();
+        edges
+            .filter(e => e.source === nodeId && !e.sourceHandle && ids.has(e.target) && !result.has(e.target))
+            .forEach(e => { result.add(e.target); queue.push(e.target); });
+    }
+    return result;
+}
+
 /* ── layout a row of nodes and handle iteration/errorscope children ── */
-function layoutRow(ordered, startY, map, edges) {
-    let x = PAD_X;
+function layoutRow(ordered, startY, map, edges, startX = PAD_X) {
+    let x = startX;
     for (const node of ordered) {
         const ref = map[node.id];
         ref.position = { x, y: startY };
@@ -52,6 +71,17 @@ function layoutRow(ordered, startY, map, edges) {
     return x; // returns x after last node (for width calculation)
 }
 
+/* ── x position where the NO row should start (right after the condition node) ── */
+function noRowStartX(orderedMain, noKids, map, edges) {
+    const noIds = new Set(noKids.map(n => n.id));
+    const condNode = orderedMain.find(n =>
+        edges.some(e => e.source === n.id && e.sourceHandle === "false" && noIds.has(e.target))
+    );
+    if (!condNode) return PAD_X;
+    const ref = map[condNode.id];
+    return ref.position.x + (ref.style?.width || 58) + GAP;
+}
+
 /* ── layout nodes inside a scope (container or iteration/errorscope) ── */
 function layoutScope(scopeId, isContainer, map, edges) {
     const scope    = map[scopeId];
@@ -70,11 +100,30 @@ function layoutScope(scopeId, isContainer, map, edges) {
         const processingKids = children.filter(n => n.data?.section !== "processingFailed");
         const ehKids         = children.filter(n => n.data?.section === "processingFailed");
 
-        // Processing row — vertically centred in the processing zone
-        const orderedP  = chainOrder(processingKids, edges);
-        const maxHP     = orderedP.length ? Math.max(...orderedP.map(n => n.style?.height || 58)) : 0;
-        const nodeYP    = hdr + Math.max(8, (processingH - maxHP) / 2);
-        const xAfterP   = layoutRow(orderedP, nodeYP, map, edges);
+        // Split processing kids into YES-path (main) and NO-branch rows
+        const noIds      = noRouteSet(processingKids, edges);
+        const mainKids   = processingKids.filter(n => !noIds.has(n.id));
+        const noKids     = processingKids.filter(n =>  noIds.has(n.id));
+
+        const orderedMain = chainOrder(mainKids, edges);
+        const orderedNo   = chainOrder(noKids,   edges);
+
+        const maxHMain = orderedMain.length ? Math.max(...orderedMain.map(n => n.style?.height || 58)) : 0;
+        const maxHNo   = orderedNo.length   ? Math.max(...orderedNo.map(n =>   n.style?.height || 58)) : 0;
+
+        let nodeYMain, nodeYNo;
+        if (orderedNo.length === 0) {
+            nodeYMain = hdr + Math.max(8, (processingH - maxHMain) / 2);
+        } else {
+            const totalH = maxHMain + ROW_GAP + maxHNo;
+            const startY = hdr + Math.max(8, (processingH - totalH) / 2);
+            nodeYMain = startY;
+            nodeYNo   = startY + maxHMain + ROW_GAP;
+        }
+
+        const xAfterMain = layoutRow(orderedMain, nodeYMain, map, edges);
+        const noStartX   = orderedNo.length ? noRowStartX(orderedMain, noKids, map, edges) : PAD_X;
+        const xAfterNo   = orderedNo.length ? layoutRow(orderedNo, nodeYNo, map, edges, noStartX) : PAD_X;
 
         // EH row — vertically centred in the EH body, only when expanded
         let xAfterEH = PAD_X;
@@ -86,23 +135,45 @@ function layoutScope(scopeId, isContainer, map, edges) {
             xAfterEH = layoutRow(orderedEH, nodeYEH, map, edges);
         }
 
-        // Widen the container to fit the widest section
+        // Widen the container to fit the widest row
         if (scope) {
-            const totalW = Math.max(xAfterP, xAfterEH) - GAP + PAD_X;
+            const totalW = Math.max(xAfterMain, xAfterNo, xAfterEH) - GAP + PAD_X;
             scope.style  = { ...scope.style, width: Math.max(totalW, 300) };
         }
     } else {
-        // iteration / errorscope — single row centred vertically
-        const ordered  = chainOrder(children, edges);
-        const maxNodeH = Math.max(...ordered.map(n => n.style?.height || 58));
-        const nodeY    = hdr + Math.max(8, (scopeH - hdr - maxNodeH) / 2);
-        layoutRow(ordered, nodeY, map, edges);
+        // iteration / errorscope — split into YES and NO rows
+        const noIds    = noRouteSet(children, edges);
+        const mainKids = children.filter(n => !noIds.has(n.id));
+        const noKids   = children.filter(n =>  noIds.has(n.id));
+
+        const orderedMain = chainOrder(mainKids, edges);
+        const orderedNo   = chainOrder(noKids,   edges);
+
+        const maxHMain = orderedMain.length ? Math.max(...orderedMain.map(n => n.style?.height || 58)) : 0;
+        const maxHNo   = orderedNo.length   ? Math.max(...orderedNo.map(n =>   n.style?.height || 58)) : 0;
+
+        let nodeYMain, nodeYNo;
+        if (orderedNo.length === 0) {
+            nodeYMain = hdr + Math.max(8, (scopeH - hdr - maxHMain) / 2);
+        } else {
+            const totalH = maxHMain + ROW_GAP + maxHNo;
+            const startY = hdr + Math.max(8, (scopeH - hdr - totalH) / 2);
+            nodeYMain = startY;
+            nodeYNo   = startY + maxHMain + ROW_GAP;
+        }
+
+        layoutRow(orderedMain, nodeYMain, map, edges);
+        if (orderedNo.length) {
+            const noStartX = noRowStartX(orderedMain, noKids, map, edges);
+            layoutRow(orderedNo, nodeYNo, map, edges, noStartX);
+        }
     }
 }
 
 /**
  * Returns a new nodes array where every node inside a workflowcontainer
  * is repositioned to a clean horizontal row, centered vertically.
+ * NO-branch nodes are placed in a second row below the YES/main row.
  * Iteration/errorscope children are also laid out and the scopes resized.
  */
 export function autoLayout(nodes, edges) {

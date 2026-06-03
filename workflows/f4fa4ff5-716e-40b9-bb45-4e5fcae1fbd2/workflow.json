@@ -1,0 +1,104 @@
+{
+  "id" : "f4fa4ff5-716e-40b9-bb45-4e5fcae1fbd2",
+  "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
+  "name" : "HTTP_TEST",
+  "description" : "",
+  "inputBody" : { },
+  "inputHeaders" : { },
+  "workflow" : {
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 0
+      },
+      "data" : {
+        "containerType" : "processing"
+      },
+      "style" : {
+        "width" : 694,
+        "height" : 353
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 694,
+        "height" : 353
+      },
+      "selected" : true
+    }, {
+      "id" : "be1fa118-cf04-423c-884c-83199003f0be",
+      "type" : "http",
+      "position" : {
+        "x" : 72,
+        "y" : 124
+      },
+      "data" : {
+        "name" : "Http Outbound",
+        "method" : "GET",
+        "url" : "${vars.baseUrl}/${vars.todosPath}",
+        "headers" : "",
+        "body" : "",
+        "section" : "processing",
+        "script" : "{}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "890cd6bc-a3e4-4073-8699-56685342c82b",
+      "type" : "log",
+      "position" : {
+        "x" : 214,
+        "y" : 114
+      },
+      "data" : {
+        "name" : "Log Message",
+        "section" : "processing",
+        "script" : "${body}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    } ],
+    "edges" : [ {
+      "source" : "be1fa118-cf04-423c-884c-83199003f0be",
+      "target" : "890cd6bc-a3e4-4073-8699-56685342c82b",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__be1fa118-cf04-423c-884c-83199003f0be-890cd6bc-a3e4-4073-8699-56685342c82b",
+      "selected" : false
+    } ]
+  },
+  "config" : {
+    "baseUrl" : "https://random123.free.beeceptor.com",
+    "todosPath" : "/todos"
+  }
+}

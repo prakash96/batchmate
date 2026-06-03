@@ -1,0 +1,16 @@
+{
+  "runId" : "run-f384baf33352",
+  "workflowId" : "2ac13d2c-2cbc-4743-a37a-4164160e0eab",
+  "workflowName" : "CONFIG_TEST",
+  "runDateTime" : "2026-06-02T00:11:19.3017398",
+  "status" : "success",
+  "durationMs" : 0,
+  "resultBody" : "",
+  "steps" : [ {
+    "nodeId" : "f165704d-e4a5-474e-a0dd-572521c74fde",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

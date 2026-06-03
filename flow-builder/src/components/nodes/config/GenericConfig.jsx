@@ -2,7 +2,6 @@ import { useMetadataStore } from '../../../store/metadataStore';
 import {
     Section, Field,
     TextInput, NumberInput, SelectInput, CheckboxInput, TextAreaInput,
-    PasswordWithVaultPicker,
     inputStyle, labelStyle,
 } from './ConfigHelpers';
 import { useConnectionStore } from '../../../store/connectionStore';
@@ -178,7 +177,7 @@ function renderField(field, data, upd, suggestions) {
         case 'password':
             return (
                 <Field key={`${field.key}|${field.label}`} label={field.label}>
-                    <PasswordWithVaultPicker value={data[field.key]} placeholder={field.placeholder} onChange={onChange} />
+                    <TextInput type="password" value={data[field.key]} placeholder={field.placeholder} onChange={onChange} />
                 </Field>
             );
         case 'number':

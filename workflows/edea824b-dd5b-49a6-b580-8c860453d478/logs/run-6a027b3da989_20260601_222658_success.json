@@ -1,0 +1,16 @@
+{
+  "runId" : "run-6a027b3da989",
+  "workflowId" : "edea824b-dd5b-49a6-b580-8c860453d478",
+  "workflowName" : "Email Test",
+  "runDateTime" : "2026-06-01T22:26:53.4648055",
+  "status" : "success",
+  "durationMs" : 5433,
+  "resultBody" : "smtp",
+  "steps" : [ {
+    "nodeId" : "ebc11bb9-5cc3-44ad-915c-7fc8af1d6db5",
+    "nodeType" : "smtp",
+    "nodeName" : "SMTP Email",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

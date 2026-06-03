@@ -1,0 +1,26 @@
+{
+  "runId" : "run-66e5ff01f964",
+  "workflowId" : "f4fa4ff5-716e-40b9-bb45-4e5fcae1fbd2",
+  "workflowName" : "HTTP_TEST",
+  "runDateTime" : "2026-06-02T00:54:39.3196309",
+  "status" : "success",
+  "durationMs" : 335,
+  "resultBody" : "[\n  {\n    \"id\": 1,\n    \"title\": \"Create an endpoint at Beeceptor.\",\n    \"completed\": true\n  },\n  {\n    \"id\": 2,\n    \"title\": \"Send a request to your new Beeceptor endpoint.\",\n    \"completed\": true\n  },\n  {\n    \"id\": 3,\n    \"title\": \"Create a mocking rule to send dummy data.\",\n    \"completed\": false\n  },\n  {\n    \"id\": 4,\n    \"title\": \"Try out a failure response by sending 500 HTTP status code.\",\n    \"completed\": false\n  },\n  {\n    \"id\": 5,\n    \"title\": \"Use the proxy feature to send a request to a real API. Intercept traffic using Beeceptor.\",\n    \"completed\": false\n  }\n]",
+  "steps" : [ {
+    "nodeId" : "be1fa118-cf04-423c-884c-83199003f0be",
+    "nodeType" : "http",
+    "nodeName" : "Http Outbound",
+    "section" : "processing"
+  }, {
+    "nodeId" : "890cd6bc-a3e4-4073-8699-56685342c82b",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  }, {
+    "nodeId" : "aee23c37-4f43-4201-8e1b-2cb631127dc6",
+    "nodeType" : "streamtostring",
+    "nodeName" : "Stream to String",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

@@ -1,0 +1,17 @@
+{
+  "runId" : "run-001be8e5cbc0",
+  "workflowId" : "999bde76-d0c7-4a0f-8cc7-d23e0fcdfaaf",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-06-02T19:43:42.0868156",
+  "status" : "failed",
+  "durationMs" : 2654,
+  "error" : "ERROR: relation \"APP_LOGS\" does not exist\n  Position: 15",
+  "resultBody" : "select * from \"APP_LOGS\"",
+  "steps" : [ {
+    "nodeId" : "3e8a4ee2-1f3d-4a34-aa37-18524123d403",
+    "nodeType" : "dbexecute",
+    "nodeName" : "SQL Execute",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

@@ -1,7 +1,7 @@
 {
   "id" : "a40bf72f-49e6-4770-bb22-14a19e5c52bc",
   "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
-  "name" : "Compression Test",
+  "name" : "COMPRESSION_TEST",
   "description" : "",
   "inputBody" : { },
   "inputHeaders" : { },
@@ -17,7 +17,7 @@
         "containerType" : "processing"
       },
       "style" : {
-        "width" : 592,
+        "width" : 694,
         "height" : 389
       },
       "draggable" : true,
@@ -25,7 +25,7 @@
       "deletable" : false,
       "zIndex" : -1,
       "measured" : {
-        "width" : 592,
+        "width" : 694,
         "height" : 389
       },
       "selected" : true

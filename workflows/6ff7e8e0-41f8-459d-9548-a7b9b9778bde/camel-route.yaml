@@ -1,4 +1,4 @@
-# Camel YAML DSL — generated from workflow: Ftp to File
+# Camel YAML DSL — generated from workflow: FTP_INBOUND_TEST
 # ID: 6ff7e8e0-41f8-459d-9548-a7b9b9778bde
 
   - route:
@@ -13,7 +13,7 @@
         - setProperty:
             name: workflowName
             expression:
-              constant: Ftp to File
+              constant: FTP_INBOUND_TEST
         - log:
             message: 'ftplist: Connecting to test.rebex.net:21'
             logName: com.batchmate.workflow.execution

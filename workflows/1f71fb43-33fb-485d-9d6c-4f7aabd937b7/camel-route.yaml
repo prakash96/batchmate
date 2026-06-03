@@ -1,4 +1,4 @@
-# Camel YAML DSL — generated from workflow: Sftp to File
+# Camel YAML DSL — generated from workflow: SFTP_INBOUND_TEST
 # ID: 1f71fb43-33fb-485d-9d6c-4f7aabd937b7
 
   - route:
@@ -13,7 +13,7 @@
         - setProperty:
             name: workflowName
             expression:
-              constant: Sftp to File
+              constant: SFTP_INBOUND_TEST
         - log:
             message: 'sftplist: Connecting to test.rebex.net:22'
             logName: com.batchmate.workflow.execution

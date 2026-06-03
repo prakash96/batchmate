@@ -1,0 +1,16 @@
+[19:49:35.800] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[19:49:35.805] INFO  controller.WorkflowController — Workflow 'SQL_TEST' run started [runId=run-31fbde48b735]
+[19:49:35.808] INFO  workflow.execution — dbexecute: Connecting to conn-1779737211864-libkc
+[19:49:35.809] INFO  workflow.execution — dbexecute: Executing query
+[19:49:36.234] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 32CDEFE81FBB56C-0000000000000008 on ExchangeId: 32CDEFE81FBB56C-0000000000000008). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: JSON cannot be fully parsed at position 2
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       999bde76-d0c7-4a0f-8cc7-d23e0f from[direct://999bde76-d0c7-4a0f-8cc7-d23e0fcdfaaf          424
+	...
+camel-route.yaml:32                      999bde76-d0c7-4a0f-8cc7-d23e0f split[js{JSON.parse(body)}]                                   0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[19:49:36.236] ERROR controller.WorkflowController — Workflow 'SQL_TEST' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: JSON cannot be fully parsed at position 2

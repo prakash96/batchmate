@@ -14,6 +14,7 @@ import { GenericNode, CUSTOM_NODES } from "./nodeTypes";
 import { getSectionForPosition, isAllowedInSection, getContainerIds } from "../../utils/sectionRules";
 import { getNodeDefaults } from "../nodes/nodeRegistry";
 import { autoResizeContainer } from "../../utils/containerResize";
+import { autoLayout } from "../../utils/autoLayout";
 
 /* ================= CONTAINER TYPES ================= */
 
@@ -183,6 +184,58 @@ function applyNestingStyles(nodes) {
             }
         };
     });
+}
+
+/* ================= AUTO-CONNECT HELPERS ================= */
+
+function makeEdge(source, target) {
+    return { id: `${source}-${target}`, source, target, animated: false, type: "smoothstep", style: { stroke: "#888" }, label: "" };
+}
+
+function pointToSegmentHit(px, py, ax, ay, bx, by, threshold) {
+    const dx = bx - ax, dy = by - ay;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return null;
+    const t = ((px - ax) * dx + (py - ay) * dy) / lenSq;
+    if (t < 0.2 || t > 0.8) return null;
+    const dist = Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+    return dist < threshold ? t : null;
+}
+
+function findEdgeNearDrop(position, edges, nodes, threshold = 60) {
+    for (const edge of edges) {
+        const src = nodes.find(n => n.id === edge.source);
+        const tgt = nodes.find(n => n.id === edge.target);
+        if (!src || !tgt) continue;
+        const sa = getAbsolutePosition(src, nodes);
+        const ta = getAbsolutePosition(tgt, nodes);
+        const sw = src.measured?.width ?? src.style?.width ?? 58;
+        const sh = src.measured?.height ?? src.style?.height ?? 58;
+        const tw = tgt.measured?.width ?? tgt.style?.width ?? 58;
+        const th = tgt.measured?.height ?? tgt.style?.height ?? 58;
+        const hit = pointToSegmentHit(
+            position.x, position.y,
+            sa.x + sw / 2, sa.y + sh / 2,
+            ta.x + tw / 2, ta.y + th / 2,
+            threshold
+        );
+        if (hit !== null) return edge;
+    }
+    return null;
+}
+
+function findPredecessorNode(position, parentId, nodes) {
+    let best = null, bestDist = Infinity;
+    for (const node of nodes) {
+        if (node.parentId !== parentId || isContainer(node)) continue;
+        const abs = getAbsolutePosition(node, nodes);
+        const cx = abs.x + (node.measured?.width ?? node.style?.width ?? 58) / 2;
+        const cy = abs.y + (node.measured?.height ?? node.style?.height ?? 58) / 2;
+        if (cx >= position.x) continue;
+        const dist = Math.hypot(cx - position.x, cy - position.y);
+        if (dist < bestDist) { bestDist = dist; best = node; }
+    }
+    return best;
 }
 
 /* ================= FULL LAYOUT ENGINE ================= */
@@ -448,9 +501,22 @@ export default function FlowCanvas({ expandedRowId, layoutKey }) {
             extent: parent ? "parent" : undefined
         };
 
+        const nearEdge = findEdgeNearDrop(position, edges, nodes);
+        let nextEdges;
+        if (nearEdge) {
+            nextEdges = edges
+                .filter(e => e.id !== nearEdge.id)
+                .concat([makeEdge(nearEdge.source, newNode.id), makeEdge(newNode.id, nearEdge.target)]);
+        } else {
+            const predecessor = findPredecessorNode(position, parent?.id, nodes);
+            nextEdges = predecessor ? [...edges, makeEdge(predecessor.id, newNode.id)] : edges;
+        }
+
         pushHistory(nodes, edges);
-        setNodes(nds => layoutAll([...nds, newNode]));
+        setNodes(autoLayout([...nodes, newNode], nextEdges));
+        setEdges(nextEdges);
         revalidate();
+        setTimeout(() => resizeAndFit(), 80);
 
         setHoveredParentId(null);
     };

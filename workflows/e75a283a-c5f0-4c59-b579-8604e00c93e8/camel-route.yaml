@@ -1,4 +1,4 @@
-# Camel YAML DSL — generated from workflow: PGP Decrypt Test
+# Camel YAML DSL — generated from workflow: PGP_DECRYPT_TEST
 # ID: e75a283a-c5f0-4c59-b579-8604e00c93e8
 
   - route:
@@ -13,7 +13,7 @@
         - setProperty:
             name: workflowName
             expression:
-              constant: PGP Decrypt Test
+              constant: PGP_DECRYPT_TEST
         - log:
             message: 'fileread: Reading c:/files/readme.txt.pgp'
             logName: com.batchmate.workflow.execution
@@ -44,3 +44,35 @@
             loggingLevel: INFO
         - toD:
             uri: file:c:/files?fileName=${header.fileName}.txt&autoCreate=true&fileExist=Override
+        - log:
+            message: 'fileexists: Checking file c:/files/${header.fileName}.txt'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - script:
+            expression:
+              js: var Files=Java.type('java.nio.file.Files');var Paths=Java.type('java.nio.file.Paths');var
+                _exists=Files.exists(Paths.get(String('c:/files/' + exchange.getMessage().getHeaders().get('fileName')
+                + '.txt')));exchange.getMessage().setBody(_exists);
+        - choice:
+            when:
+              - expression:
+                  js: exchange.getMessage().getBody() === true
+                steps:
+                  - setProperty:
+                      name: _logMsg
+                      expression:
+                        js: '''File exists: '' + exchange.getMessage().getBody()'
+                  - log:
+                      message: ${exchangeProperty._logMsg}
+                      logName: com.batchmate.workflow.execution
+                      loggingLevel: INFO
+            otherwise:
+              steps:
+                - setProperty:
+                    name: _logMsg
+                    expression:
+                      js: '''Not exists '' + exchange.getMessage().getBody()'
+                - log:
+                    message: ${exchangeProperty._logMsg}
+                    logName: com.batchmate.workflow.execution
+                    loggingLevel: INFO

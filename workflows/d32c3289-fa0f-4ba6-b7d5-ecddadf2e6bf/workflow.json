@@ -1,7 +1,7 @@
 {
   "id" : "d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf",
   "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
-  "name" : "File to Sftp",
+  "name" : "SFTP_OUTBOUND_TEST",
   "description" : "",
   "inputBody" : { },
   "inputHeaders" : { },
@@ -16,7 +16,7 @@
       "data" : {
         "containerType" : "processing",
         "errorHandlerExpanded" : true,
-        "rethrowError" : false,
+        "rethrowError" : true,
         "errorVarPrefix" : ""
       },
       "style" : {
@@ -31,7 +31,7 @@
         "width" : 694,
         "height" : 446
       },
-      "selected" : false
+      "selected" : true
     }, {
       "id" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
       "type" : "filelist",
@@ -168,11 +168,43 @@
         "width" : 58,
         "height" : 58
       },
-      "selected" : true,
+      "selected" : false,
       "dragging" : true,
       "parentNode" : "wc-processing",
       "hidden" : false,
       "section" : "processingFailed"
+    }, {
+      "id" : "87e62dd1-05d8-4204-9c23-f3fb2d18a6ac",
+      "type" : "smtp",
+      "position" : {
+        "x" : 220,
+        "y" : 345
+      },
+      "data" : {
+        "name" : "SMTP Email",
+        "smtpSecurity" : "starttls",
+        "bodyFormat" : "html",
+        "to" : "bhanuprksh96@gmail.com",
+        "body" : "${vars.errorMessage}",
+        "connectionId" : "conn-1780246147011-26t5h",
+        "fromAddress" : "bhanuprksh96@gmail.com",
+        "subject" : "${vars.workflowName} Failed",
+        "section" : "processingFailed"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "section" : "processingFailed",
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing"
     } ],
     "edges" : [ {
       "source" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
@@ -194,6 +226,16 @@
       },
       "label" : "",
       "id" : "xy-edge__9bd36fa6-1f83-4280-8ebd-0aa7bdc588ea-871f7922-143e-492d-a4d1-f418d691b889"
+    }, {
+      "source" : "a88d3f71-d406-45bb-b8df-bca10ffc9829",
+      "target" : "87e62dd1-05d8-4204-9c23-f3fb2d18a6ac",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__a88d3f71-d406-45bb-b8df-bca10ffc9829-87e62dd1-05d8-4204-9c23-f3fb2d18a6ac"
     } ]
   }
 }

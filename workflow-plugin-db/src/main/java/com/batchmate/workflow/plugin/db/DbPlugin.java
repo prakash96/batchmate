@@ -52,10 +52,6 @@ public class DbPlugin implements NodeConverterPlugin {
         steps.add(ConversionUtils.setBodyConstant(query));
         steps.add(ConversionUtils.toStep("jdbc:" + beanName + "?resetAutoCommit=false", null));
 
-        Map<String, Object> marshalStep = new LinkedHashMap<>();
-        marshalStep.put("marshal", Map.of("json", new LinkedHashMap<>()));
-        steps.add(marshalStep);
-
         if (!resultVar.isEmpty()) {
             steps.add(ConversionUtils.setVarExpr(resultVar, Map.of("js", "body")));
         }

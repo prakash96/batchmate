@@ -1,7 +1,7 @@
 {
   "id" : "6ff7e8e0-41f8-459d-9548-a7b9b9778bde",
   "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
-  "name" : "Ftp to File",
+  "name" : "FTP_INBOUND_TEST",
   "description" : "",
   "inputBody" : { },
   "inputHeaders" : { },
@@ -18,7 +18,7 @@
         "errorHandlerExpanded" : false
       },
       "style" : {
-        "width" : 528,
+        "width" : 694,
         "height" : 382.5
       },
       "draggable" : true,
@@ -26,7 +26,7 @@
       "deletable" : false,
       "zIndex" : -1,
       "measured" : {
-        "width" : 528,
+        "width" : 694,
         "height" : 383
       },
       "selected" : true

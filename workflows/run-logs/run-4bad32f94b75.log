@@ -1,0 +1,31 @@
+[00:45:17.267] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:45:17.304] INFO  controller.WorkflowController — Workflow 'HTTP_TEST' run started [runId=run-4bad32f94b75]
+[00:45:17.309] INFO  workflow.execution — http: GET https://random123.free.beeceptor.com//todos
+[00:45:17.680] INFO  workflow.execution — [
+  {
+    "id": 1,
+    "title": "Create an endpoint at Beeceptor.",
+    "completed": true
+  },
+  {
+    "id": 2,
+    "title": "Send a request to your new Beeceptor endpoint.",
+    "completed": true
+  },
+  {
+    "id": 3,
+    "title": "Create a mocking rule to send dummy data.",
+    "completed": false
+  },
+  {
+    "id": 4,
+    "title": "Try out a failure response by sending 500 HTTP status code.",
+    "completed": false
+  },
+  {
+    "id": 5,
+    "title": "Use the proxy feature to send a request to a real API. Intercept traffic using Beeceptor.",
+    "completed": false
+  }
+]
+[00:45:17.736] INFO  controller.WorkflowController — Workflow 'HTTP_TEST' run completed successfully in 469ms
