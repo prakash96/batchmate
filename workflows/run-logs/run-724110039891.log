@@ -1,0 +1,199 @@
+[01:37:24.514] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[01:37:24.516] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run started [runId=run-724110039891]
+[01:37:24.520] INFO  workflow.execution — gcslist: Listing gs://batchmatetest
+[01:37:24.795] INFO  workflow.execution — firewall.txt
+[01:37:24.795] INFO  workflow.execution — gcsread: Reading gs://batchmatetest/firewall.txt
+[01:37:26.333] INFO  workflow.execution — 0001 - Monroe, NC
+0010 - Concord, NC
+0016 - Greenville, SC
+0089 - Simpsonville, SC
+=========================================================================
+0311 - Gallatin, TN
+0315 - Columbia, TN
+0316 - Springfield, TN
+0319 - Lenoir, NC
+0320 - Paris, TX
+0321 - Williamsburg, VA
+0322 - Lynchburg, VA - not working
+0323 - Melbourne, FL
+0325 - Beaufort, SC
+0328 - Kerrville, TX
+0329 - Charlotte, NC
+0331 - Conyers, GA
+0334 - Marietta, GA
+0335 - Sevierville, TN
+0336 - McKinney, TX
+0337 - Cumming, GA
+0339 - Alabaster, AL
+0341 - Waxahachie, TX
+0345 - Clermont, FL
+0346 - Ft. Myers, FL
+0347 - Fredericksburg, VA
+0348 - Guntersville, AL
+0349 - Trussville, AL
+0350 - St. Augustine, FL
+0351 - Branson, MO
+0352 - Owasso, OK
+0353 - Harrisonburg, VA
+0355 - Lakeland, FL
+0356 - Shreveport, LA
+0358 - Mt. Juliet, TN
+0360 - Roanoke Rapids, NC
+0366 - Thomaston, GA
+0368 - Wilson, NC - not working
+0374 - Walterboro, SC
+0375 - Buford, GA
+0377 - Rockwall, TX
+0378 - Columbia, SC
+0379 - Flower Mound, TX
+0380 - Murfreesboro, TN
+0381 - Fort Worth, TX
+0385 - Weatherford, TX
+0386 - Burlington, NC
+0388 - Cape Coral, FL
+0392 - Port Orange, FL
+0394 - Wilmington, NC
+0396 - Oxford, MS
+0398 - Macon, GA
+0400 - Prattville, AL
+0401 - Winder, GA
+0402 - Richmond, KY
+0404 - Newnan, GA
+0408 - Bluefield, WV
+0411 - Corinth, MS
+0412 - Waynesville, NC
+0413 - Pensacola, FL
+0414 - Morganton, NC
+0415 - New Braunfels, TX
+0416 - Salisbury, NC 
+0417 - Cullman, AL
+0423 - Huntsville, AL
+0424 - High Point, NC - not working
+0426 - Denham Springs, LA
+0428 - Jacksonville, FL
+0449 - Kinston, NC
+0452 - Charlotte, NC
+0454 - Easley, SC - Not working
+0458 - Raleigh, NC
+0459 - Bristol, TN
+0462 - Roanoke, VA
+0463 - North Charleston, SC
+0464 - Greer, SC
+0468 - Euless, TX
+0476 - Fayetteville, NC
+0478 - Mansfield, TX - not working
+0482 - Spartanburg, SC
+0484 - Albany, GA
+0490 - Gainesville, FL
+0491 - Charlottesville, VA
+0495 - Griffin, GA
+0496 - Middlesboro, KY
+0497 - Leesburg, FL
+0498 - Mt. Hope, WV
+0501 - Somerset, KY
+0503 - Sumter, SC
+0510 - Valdosta, GA
+0513 - Orangeburg, SC
+0514 - Brunswick, GA
+0516 - Myrtle Beach, SC
+0517 - Roanoke, VA
+0520 - Waycross, GA
+0528 - Americus, GA
+0529 - Zebulon, NC
+0530 - Farmville, VA
+0531 - Staunton, VA
+0532 - Southern Pines, NC
+0534 - Hilton Head, SC
+0538 - Seneca, SC
+0540 - Christiansburg, VA
+0543 - California, MD
+0544 - Martinsville, VA
+0547 - Vidalia, GA
+0549 - Mobile, AL
+0551 - Murrells Inlet, SC
+0552 - Greenville, NC
+0553 - Pineville, NC
+0554 - Aiken, SC
+0555 - Kill Devil Hills, NC
+0558 - Stuttgart, AR
+0560 - Hartsville, SC
+0561 - Wise, VA
+0564 - Elkin, NC
+0565 - Laurinburg, NC
+0566 - Summerville, SC
+0569 - Georgetown, SC
+0571 - Lexington, NC
+0574 - Rome, GA
+0580 - Mooresville, NC
+0581 - Rock Hill, SC
+0582 - Centerville, GA
+0583 - Sebring, FL
+0584 - Williamston, NC
+0585 - Cookeville, TN
+0587 - Pisgah Forest, NC - not working
+0588 - Jackson, TN
+0593 - Whiteville, NC
+0594 - Lake City, SC
+0598 - Henderson, NC
+0599 - Toccoa, GA
+0603 - Birmingham, AL
+0604 - Birmingham, AL
+0607 - Huntsville, AL
+0608 - Tuscaloosa, AL
+0611 - Decatur, AL
+0613 - Montgomery, AL
+0614 - Florence, AL
+0615 - Dothan, AL
+0616 - Gadsden, AL
+0627 - Tallahassee, FL
+0629 - Franklin, TN - not working
+0633 - Little Rock, AR
+0636 - Evans, GA
+0638 - Bowling Green, KY
+0639 - Hagerstown, MD - not working
+0645 - Monroe, LA
+0663 - Ashland, KY
+0664 - Elizabethtown, KY
+0667 - Greenville, MS
+0668 - Meridian, MS
+0669 - Vicksburg, MS
+0670 - Hattiesburg, MS
+0671 - Tupelo, MS
+0673 - Gautier, MS
+0674 - Laurel, MS
+0675 - Columbus, MS
+0676 - Ridgeland, MS
+0677 - Natchez, MS
+0678 - Flowood, MS
+0679 - Biloxi, MS
+0680 - McComb, MS
+0682 - Kingsport, TN
+0683 - Maryville, TN
+0684 - Athens, TN
+0685 - Knoxville, TN
+0688 - Johnson City, TN
+0689 - Knoxville, TN
+0691 - Chattanooga, TN
+0692 - Cleveland, TN
+0694 - Chattanooga, TN
+0721 - Chapel, FL
+0722 - Frisco,TX -Not working
+0760 - Greeneville, TN
+0761 - Laurens, SC - Not working
+0762 - Clarksville, TN - Not working
+0763 - Douglasville, GA - Not working
+0765 - Russellville, AR
+0766 - Palm Coast, FL
+0768 - Land O'Lakes, FL
+0790 - Westminster, MD
+0791 - Franklin, VA
+0792 - Vienna, WV
+0793 - Sherman, TX
+0794 - Stillwater, OK
+0795 - Bossier City, LA
+0797 - Charlotte, NC- not working
+0798 - Gastonia, NC
+0799 - Raleigh , NC - not working
+0701 - Charleston, SC _ not working
+[01:37:26.378] INFO  workflow.execution — filewrite: Writing to c:/files/gcs/
+[01:37:26.398] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run completed successfully in 1884ms

@@ -5200,6 +5200,342 @@
     ]
   },
   {
+    "type": "gcsread",
+    "label": "GCS Read",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "Cloud Storage",
+    "sidebarLabel": "GCS Read",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "GCS Read",
+      "setAsBody": true
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "GCS Credentials",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "gcs"
+          },
+          {
+            "key": "serviceAccountKeyFile",
+            "label": "Service Account Key File",
+            "type": "text",
+            "placeholder": "/path/to/service-account.json",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "projectId",
+            "label": "GCP Project ID",
+            "type": "text",
+            "placeholder": "my-gcp-project",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          }
+        ]
+      },
+      {
+        "title": "Source Object",
+        "open": true,
+        "fields": [
+          {
+            "key": "bucket",
+            "label": "Bucket Name",
+            "type": "text",
+            "placeholder": "my-data-bucket"
+          },
+          {
+            "key": "objectKey",
+            "label": "Object Key",
+            "type": "text",
+            "placeholder": "inbox/report.csv  or  ${vars.fileName}"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "gcsFileContent"
+          },
+          {
+            "key": "setAsBody",
+            "label": "Set File Content As Body",
+            "type": "checkbox"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "gcswrite",
+    "label": "GCS Write",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "Cloud Storage",
+    "sidebarLabel": "GCS Write",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "GCS Write"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "GCS Credentials",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "gcs"
+          },
+          {
+            "key": "serviceAccountKeyFile",
+            "label": "Service Account Key File",
+            "type": "text",
+            "placeholder": "/path/to/service-account.json",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "projectId",
+            "label": "GCP Project ID",
+            "type": "text",
+            "placeholder": "my-gcp-project",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          }
+        ]
+      },
+      {
+        "title": "Destination Object",
+        "open": true,
+        "fields": [
+          {
+            "key": "bucket",
+            "label": "Bucket Name",
+            "type": "text",
+            "placeholder": "my-data-bucket"
+          },
+          {
+            "key": "objectKey",
+            "label": "Object Key",
+            "type": "text",
+            "placeholder": "outbox/report.csv  or  ${vars.fileName}"
+          },
+          {
+            "key": "contentType",
+            "label": "Content Type",
+            "type": "text",
+            "placeholder": "text/csv  or  application/json"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "gcsUploadResult"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "gcsdelete",
+    "label": "GCS Delete",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "Cloud Storage",
+    "sidebarLabel": "GCS Delete",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "GCS Delete"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "GCS Credentials",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "gcs"
+          },
+          {
+            "key": "serviceAccountKeyFile",
+            "label": "Service Account Key File",
+            "type": "text",
+            "placeholder": "/path/to/service-account.json",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "projectId",
+            "label": "GCP Project ID",
+            "type": "text",
+            "placeholder": "my-gcp-project",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          }
+        ]
+      },
+      {
+        "title": "Target Object",
+        "open": true,
+        "fields": [
+          {
+            "key": "bucket",
+            "label": "Bucket Name",
+            "type": "text",
+            "placeholder": "my-data-bucket"
+          },
+          {
+            "key": "objectKey",
+            "label": "Object Key",
+            "type": "text",
+            "placeholder": "inbox/report.csv  or  ${vars.fileName}"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "gcsDeleteResult"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "gcslist",
+    "label": "GCS List",
+    "icon": "",
+    "nodeClass": "fileread",
+    "group": "Cloud Storage",
+    "sidebarLabel": "GCS List",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "GCS List"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "GCS Credentials",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "gcs"
+          },
+          {
+            "key": "serviceAccountKeyFile",
+            "label": "Service Account Key File",
+            "type": "text",
+            "placeholder": "/path/to/service-account.json",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          },
+          {
+            "key": "projectId",
+            "label": "GCP Project ID",
+            "type": "text",
+            "placeholder": "my-gcp-project",
+            "showWhen": {
+              "key": "connectionId",
+              "empty": true
+            }
+          }
+        ]
+      },
+      {
+        "title": "Bucket",
+        "open": true,
+        "fields": [
+          {
+            "key": "bucket",
+            "label": "Bucket Name",
+            "type": "text",
+            "placeholder": "my-data-bucket"
+          },
+          {
+            "key": "prefix",
+            "label": "Prefix Filter",
+            "type": "text",
+            "placeholder": "inbox/  or  ${vars.prefix}"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "gcsFiles"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "type": "jsontostring",
     "label": "JSON to String",
     "icon": "",

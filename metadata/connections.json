@@ -50,4 +50,12 @@
     "port" : 21
   },
   "id" : "conn-1780248351634-h3h2x"
+}, {
+  "name" : "GCS Connection",
+  "type" : "gcs",
+  "config" : {
+    "projectId" : "batchmate-498518",
+    "serviceAccountKeyFile" : "C:\\files\\gcp\\batchmate-498518-f022a6eabb35.json"
+  },
+  "id" : "conn-1780685960114-nykjk"
 } ]

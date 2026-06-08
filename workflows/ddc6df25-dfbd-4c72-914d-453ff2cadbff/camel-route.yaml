@@ -1,0 +1,65 @@
+# Camel YAML DSL — generated from workflow: GCS_INBOUND_TEST
+# ID: ddc6df25-dfbd-4c72-914d-453ff2cadbff
+
+  - route:
+      id: ddc6df25-dfbd-4c72-914d-453ff2cadbff-processing
+      from:
+        uri: direct:ddc6df25-dfbd-4c72-914d-453ff2cadbff
+      steps:
+        - setProperty:
+            name: workflowId
+            expression:
+              constant: ddc6df25-dfbd-4c72-914d-453ff2cadbff
+        - setProperty:
+            name: workflowName
+            expression:
+              constant: GCS_INBOUND_TEST
+        - log:
+            message: 'gcslist: Listing gs://batchmatetest'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - to:
+            uri: google-storage://batchmatetest?serviceAccountKey=file:C:/files/gcp/batchmate-498518-f022a6eabb35.json&operation=listObjects
+        - setProperty:
+            name: gcsFiles
+            expression:
+              simple: ${body}
+        - split:
+            expression:
+              simple: ${body}
+            steps:
+              - setProperty:
+                  name: _logMsg
+                  expression:
+                    js: (function(){var _b=exchange.getMessage().getBody();if(_b==null)return
+                      null;if(_b instanceof java.util.Map)return _b.get('name');try{var
+                      _gn='get'+'name'[0].toUpperCase()+'name'.slice(1);if(typeof
+                      _b[_gn]==='function')return _b[_gn]();}catch(_ge){}try{var _s=_b
+                      instanceof java.lang.String?_b:new java.lang.String(_b);return
+                      JSON.parse(_s)['name'];}catch(e){return null;}})()
+              - log:
+                  message: ${exchangeProperty._logMsg}
+                  logName: com.batchmate.workflow.execution
+                  loggingLevel: INFO
+              - log:
+                  message: 'gcsread: Reading gs://batchmatetest/${body.name}'
+                  logName: com.batchmate.workflow.execution
+                  loggingLevel: INFO
+              - pollEnrich:
+                  expression:
+                    simple: google-storage://batchmatetest?serviceAccountKey=file:C:/files/gcp/batchmate-498518-f022a6eabb35.json&objectName=${body.name}&deleteAfterRead=false
+                  timeout: 5000
+              - script:
+                  expression:
+                    js: var _b=exchange.getMessage().getBody();if(_b!==null&&String(_b.getClass().getName()).includes('GenericFile')){var
+                      Files=Java.type('java.nio.file.Files');var Paths=Java.type('java.nio.file.Paths');var
+                      _gf=_b.getFile();var _path=_gf!=null?String(_gf.getAbsolutePath()):String(_b.getAbsoluteFilePath());exchange.getMessage().setBody(Files.readString(Paths.get(_path)));}
+              - script:
+                  expression:
+                    js: var _h=exchange.getMessage();var _n=String(_h.getHeader('CamelGoogleCloudStorageObjectName')||'');if(_n){_h.setHeader('CamelFileName',_n);_h.setHeader('fileName',_n);}
+              - log:
+                  message: 'filewrite: Writing to c:/files/gcs/<original name>'
+                  logName: com.batchmate.workflow.execution
+                  loggingLevel: INFO
+              - to:
+                  uri: file:c:/files/gcs?autoCreate=true&fileExist=Override

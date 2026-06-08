@@ -1,0 +1,4 @@
+[00:22:29.140] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:22:29.144] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run started [runId=run-b7b71b65ad95]
+[00:22:29.152] INFO  workflow.execution — gcslist: Listing gs://batchmatetest
+[00:22:29.681] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run completed successfully in 541ms

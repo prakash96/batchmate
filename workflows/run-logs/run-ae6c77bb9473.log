@@ -1,0 +1,15 @@
+[00:33:58.610] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:33:58.614] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run started [runId=run-ae6c77bb9473]
+[00:33:58.653] INFO  workflow.execution — gcslist: Listing gs://batchmatetest
+[00:33:58.696] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 2563DF0E12EE9B7-0000000000000000 on ExchangeId: 2563DF0E12EE9B7-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.ResolveEndpointFailedException: Failed to resolve endpoint: google-storage://batchmatetest?operation=listObjects&serviceAccountKey=xxxxxx due to: Failed to resolve endpoint: google-storage://batchmatetest?operation=listObjects&serviceAccountKey=xxxxxx due to: There are 2 parameters that couldn't be set on the endpoint. Check the uri if the parameters are spelt correctly and that they are properties of the endpoint. Unknown parameters=[{operation=listObjects, serviceAccountKey=C:\files\gcp\batchmate-498518-f022a6eabb35.json}]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ddc6df25-dfbd-4c72-914d-453ff2 from[direct://ddc6df25-dfbd-4c72-914d-453ff2cadbff           62
+	...
+camel-route.yaml:21                      ddc6df25-dfbd-4c72-914d-453ff2 pollEnrich[constant{google-storage://batchmatetest            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:33:58.758] ERROR controller.WorkflowController — Workflow 'GCS_TEST' run failed: Failed to resolve endpoint: google-storage://batchmatetest?operation=listObjects&serviceAccountKey=xxxxxx due to: Failed to resolve endpoint: google-storage://batchmatetest?operation=listObjects&serviceAccountKey=xxxxxx due to: There are 2 parameters that couldn't be set on the endpoint. Check the uri if the parameters are spelt correctly and that they are properties of the endpoint. Unknown parameters=[{operation=listObjects, serviceAccountKey=C:\files\gcp\batchmate-498518-f022a6eabb35.json}]

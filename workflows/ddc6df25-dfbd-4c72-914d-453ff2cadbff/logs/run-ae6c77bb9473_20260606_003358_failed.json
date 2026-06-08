@@ -1,0 +1,22 @@
+{
+  "runId" : "run-ae6c77bb9473",
+  "workflowId" : "ddc6df25-dfbd-4c72-914d-453ff2cadbff",
+  "workflowName" : "GCS_TEST",
+  "runDateTime" : "2026-06-06T00:33:58.5775277",
+  "status" : "failed",
+  "durationMs" : 150,
+  "error" : "Failed to resolve endpoint: google-storage://batchmatetest?operation=listObjects&serviceAccountKey=xxxxxx due to: Failed to resolve endpoint: google-storage://batchmatetest?operation=listObjects&serviceAccountKey=xxxxxx due to: There are 2 parameters that couldn't be set on the endpoint. Check the uri if the parameters are spelt correctly and that they are properties of the endpoint. Unknown parameters=[{operation=listObjects, serviceAccountKey=C:\\files\\gcp\\batchmate-498518-f022a6eabb35.json}]",
+  "resultBody" : "",
+  "steps" : [ {
+    "nodeId" : "7ceec0df-6cb4-428f-ac02-76863d9f29ad",
+    "nodeType" : "gcslist",
+    "nodeName" : "GCS List",
+    "section" : "processing"
+  }, {
+    "nodeId" : "6c5aab88-1a32-419a-aec8-d3e4e52e7cc5",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

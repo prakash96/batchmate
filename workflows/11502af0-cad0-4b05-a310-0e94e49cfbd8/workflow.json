@@ -1,0 +1,237 @@
+{
+  "id" : "11502af0-cad0-4b05-a310-0e94e49cfbd8",
+  "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
+  "name" : "GCS_OUTBOUND_TEST",
+  "description" : "",
+  "inputBody" : { },
+  "inputHeaders" : { },
+  "workflow" : {
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 0
+      },
+      "data" : {
+        "containerType" : "processing",
+        "errorHandlerExpanded" : true,
+        "rethrowError" : true,
+        "errorVarPrefix" : ""
+      },
+      "style" : {
+        "width" : 694,
+        "height" : 446
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 694,
+        "height" : 446
+      },
+      "selected" : true
+    }, {
+      "id" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
+      "type" : "filelist",
+      "position" : {
+        "x" : 24,
+        "y" : 105
+      },
+      "data" : {
+        "name" : "File List",
+        "recursive" : false,
+        "dirPath" : "C:/files",
+        "filter" : "*.txt"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "type" : "iteration",
+      "position" : {
+        "x" : 110,
+        "y" : 105
+      },
+      "data" : {
+        "name" : "Iteration",
+        "collection" : "body",
+        "concurrency" : 1,
+        "placeholder" : "",
+        "depth" : 1,
+        "onError" : "stop"
+      },
+      "style" : {
+        "width" : 220,
+        "height" : 120
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 220,
+        "height" : 120
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "9bd36fa6-1f83-4280-8ebd-0aa7bdc588ea",
+      "type" : "fileread",
+      "position" : {
+        "x" : 24,
+        "y" : 34
+      },
+      "data" : {
+        "name" : "File Read",
+        "encoding" : "utf8",
+        "filePath" : "${body.filePath}",
+        "directory" : "C:/files",
+        "fileName" : "${body.fileName}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "section" : "processing"
+    }, {
+      "id" : "a88d3f71-d406-45bb-b8df-bca10ffc9829",
+      "type" : "log",
+      "position" : {
+        "x" : 24,
+        "y" : 357
+      },
+      "data" : {
+        "name" : "Log Message",
+        "section" : "processingFailed",
+        "script" : "Error Logger: ${vars.workflowName} - ${vars.errorMessage}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "hidden" : false,
+      "section" : "processingFailed"
+    }, {
+      "id" : "87e62dd1-05d8-4204-9c23-f3fb2d18a6ac",
+      "type" : "smtp",
+      "position" : {
+        "x" : 110,
+        "y" : 357
+      },
+      "data" : {
+        "name" : "SMTP Email",
+        "smtpSecurity" : "starttls",
+        "bodyFormat" : "html",
+        "to" : "bhanuprksh96@gmail.com",
+        "body" : "${vars.errorMessage}",
+        "connectionId" : "conn-1780246147011-26t5h",
+        "fromAddress" : "bhanuprksh96@gmail.com",
+        "subject" : "${vars.workflowName} Failed",
+        "section" : "processingFailed"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "section" : "processingFailed",
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing"
+    }, {
+      "id" : "40654cc4-feb9-498d-b477-86e50f7837bc",
+      "type" : "gcswrite",
+      "position" : {
+        "x" : 110,
+        "y" : 34
+      },
+      "data" : {
+        "name" : "GCS Write",
+        "section" : "processing",
+        "connectionId" : "conn-1780685960114-nykjk",
+        "bucket" : "batchmatetest",
+        "objectKey" : "${headers.fileName}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    } ],
+    "edges" : [ {
+      "source" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
+      "target" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__7885cec1-f9b9-47af-8c98-efe865e8e3a0-a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb"
+    }, {
+      "source" : "a88d3f71-d406-45bb-b8df-bca10ffc9829",
+      "target" : "87e62dd1-05d8-4204-9c23-f3fb2d18a6ac",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : "",
+      "id" : "xy-edge__a88d3f71-d406-45bb-b8df-bca10ffc9829-87e62dd1-05d8-4204-9c23-f3fb2d18a6ac"
+    }, {
+      "id" : "9bd36fa6-1f83-4280-8ebd-0aa7bdc588ea-40654cc4-feb9-498d-b477-86e50f7837bc",
+      "source" : "9bd36fa6-1f83-4280-8ebd-0aa7bdc588ea",
+      "target" : "40654cc4-feb9-498d-b477-86e50f7837bc",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : ""
+    } ]
+  }
+}

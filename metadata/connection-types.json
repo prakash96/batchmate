@@ -119,6 +119,14 @@
       { "key": "endpoint",        "label": "Custom Endpoint", "type": "text",     "placeholder": "https://minio.local:9000" }
     ]
   },
+  "gcs": {
+    "label": "Google Cloud Storage",
+    "icon": "☁️",
+    "fields": [
+      { "key": "projectId",            "label": "GCP Project ID",          "type": "text",     "placeholder": "my-gcp-project",             "required": true },
+      { "key": "serviceAccountKeyFile","label": "Service Account Key File", "type": "text",     "placeholder": "/path/to/service-account.json" }
+    ]
+  },
   "smtp": {
     "label": "SMTP",
     "icon": "📧",

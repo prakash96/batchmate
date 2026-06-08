@@ -12,6 +12,7 @@ import com.batchmate.workflow.service.VaultService;
 import com.batchmate.workflow.util.PathResolver;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
+import org.apache.camel.support.DefaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,7 @@ public class NodeConverterRegistry {
     private final Map<String, NodeConverter>    converters        = new LinkedHashMap<>();
     private final Map<String, ConnectionTester> connectionTesters = new LinkedHashMap<>();
     private final List<String> pluginStatus = new ArrayList<>();
+    private final List<URL>    pluginUrls   = new ArrayList<>();
     private final CamelContext camelContext;
     private final VaultService vaultService;
     private final ConnectionService connectionService;
@@ -57,6 +59,7 @@ public class NodeConverterRegistry {
 
     @PostConstruct
     public void loadPlugins() {
+        fixSslTrustAnchors();
         camelContext.getPropertiesComponent()
             .addPropertiesSource(new ConnectionPropertiesSource(connectionService));
         camelContext.getPropertiesComponent()
@@ -81,12 +84,27 @@ public class NodeConverterRegistry {
         }
         pluginStatus.add("INFO  Total node types registered: " + converters.size()
                 + " [" + String.join(", ", converters.keySet()) + "]");
+
+        // Extend CamelContext's application ClassLoader with all plugin JAR URLs so that
+        // Camel's DefaultPropertyConfigurerResolver can load endpoint configurers (e.g.
+        // GoogleCloudStorageEndpointConfigurer) that live in plugin classloaders.
+        // Camel resolves configurers lazily at route-deployment time, so this update
+        // in @PostConstruct is always in time.
+        if (!pluginUrls.isEmpty()) {
+            ClassLoader parent = camelContext.getApplicationContextClassLoader();
+            if (parent == null) parent = getClass().getClassLoader();
+            URLClassLoader extended = new URLClassLoader(pluginUrls.toArray(new URL[0]), parent);
+            camelContext.setApplicationContextClassLoader(extended);
+            log.info("Extended CamelContext ClassLoader with {} plugin JAR(s)", pluginUrls.size());
+        }
     }
 
     private void loadJar(Path jar) {
         try {
+            URL jarUrl = jar.toUri().toURL();
+            pluginUrls.add(jarUrl);
             URLClassLoader cl = new URLClassLoader(
-                    new URL[]{ jar.toUri().toURL() },
+                    new URL[]{ jarUrl },
                     getClass().getClassLoader());
 
             registerCamelComponents(jar, cl);
@@ -124,7 +142,29 @@ public class NodeConverterRegistry {
         }
     }
 
-    private static final String CAMEL_COMPONENT_PREFIX = "META-INF/services/org/apache/camel/component/";
+    /**
+     * On Windows JDKs, the cacerts file may ship empty — detect this at startup and
+     * fall back to the Windows system certificate store so HTTPS requests work out of the box.
+     */
+    private static void fixSslTrustAnchors() {
+        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) return;
+        if (System.getProperty("javax.net.ssl.trustStore") != null
+                || System.getProperty("javax.net.ssl.trustStoreType") != null) return;
+        try {
+            javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory
+                .getInstance(javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init((java.security.KeyStore) null);
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("trustAnchors")) {
+                System.setProperty("javax.net.ssl.trustStoreType", "Windows-ROOT");
+                log.info("Empty JVM trust store detected — switched SSL trust store to Windows-ROOT");
+            }
+        }
+    }
+
+    private static final String CAMEL_COMPONENT_PREFIX  = "META-INF/services/org/apache/camel/component/";
+    private static final String CAMEL_CONFIGURER_PREFIX = "META-INF/services/org/apache/camel/configurer/";
 
     @SuppressWarnings("unchecked")
     private void registerCamelComponents(Path jar, URLClassLoader cl) {
@@ -143,6 +183,13 @@ public class NodeConverterRegistry {
                       Class<? extends Component> compClass =
                           (Class<? extends Component>) cl.loadClass(className);
                       Component comp = compClass.getDeclaredConstructor().newInstance();
+                      // Inject configurers directly into DefaultComponent's private fields BEFORE
+                      // addComponent() triggers doBuild(). doBuild() skips resolvePropertyConfigurer()
+                      // when the fields are already non-null (bytecode: ifnonnull → skip resolver).
+                      // Using cl (same classloader as comp) avoids ClassCastException inside the
+                      // configurer when it casts the endpoint object back to its plugin-loaded type.
+                      injectConfigurerField(zf, cl, comp, "endpointPropertyConfigurer",  scheme + "-endpoint");
+                      injectConfigurerField(zf, cl, comp, "componentPropertyConfigurer", scheme + "-component");
                       configureComponent(scheme, comp, cl);
                       camelContext.addComponent(scheme, comp);
                       log.info("Registered Camel component '{}' from plugin: {}", scheme, jar.getFileName());
@@ -153,6 +200,24 @@ public class NodeConverterRegistry {
               });
         } catch (IOException e) {
             log.debug("Could not scan {} for Camel components: {}", jar.getFileName(), e.getMessage());
+        }
+    }
+
+    private void injectConfigurerField(ZipFile zf, URLClassLoader cl, Component comp, String fieldName, String configurerKey) {
+        java.util.zip.ZipEntry entry = zf.getEntry(CAMEL_CONFIGURER_PREFIX + configurerKey);
+        if (entry == null) return;
+        try (InputStream is = zf.getInputStream(entry)) {
+            Properties props = new Properties();
+            props.load(is);
+            String className = props.getProperty("class");
+            if (className == null) return;
+            Object configurer = cl.loadClass(className).getDeclaredConstructor().newInstance();
+            java.lang.reflect.Field field = DefaultComponent.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(comp, configurer);
+            log.debug("Injected configurer '{}' into {} field '{}'", configurerKey, comp.getClass().getSimpleName(), fieldName);
+        } catch (Exception e) {
+            log.warn("Could not inject configurer '{}' into '{}': {}", configurerKey, fieldName, e.getMessage());
         }
     }
 

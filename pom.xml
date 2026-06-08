@@ -33,6 +33,7 @@
         <module>workflow-plugin-notification</module>
         <module>workflow-plugin-db</module>
         <module>workflow-plugin-aws</module>
+        <module>workflow-plugin-gcs</module>
         <module>workflow-plugin-security</module>
         <module>workflow-plugin-compression</module>
         <module>workflow-plugin-converter</module>

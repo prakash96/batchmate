@@ -1,0 +1,6 @@
+[00:17:57.284] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:17:57.310] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run started [runId=run-0683c25c9d1a]
+[00:17:57.314] INFO  workflow.execution — gcslist: Listing gs://batchmatetest
+[00:17:57.587] INFO  workflow.execution — Blob{bucket=batchmatetest, name=firewall.txt, generation=1780856968932203, size=4490, content-type=text/plain, metadata=null}
+[00:17:57.587] INFO  workflow.execution — gcsread: Reading gs://batchmatetest/firewall.txt
+[00:18:02.238] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run completed successfully in 4954ms

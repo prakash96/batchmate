@@ -1,0 +1,15 @@
+[00:30:05.954] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[00:30:05.958] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run started [runId=run-9c2dc9b48fe3]
+[00:30:05.959] INFO  workflow.execution — gcslist: Listing gs://batchmatetest
+[00:30:05.993] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: CF86AF2A9E38941-0000000000000000 on ExchangeId: CF86AF2A9E38941-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.NoSuchEndpointException: No endpoint could be found for: google-storage://batchmatetest?operation=listObjects&serviceAccountKey=C%3A%5Cfiles%5Cgcp%5Cbatchmate-498518-f022a6eabb35.json, please check your classpath contains the needed Camel component jar.
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ddc6df25-dfbd-4c72-914d-453ff2 from[direct://ddc6df25-dfbd-4c72-914d-453ff2cadbff           15
+	...
+camel-route.yaml:21                      ddc6df25-dfbd-4c72-914d-453ff2 pollEnrich[constant{google-storage://batchmatetest            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[00:30:05.999] ERROR controller.WorkflowController — Workflow 'GCS_TEST' run failed: No endpoint could be found for: google-storage://batchmatetest?operation=listObjects&serviceAccountKey=C%3A%5Cfiles%5Cgcp%5Cbatchmate-498518-f022a6eabb35.json, please check your classpath contains the needed Camel component jar.

@@ -16,7 +16,29 @@ public class CoreNodesPlugin implements NodeConverterPlugin {
 
     @Override
     public Map<String, Object> beans() {
-        return Collections.singletonMap("compareHelper", compareHelper);
+        Map<String, Object> b = new LinkedHashMap<>();
+        b.put("compareHelper", compareHelper);
+        // Trust-all HttpClientConfigurer — used by the http node when sslVerify=false
+        b.put("noopSslHttpConfigurer",
+            (org.apache.camel.component.http.HttpClientConfigurer) clientBuilder -> {
+                try {
+                    javax.net.ssl.SSLContext ctx = javax.net.ssl.SSLContext.getInstance("TLS");
+                    ctx.init(null, new javax.net.ssl.TrustManager[]{
+                        new javax.net.ssl.X509TrustManager() {
+                            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                                return new java.security.cert.X509Certificate[0];
+                            }
+                            public void checkClientTrusted(java.security.cert.X509Certificate[] c, String t) {}
+                            public void checkServerTrusted(java.security.cert.X509Certificate[] c, String t) {}
+                        }
+                    }, null);
+                    clientBuilder.setSSLContext(ctx);
+                    clientBuilder.setSSLHostnameVerifier((h, s) -> true);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to build noop SSL context", e);
+                }
+            });
+        return b;
     }
 
     @Override
@@ -38,10 +60,11 @@ public class CoreNodesPlugin implements NodeConverterPlugin {
     // ── Converters ────────────────────────────────────────────────────────────
 
     private List<Map<String, Object>> convertHttp(JsonNode data) {
-        String method  = data.path("method").asText("GET");
-        String url     = data.path("url").asText("").trim();
-        String body    = data.path("body").asText("").trim();
-        String headers = data.path("headers").asText("").trim();
+        String method     = data.path("method").asText("GET");
+        String url        = data.path("url").asText("").trim();
+        String body       = data.path("body").asText("").trim();
+        String headers    = data.path("headers").asText("").trim();
+        boolean sslVerify = data.path("sslVerify").asBoolean(true);
 
         boolean dynamicUrl     = url.contains("${");
         boolean dynamicBody    = body.contains("${");
@@ -89,14 +112,19 @@ public class CoreNodesPlugin implements NodeConverterPlugin {
                 // Evaluate the URL expression at runtime, store in a property, use toD.
                 // CamelHttpMethod header drives the HTTP method for dynamic endpoints.
                 String urlJs = ConversionUtils.simpleToJs(url);
+                String setUrlJs = !sslVerify
+                    ? "var _u=String(" + urlJs + ");"
+                      + "exchange.setProperty('_httpUrl',_u+(_u.indexOf('?')>=0?'&':'?')+'httpClientConfigurer=#noopSslHttpConfigurer');"
+                    : "exchange.setProperty('_httpUrl', String(" + urlJs + "));";
                 steps.add(ConversionUtils.scriptStep("js",
                     "exchange.getMessage().getHeaders().put('CamelHttpMethod','"
                     + ConversionUtils.escapeJs(method) + "');"
-                    + "exchange.setProperty('_httpUrl', String(" + urlJs + "));"));
+                    + setUrlJs));
                 steps.add(ConversionUtils.toDStep("${exchangeProperty._httpUrl}"));
             } else {
                 Map<String, Object> params = new LinkedHashMap<>();
                 params.put("httpMethod", method);
+                if (!sslVerify) params.put("httpClientConfigurer", "#noopSslHttpConfigurer");
                 steps.add(ConversionUtils.toStep(url, params));
             }
             steps.add(ConversionUtils.readHttpBody());

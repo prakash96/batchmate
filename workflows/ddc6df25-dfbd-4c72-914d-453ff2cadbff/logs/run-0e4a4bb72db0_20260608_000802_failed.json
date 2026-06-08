@@ -1,0 +1,32 @@
+{
+  "runId" : "run-0e4a4bb72db0",
+  "workflowId" : "ddc6df25-dfbd-4c72-914d-453ff2cadbff",
+  "workflowName" : "GCS_TEST",
+  "runDateTime" : "2026-06-08T00:08:01.8207651",
+  "status" : "failed",
+  "durationMs" : 636,
+  "error" : "Cannot store file: C:\\files\\gcs\\8ECB868802DECEF-0000000000000004",
+  "resultBody" : "[Blob{bucket=batchmatetest, name=firewall.txt, generation=1780856968932203, size=4490, content-type=text/plain, metadata=null}]",
+  "steps" : [ {
+    "nodeId" : "366b6f6e-53a1-4411-a577-4ee9678e33ad",
+    "nodeType" : "gcslist",
+    "nodeName" : "GCS List",
+    "section" : "processing"
+  }, {
+    "nodeId" : "0612c2be-51d9-46f9-b876-ec5180f8280b",
+    "nodeType" : "iteration",
+    "nodeName" : "Iteration",
+    "section" : "processing"
+  }, {
+    "nodeId" : "d928edfe-1d5d-4790-b4c5-b4d8b5e2ef79",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  }, {
+    "nodeId" : "76f3902e-4c72-407c-9410-48b187252cb2",
+    "nodeType" : "filewrite",
+    "nodeName" : "File Write",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

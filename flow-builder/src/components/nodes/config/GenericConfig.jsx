@@ -35,7 +35,7 @@ function ConnectionSelect({ value, connectionType, connectionTypes, onChange }) 
                 <option key={c.id} value={c.id}>{c.name}</option>
             ))}
             {filtered.length === 0 && types && (
-                <option disabled>No database connections saved</option>
+                <option disabled>No {types.join("/").toUpperCase()} connections saved</option>
             )}
         </select>
     );

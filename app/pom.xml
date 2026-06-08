@@ -256,6 +256,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.batchmate.workflow</groupId>
+                                    <artifactId>workflow-plugin-gcs</artifactId>
+                                    <version>${project.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.batchmate.workflow</groupId>
                                     <artifactId>workflow-plugin-security</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
