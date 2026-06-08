@@ -1,0 +1,8 @@
+[17:13:08.645] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[17:13:08.649] INFO  controller.WorkflowController — Workflow 'GCS_OUTBOUND_TEST' run started [runId=run-11347709906c]
+[17:13:08.653] INFO  workflow.execution — filelist: Listing directory C:/files
+[17:13:08.662] INFO  workflow.execution — fileread: Reading C:\files\readme.txt
+[17:13:08.713] INFO  workflow.execution — gcswrite: Writing gs://batchmatetest/readme.txt
+[17:13:09.947] INFO  workflow.execution — fileread: Reading C:\files\readme.txt.pgp.txt
+[17:13:09.960] INFO  workflow.execution — gcswrite: Writing gs://batchmatetest/readme.txt.pgp.txt
+[17:13:11.108] INFO  controller.WorkflowController — Workflow 'GCS_OUTBOUND_TEST' run completed successfully in 2463ms

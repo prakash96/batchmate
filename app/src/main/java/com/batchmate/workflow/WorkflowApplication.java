@@ -35,7 +35,25 @@ public class WorkflowApplication implements CommandLineRunner {
     }
 
     public static void main(String[] args) {
+        disableSslVerification();
         SpringApplication.run(WorkflowApplication.class, args);
+    }
+
+    private static void disableSslVerification() {
+        try {
+            javax.net.ssl.TrustManager[] trustAll = { new javax.net.ssl.X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[0]; }
+                public void checkClientTrusted(java.security.cert.X509Certificate[] c, String t) {}
+                public void checkServerTrusted(java.security.cert.X509Certificate[] c, String t) {}
+            }};
+            javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("TLS");
+            sc.init(null, trustAll, new java.security.SecureRandom());
+            javax.net.ssl.SSLContext.setDefault(sc);
+            javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier((h, s) -> true);
+        } catch (Exception e) {
+            System.err.println("WARN: Could not disable SSL verification: " + e.getMessage());
+        }
     }
 
     @Override

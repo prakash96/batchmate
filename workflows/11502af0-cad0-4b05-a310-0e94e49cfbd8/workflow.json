@@ -117,65 +117,6 @@
       "parentNode" : "a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb",
       "section" : "processing"
     }, {
-      "id" : "a88d3f71-d406-45bb-b8df-bca10ffc9829",
-      "type" : "log",
-      "position" : {
-        "x" : 24,
-        "y" : 357
-      },
-      "data" : {
-        "name" : "Log Message",
-        "section" : "processingFailed",
-        "script" : "Error Logger: ${vars.workflowName} - ${vars.errorMessage}"
-      },
-      "style" : {
-        "width" : 58,
-        "height" : 58
-      },
-      "parentId" : "wc-processing",
-      "extent" : "parent",
-      "measured" : {
-        "width" : 58,
-        "height" : 58
-      },
-      "selected" : false,
-      "dragging" : true,
-      "parentNode" : "wc-processing",
-      "hidden" : false,
-      "section" : "processingFailed"
-    }, {
-      "id" : "87e62dd1-05d8-4204-9c23-f3fb2d18a6ac",
-      "type" : "smtp",
-      "position" : {
-        "x" : 110,
-        "y" : 357
-      },
-      "data" : {
-        "name" : "SMTP Email",
-        "smtpSecurity" : "starttls",
-        "bodyFormat" : "html",
-        "to" : "bhanuprksh96@gmail.com",
-        "body" : "${vars.errorMessage}",
-        "connectionId" : "conn-1780246147011-26t5h",
-        "fromAddress" : "bhanuprksh96@gmail.com",
-        "subject" : "${vars.workflowName} Failed",
-        "section" : "processingFailed"
-      },
-      "style" : {
-        "width" : 58,
-        "height" : 58
-      },
-      "parentId" : "wc-processing",
-      "extent" : "parent",
-      "measured" : {
-        "width" : 58,
-        "height" : 58
-      },
-      "section" : "processingFailed",
-      "selected" : false,
-      "dragging" : true,
-      "parentNode" : "wc-processing"
-    }, {
       "id" : "40654cc4-feb9-498d-b477-86e50f7837bc",
       "type" : "gcswrite",
       "position" : {
@@ -212,16 +153,6 @@
       },
       "label" : "",
       "id" : "xy-edge__7885cec1-f9b9-47af-8c98-efe865e8e3a0-a4784cf1-ac6c-4d1f-89c9-5d464b6b2ffb"
-    }, {
-      "source" : "a88d3f71-d406-45bb-b8df-bca10ffc9829",
-      "target" : "87e62dd1-05d8-4204-9c23-f3fb2d18a6ac",
-      "animated" : false,
-      "type" : "smoothstep",
-      "style" : {
-        "stroke" : "#888"
-      },
-      "label" : "",
-      "id" : "xy-edge__a88d3f71-d406-45bb-b8df-bca10ffc9829-87e62dd1-05d8-4204-9c23-f3fb2d18a6ac"
     }, {
       "id" : "9bd36fa6-1f83-4280-8ebd-0aa7bdc588ea-40654cc4-feb9-498d-b477-86e50f7837bc",
       "source" : "9bd36fa6-1f83-4280-8ebd-0aa7bdc588ea",
