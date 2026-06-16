@@ -1,0 +1,99 @@
+{
+  "id" : "921a300d-46c6-4fce-a765-74a65018a364",
+  "packageId" : "7138ab7b-27d6-4afc-a4e0-0a1ebbf617bc",
+  "name" : "New Workflow",
+  "description" : "",
+  "inputBody" : { },
+  "inputHeaders" : { },
+  "workflow" : {
+    "nodes" : [ {
+      "id" : "wc-processing",
+      "type" : "workflowcontainer",
+      "position" : {
+        "x" : 20,
+        "y" : 0
+      },
+      "data" : {
+        "containerType" : "processing"
+      },
+      "style" : {
+        "width" : 528,
+        "height" : 300
+      },
+      "draggable" : true,
+      "selectable" : true,
+      "deletable" : false,
+      "zIndex" : -1,
+      "measured" : {
+        "width" : 528,
+        "height" : 300
+      },
+      "selected" : true
+    }, {
+      "id" : "6c211632-16e6-4591-b74c-b2b240cce24b",
+      "type" : "http",
+      "position" : {
+        "x" : 24,
+        "y" : 123
+      },
+      "data" : {
+        "name" : "Http Outbound",
+        "method" : "GET",
+        "url" : "https://self-signed.badssl.com/",
+        "headers" : "",
+        "body" : "",
+        "section" : "processing",
+        "script" : "{}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "dragging" : true,
+      "parentNode" : "wc-processing",
+      "section" : "processing"
+    }, {
+      "id" : "378b0c1c-6e72-4f45-887c-2826f48e67f2",
+      "type" : "log",
+      "position" : {
+        "x" : 110,
+        "y" : 123
+      },
+      "data" : {
+        "name" : "Log Message",
+        "section" : "processing",
+        "script" : "${body}"
+      },
+      "style" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "parentId" : "wc-processing",
+      "extent" : "parent",
+      "measured" : {
+        "width" : 58,
+        "height" : 58
+      },
+      "selected" : false,
+      "section" : "processing"
+    } ],
+    "edges" : [ {
+      "id" : "6c211632-16e6-4591-b74c-b2b240cce24b-378b0c1c-6e72-4f45-887c-2826f48e67f2",
+      "source" : "6c211632-16e6-4591-b74c-b2b240cce24b",
+      "target" : "378b0c1c-6e72-4f45-887c-2826f48e67f2",
+      "animated" : false,
+      "type" : "smoothstep",
+      "style" : {
+        "stroke" : "#888"
+      },
+      "label" : ""
+    } ]
+  }
+}

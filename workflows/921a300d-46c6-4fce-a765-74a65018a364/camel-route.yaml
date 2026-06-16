@@ -1,0 +1,47 @@
+# Camel YAML DSL — generated from workflow: New Workflow
+# ID: 921a300d-46c6-4fce-a765-74a65018a364
+
+  - route:
+      id: 921a300d-46c6-4fce-a765-74a65018a364-processing
+      from:
+        uri: direct:921a300d-46c6-4fce-a765-74a65018a364
+      steps:
+        - setProperty:
+            name: workflowId
+            expression:
+              constant: 921a300d-46c6-4fce-a765-74a65018a364
+        - setProperty:
+            name: workflowName
+            expression:
+              constant: New Workflow
+        - log:
+            message: 'http: GET https://self-signed.badssl.com/'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('Accept-Encoding','identity');
+        - to:
+            uri: https://self-signed.badssl.com/
+            parameters:
+              httpMethod: GET
+        - script:
+            expression:
+              js: var _b=exchange.getMessage().getBody();if(_b instanceof java.io.InputStream){  var
+                _ce=String(exchange.getMessage().getHeader('Content-Encoding')||'');  var
+                _is=_ce.toLowerCase().indexOf('gzip')>=0    ?new java.util.zip.GZIPInputStream(_b)    :_b;  var
+                _isr=new java.io.InputStreamReader(_is,'UTF-8');  var _br=new java.io.BufferedReader(_isr);  var
+                _sb=new java.lang.StringBuilder();  var _ln;  while((_ln=_br.readLine())!==null){_sb.append(_ln).append('\n');}  _br.close();  exchange.getMessage().setBody(_sb.toString().trim());  if(_ce)exchange.getMessage().removeHeader('Content-Encoding');}
+        - script:
+            expression:
+              js: var _m=exchange.getMessage();var _ks=_m.getHeaders().keySet().toArray();for(var
+                _i=0;_i<_ks.length;_i++){  var _k=String(_ks[_i]);  if(_k.startsWith('CamelHttp')){    var
+                _nk=_k.substring(5,6).toLowerCase()+_k.substring(6);    _m.getHeaders().put(_nk,_m.getHeaders().get(_k));  }}
+        - setProperty:
+            name: _logMsg
+            expression:
+              js: exchange.getMessage().getBody()
+        - log:
+            message: ${exchangeProperty._logMsg}
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO

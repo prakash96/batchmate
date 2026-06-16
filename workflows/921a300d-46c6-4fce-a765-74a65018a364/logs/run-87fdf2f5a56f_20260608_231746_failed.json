@@ -1,0 +1,17 @@
+{
+  "runId" : "run-87fdf2f5a56f",
+  "workflowId" : "921a300d-46c6-4fce-a765-74a65018a364",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-06-08T23:17:44.7114783",
+  "status" : "failed",
+  "durationMs" : 1316,
+  "error" : "PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target",
+  "resultBody" : "",
+  "steps" : [ {
+    "nodeId" : "6c211632-16e6-4591-b74c-b2b240cce24b",
+    "nodeType" : "http",
+    "nodeName" : "Http Outbound",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

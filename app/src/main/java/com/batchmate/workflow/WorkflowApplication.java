@@ -39,18 +39,43 @@ public class WorkflowApplication implements CommandLineRunner {
         SpringApplication.run(WorkflowApplication.class, args);
     }
 
+    // ── TrustManagerFactorySpi that returns a no-op X509TrustManager ─────────
+    // Registered as a Security Provider so ALL SSL code in the JVM — including
+    // Apache HttpClient which calls SSLContext.init(null,null,null) internally —
+    // gets a trust-all manager instead of the PKIX validator that reads cacerts.
+    public static final class TrustAllTMFSpi extends javax.net.ssl.TrustManagerFactorySpi {
+        private static final javax.net.ssl.TrustManager[] TMS = { new javax.net.ssl.X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[0]; }
+            public void checkClientTrusted(java.security.cert.X509Certificate[] c, String t) {}
+            public void checkServerTrusted(java.security.cert.X509Certificate[] c, String t) {}
+        }};
+        @Override protected void engineInit(java.security.KeyStore ks) {}
+        @Override protected void engineInit(javax.net.ssl.ManagerFactoryParameters s) {}
+        @Override protected javax.net.ssl.TrustManager[] engineGetTrustManagers() { return TMS; }
+    }
+
     private static void disableSslVerification() {
         try {
-            javax.net.ssl.TrustManager[] trustAll = { new javax.net.ssl.X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[0]; }
-                public void checkClientTrusted(java.security.cert.X509Certificate[] c, String t) {}
-                public void checkServerTrusted(java.security.cert.X509Certificate[] c, String t) {}
-            }};
+            // 1. Register a Security Provider that intercepts TrustManagerFactory instantiation
+            //    for all standard algorithms. This covers Apache HttpClient (and any other code
+            //    that calls TrustManagerFactory.getInstance("PKIX").init(null)).
+            String spiClass = TrustAllTMFSpi.class.getName();
+            java.security.Security.insertProviderAt(
+                new java.security.Provider("TrustAll", "1.0", "Trust-all TrustManagerFactory") {
+                    private static final long serialVersionUID = 1L;
+                    { for (String alg : new String[]{"PKIX","SunX509","X509","X.509"})
+                          put("TrustManagerFactory." + alg, spiClass); }
+                }, 1);
+
+            // 2. Also set JVM default SSLContext + HttpsURLConnection defaults (belt-and-suspenders).
+            javax.net.ssl.TrustManager[] trustAll = TrustAllTMFSpi.TMS;
             javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("TLS");
             sc.init(null, trustAll, new java.security.SecureRandom());
             javax.net.ssl.SSLContext.setDefault(sc);
             javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier((h, s) -> true);
+
+            System.out.println("INFO: SSL certificate verification disabled (trust-all)");
         } catch (Exception e) {
             System.err.println("WARN: Could not disable SSL verification: " + e.getMessage());
         }

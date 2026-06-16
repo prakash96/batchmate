@@ -237,6 +237,42 @@ public class NodeConverterRegistry {
                 log.debug("Could not configure passive mode for {} component: {}", scheme, e.getMessage());
             }
         }
+        if ("http".equals(scheme) || "https".equals(scheme)) {
+            installTrustAllSsl(scheme, comp, cl);
+        }
+    }
+
+    // Sets a trust-all HttpClientConfigurer on the HttpComponent so every endpoint it creates
+    // skips SSL certificate validation. Uses a Proxy loaded in the plugin ClassLoader to avoid
+    // ClassCastException when the component casts the configurer back to its own loaded type.
+    private void installTrustAllSsl(String scheme, Component comp, URLClassLoader cl) {
+        try {
+            javax.net.ssl.SSLContext ctx = javax.net.ssl.SSLContext.getInstance("TLS");
+            ctx.init(null, new javax.net.ssl.TrustManager[]{
+                new javax.net.ssl.X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[0]; }
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] c, String a) {}
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] c, String a) {}
+                }
+            }, new java.security.SecureRandom());
+
+            Class<?> ifaceClass = cl.loadClass("org.apache.camel.component.http.HttpClientConfigurer");
+            Object configurer = java.lang.reflect.Proxy.newProxyInstance(cl, new Class[]{ifaceClass},
+                (proxy, method, args) -> {
+                    if ("configureHttpClient".equals(method.getName()) && args != null && args.length == 1) {
+                        Object builder = args[0];
+                        builder.getClass().getMethod("setSSLContext", javax.net.ssl.SSLContext.class).invoke(builder, ctx);
+                        builder.getClass().getMethod("setSSLHostnameVerifier", javax.net.ssl.HostnameVerifier.class)
+                               .invoke(builder, (javax.net.ssl.HostnameVerifier) (h, s) -> true);
+                    }
+                    return null;
+                });
+
+            comp.getClass().getMethod("setHttpClientConfigurer", ifaceClass).invoke(comp, configurer);
+            log.info("Installed trust-all SSL configurer for '{}' component", scheme);
+        } catch (Exception e) {
+            log.warn("Could not install trust-all SSL for '{}': {}", scheme, e.getMessage());
+        }
     }
 
     private void registerJdbcDrivers(Path jar, URLClassLoader cl) {

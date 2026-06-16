@@ -1,0 +1,15 @@
+[23:42:38.764] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[23:42:38.780] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-8df7c3cbcf5b]
+[23:42:38.780] INFO  workflow.execution — http: GET https://self-signed.badssl.com/
+[23:42:40.086] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 6C594CEF61DF126-0000000000000000 on ExchangeId: 6C594CEF61DF126-0000000000000000). Exhausted after delivery attempt: 1 caught: javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       921a300d-46c6-4fce-a765-74a650 from[direct://921a300d-46c6-4fce-a765-74a65018a364         1291
+	...
+camel-route.yaml:24                      921a300d-46c6-4fce-a765-74a650 https://self-signed.badssl.com/?httpMethod=GET                0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[23:42:40.099] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
