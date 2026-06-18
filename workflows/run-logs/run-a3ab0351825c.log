@@ -1,0 +1,6 @@
+[21:26:50.836] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:26:50.884] INFO  controller.WorkflowController — Workflow 'SQL_TEST' run started [runId=run-a3ab0351825c]
+[21:26:50.889] INFO  workflow.execution — dbexecute: Connecting to conn-1779737211864-libkc
+[21:26:50.894] INFO  workflow.execution — dbexecute: Executing query
+[21:26:53.933] INFO  workflow.execution — {id=1, message=sample message}
+[21:26:53.935] INFO  controller.WorkflowController — Workflow 'SQL_TEST' run completed successfully in 3099ms

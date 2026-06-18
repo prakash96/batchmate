@@ -1,0 +1,52 @@
+[20:31:44.518] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[20:31:44.530] INFO  controller.WorkflowController — Workflow 'GCS_OUTBOUND_TEST' run started [runId=run-2c47c0d837fb]
+[20:31:44.551] INFO  workflow.execution — filelist: Listing directory C:/files
+[20:31:44.676] INFO  workflow.execution — fileread: Reading C:\files\readme.txt
+[20:31:44.832] INFO  workflow.execution — gcswrite: Writing gs://batchmatetest/readme.txt
+[20:31:45.292] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AD6B5B7DC2015A7-0000000000000006 on ExchangeId: AD6B5B7DC2015A7-0000000000000006). Exhausted after delivery attempt: 1 caught: com.google.cloud.storage.StorageException: 403 Forbidden
+POST https://storage.googleapis.com/upload/storage/v1/b/batchmatetest/o?name=readme.txt&uploadType=resumable
+{
+  "error": {
+    "code": 403,
+    "message": "The billing account for the owning project is disabled in state delinquent",
+    "errors": [
+      {
+        "message": "The billing account for the owning project is disabled in state delinquent",
+        "domain": "global",
+        "reason": "accountDisabled",
+        "locationType": "header",
+        "location": "Authorization"
+      }
+    ]
+  }
+}
+
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       11502af0-cad0-4b05-a310-0e94e4 from[direct://11502af0-cad0-4b05-a310-0e94e49cfbd8          714
+	...
+camel-route.yaml:74                      11502af0-cad0-4b05-a310-0e94e4 google-storage://batchmatetest?serviceAccountKey=x            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[20:31:45.295] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@33b19901 for file: GenericFile[C:\files\readme.txt]
+[20:31:45.297] ERROR controller.WorkflowController — Workflow 'GCS_OUTBOUND_TEST' run failed: Multicast processing failed for number 0. Exchange[AD6B5B7DC2015A7-0000000000000006]. Caused by: [com.google.cloud.storage.StorageException - 403 Forbidden
+POST https://storage.googleapis.com/upload/storage/v1/b/batchmatetest/o?name=readme.txt&uploadType=resumable
+{
+  "error": {
+    "code": 403,
+    "message": "The billing account for the owning project is disabled in state delinquent",
+    "errors": [
+      {
+        "message": "The billing account for the owning project is disabled in state delinquent",
+        "domain": "global",
+        "reason": "accountDisabled",
+        "locationType": "header",
+        "location": "Authorization"
+      }
+    ]
+  }
+}
+]

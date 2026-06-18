@@ -20,7 +20,7 @@
         "errorHandlerExpanded" : false
       },
       "style" : {
-        "width" : 720,
+        "width" : 694,
         "height" : 351.5
       },
       "draggable" : true,
@@ -28,10 +28,10 @@
       "deletable" : false,
       "zIndex" : -1,
       "measured" : {
-        "width" : 720,
+        "width" : 694,
         "height" : 352
       },
-      "selected" : false,
+      "selected" : true,
       "dragging" : false
     }, {
       "id" : "ffc6ca86-a8a3-4837-9327-de3e7ac8765f",
@@ -156,7 +156,7 @@
         "y" : 82.75
       },
       "data" : {
-        "name" : "Condition",
+        "name" : "File exists?",
         "script" : "",
         "section" : "processing",
         "conditions" : "body"
@@ -255,7 +255,8 @@
       "style" : {
         "stroke" : "#888"
       },
-      "label" : ""
+      "label" : "",
+      "selected" : false
     }, {
       "id" : "69dcf93f-b7bc-4544-bf61-ff52811a23f8-4292c12a-e4fe-43cf-957a-fa04a6b79c87",
       "source" : "69dcf93f-b7bc-4544-bf61-ff52811a23f8",
@@ -265,7 +266,8 @@
       "style" : {
         "stroke" : "#888"
       },
-      "label" : ""
+      "label" : "",
+      "selected" : false
     }, {
       "source" : "4292c12a-e4fe-43cf-957a-fa04a6b79c87",
       "sourceHandle" : "false",

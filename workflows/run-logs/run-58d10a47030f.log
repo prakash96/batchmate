@@ -1,0 +1,32 @@
+[21:26:50.938] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:26:50.941] INFO  controller.WorkflowController — Workflow 'GCS_INBOUND_TEST' run started [runId=run-58d10a47030f]
+[21:26:50.942] INFO  workflow.execution — gcslist: Listing gs://batchmatetest
+[21:26:51.360] INFO  workflow.execution — readme.txt
+[21:26:51.373] INFO  workflow.execution — gcsread: Reading gs://batchmatetest/readme.txt
+[21:26:56.830] INFO  workflow.execution — filewrite: Writing to c:/files/gcs/<original name>
+[21:26:56.836] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 70F78963C7666D4-0000000000000007 on ExchangeId: 70F78963C7666D4-0000000000000007). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\gcs\70F78963C7666D4-0000000000000007
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ddc6df25-dfbd-4c72-914d-453ff2 from[direct://ddc6df25-dfbd-4c72-914d-453ff2cadbff         5894
+	...
+camel-route.yaml:64                      ddc6df25-dfbd-4c72-914d-453ff2 file:c:/files/gcs?autoCreate=true&fileExist=Overri            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[21:26:56.853] INFO  workflow.execution — readme.txt.pgp.txt
+[21:26:56.853] INFO  workflow.execution — gcsread: Reading gs://batchmatetest/readme.txt.pgp.txt
+[21:27:02.238] INFO  workflow.execution — filewrite: Writing to c:/files/gcs/<original name>
+[21:27:02.238] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 70F78963C7666D4-000000000000000D on ExchangeId: 70F78963C7666D4-000000000000000D). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.file.GenericFileOperationFailedException: Cannot write null body to file: c:\files\gcs\70F78963C7666D4-000000000000000D
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       ddc6df25-dfbd-4c72-914d-453ff2 from[direct://ddc6df25-dfbd-4c72-914d-453ff2cadbff        11296
+	...
+camel-route.yaml:64                      ddc6df25-dfbd-4c72-914d-453ff2 file:c:/files/gcs?autoCreate=true&fileExist=Overri            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[21:27:02.238] ERROR controller.WorkflowController — Workflow 'GCS_INBOUND_TEST' run failed: Cannot write null body to file: c:\files\gcs\70F78963C7666D4-000000000000000D

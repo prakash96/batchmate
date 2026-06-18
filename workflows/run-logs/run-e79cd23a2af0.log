@@ -1,0 +1,14 @@
+[20:06:42.599] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[20:06:42.607] INFO  controller.WorkflowController — Workflow 'Enquiry - Failure' run started [runId=run-e79cd23a2af0]
+[20:07:13.101] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AD6B5B7DC2015A7-0000000000000001 on ExchangeId: AD6B5B7DC2015A7-0000000000000001). Exhausted after delivery attempt: 1 caught: org.apache.camel.component.direct.DirectConsumerNotAvailableException: No consumers available on endpoint: direct://27c71922-382f-44e8-be3d-850479775c4e. Exchange[]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       1432db66-b2b7-4dff-8085-e152d9 from[direct://1432db66-b2b7-4dff-8085-e152d91d2e6f        30006
+	...
+camel-route.yaml:20                      1432db66-b2b7-4dff-8085-e152d9 direct:27c71922-382f-44e8-be3d-850479775c4e                   0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[20:07:13.157] ERROR controller.WorkflowController — Workflow 'Enquiry - Failure' run failed: No consumers available on endpoint: direct://27c71922-382f-44e8-be3d-850479775c4e. Exchange[]

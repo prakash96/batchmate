@@ -1,0 +1,25 @@
+[21:26:50.923] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:26:50.929] INFO  controller.WorkflowController — Workflow 'SFTP_OUTBOUND_TEST' run started [runId=run-817aac7a6108]
+[21:26:50.932] INFO  workflow.execution — filelist: Listing directory C:/files
+[21:26:50.954] INFO  workflow.execution — fileread: Reading C:\files\readme.txt
+[21:26:52.491] INFO  workflow.execution — sftpwrite: Connecting to eu-central-1.sftpcloud.io:22
+[21:26:52.493] INFO  workflow.execution — sftpwrite: Writing /pub/example/readme.txt
+[21:26:52.526] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[21:26:55.550] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[21:26:58.444] INFO  remote.SftpOperations — Known host file not configured, using user known host file: C:\Users\Admin/.ssh/known_hosts
+[21:27:00.642] WARN  remote.RemoteFileProducer — Writing file failed with: Cannot connect to sftp://3654d12d2d2241fa891e2b57924f1c2b@eu-central-1.sftpcloud.io:22
+[21:27:00.642] WARN  file.GenericFileOnCompletion — Rollback file strategy: org.apache.camel.component.file.strategy.GenericFileRenameProcessStrategy@15c43912 for file: GenericFile[C:\files\readme.txt]
+[21:27:00.658] INFO  workflow.execution — Error Logger: SFTP_OUTBOUND_TEST - Multicast processing failed for number 0. Exchange[70F78963C7666D4-0000000000000004]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot connect to sftp://3654d12d2d2241fa891e2b57924f1c2b@eu-central-1.sftpcloud.io:22]
+[21:27:00.662] INFO  workflow.execution — smtp: Sending email to bhanuprksh96@gmail.com
+[21:27:04.198] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 70F78963C7666D4-0000000000000003 on ExchangeId: 70F78963C7666D4-0000000000000003). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: java.lang.RuntimeException: Multicast processing failed for number 0. Exchange[70F78963C7666D4-0000000000000004]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot connect to sftp://3654d12d2d2241fa891e2b57924f1c2b@eu-central-1.sftpcloud.io:22]
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       d32c3289-fa0f-4ba6-b7d5-ecddad from[direct://d32c3289-fa0f-4ba6-b7d5-ecddadf2e6bf        13269
+	...
+camel-route.yaml:108                     d32c3289-fa0f-4ba6-b7d5-ecddad script[js{if(exchange.getProperties().get('_proces            0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[21:27:04.198] ERROR controller.WorkflowController — Workflow 'SFTP_OUTBOUND_TEST' run failed: JS evaluation failed: java.lang.RuntimeException: Multicast processing failed for number 0. Exchange[70F78963C7666D4-0000000000000004]. Caused by: [org.apache.camel.component.file.GenericFileOperationFailedException - Cannot connect to sftp://3654d12d2d2241fa891e2b57924f1c2b@eu-central-1.sftpcloud.io:22]

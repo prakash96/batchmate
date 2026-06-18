@@ -1,0 +1,19 @@
+[20:06:30.775] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[20:06:30.785] INFO  controller.WorkflowController — Workflow 'Common Enquiry' run started [runId=run-3858ebac9e5a]
+[20:06:36.718] INFO  workflow.execution — [workflowref] No target workflow configured
+[20:06:37.006] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: AD6B5B7DC2015A7-0000000000000000 on ExchangeId: AD6B5B7DC2015A7-0000000000000000). Exhausted after delivery attempt: 1 caught: java.lang.RuntimeException: JSON compare mismatch (mode=deep-equal)
+actual:   null
+expected: null
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       271bb3da-c9e3-4299-ab1d-149d5e from[direct://271bb3da-c9e3-4299-ab1d-149d5ecedfd7         6048
+	...
+camel-route.yaml:67                      271bb3da-c9e3-4299-ab1d-149d5e bean[ref:compareHelper method:compareJson]                    0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[20:06:37.064] ERROR controller.WorkflowController — Workflow 'Common Enquiry' run failed: JSON compare mismatch (mode=deep-equal)
+actual:   null
+expected: null

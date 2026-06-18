@@ -27,6 +27,9 @@ public class ReportService {
     }
 
     public byte[] generateReport(List<Map<String, String>> workflows) throws IOException {
+        workflows = workflows.stream()
+                .filter(wf -> !wf.getOrDefault("name", "").toLowerCase(java.util.Locale.ROOT).startsWith("common"))
+                .collect(java.util.stream.Collectors.toList());
         List<JsonNode> allLogs = workflowService.listAllLogs();
 
         Map<String, JsonNode> latestLogMap = new HashMap<>();

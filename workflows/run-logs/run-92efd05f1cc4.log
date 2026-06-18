@@ -1,0 +1,10 @@
+[21:23:14.864] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:23:14.881] INFO  controller.WorkflowController — Workflow 'Unknown' run started [runId=run-92efd05f1cc4]
+[21:23:14.927] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/encrypt
+[21:23:24.432] INFO  workflow.execution — {
+  "REQUEST": "default_data",
+  "DIGI_SIGN": "YVIH1DmGlsuwKRTK2F7lIzFWKKHyK8DW",
+  "REQUEST_REFERENCE_NUMBER": "f9b406ae-aaec-448b-9a81-3971047f07e5",
+  "ACCESS_TOKEN": "eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODE1NjU3MzIsImV4cCI6MTc4MTY0ODE0MiwibmJmIjoxNzkzNzAyMjMxLCJpc3MiOiJXaWxraW5zb24sIEtvdmFjZWsgYW5kIERveWxlIiwic3ViIjoiOTc4NzNkYjAtMDc0ZS00YzhmLTlkYjQtNTMzZjhmY2VhNWE2IiwiYXVkIjoiYjk4MzYyNDMtZWU4YS00ZGVmLTk4ZmEtMmM1ZTRjNWRlMzBlIiwianRpIjoiYTJjMzJiNjUtZDUzOC00ZmRiLThiY2ItY2ZkM2ZjMDg4YmRkIn0.s9nC9xX4XkxpQKhRCNEguxD2hbKF2PnR7Gb8XXvRvSelCl0vQ1XPB0MjFEgP3mzi"
+}
+[21:23:24.435] INFO  controller.WorkflowController — Workflow 'Unknown' run completed successfully in 9571ms

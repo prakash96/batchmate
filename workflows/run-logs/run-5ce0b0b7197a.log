@@ -1,0 +1,7 @@
+[21:42:06.015] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:42:06.015] INFO  controller.WorkflowController — Workflow 'Enquiry - Success' run started [runId=run-5ce0b0b7197a]
+[21:42:06.015] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/encrypt
+[21:42:07.181] INFO  workflow.execution — http: GET https://random123.free.beeceptor.com/api/main
+[21:42:08.076] INFO  workflow.execution — http: GET https://random123.free.beeceptor.com/api/decrypt
+[21:42:09.025] INFO  workflow.execution — Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API.
+[21:42:09.027] INFO  controller.WorkflowController — Workflow 'Enquiry - Success' run completed successfully in 3012ms

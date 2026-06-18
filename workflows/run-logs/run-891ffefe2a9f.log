@@ -1,0 +1,15 @@
+[21:22:44.623] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:22:44.630] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-891ffefe2a9f]
+[21:22:44.633] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/encrypt
+[21:22:44.752] ERROR errorhandler.DefaultErrorHandler — Failed delivery for (MessageId: 70F78963C7666D4-0000000000000000 on ExchangeId: 70F78963C7666D4-0000000000000000). Exhausted after delivery attempt: 1 caught: org.apache.camel.RuntimeCamelException: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: Unexpected token } in JSON at position 38
+
+Message History (complete message history is disabled)
+---------------------------------------------------------------------------------------------------------------------------------------
+Source                                   ID                             Processor                                          Elapsed (ms)
+camel-route.yaml:7                       1f7b155c-f9af-48a8-b2df-2ffef6 from[direct://1f7b155c-f9af-48a8-b2df-2ffef6825f67          105
+	...
+camel-route.yaml:30                      1f7b155c-f9af-48a8-b2df-2ffef6 script[js{var _h = JSON.parse('{\n"Content-Type":             0
+
+Stacktrace
+---------------------------------------------------------------------------------------------------------------------------------------
+[21:22:44.758] ERROR controller.WorkflowController — Workflow 'New Workflow' run failed: JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: Unexpected token } in JSON at position 38

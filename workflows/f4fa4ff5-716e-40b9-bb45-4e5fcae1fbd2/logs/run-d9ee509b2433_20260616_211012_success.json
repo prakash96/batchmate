@@ -1,0 +1,21 @@
+{
+  "runId" : "run-d9ee509b2433",
+  "workflowId" : "f4fa4ff5-716e-40b9-bb45-4e5fcae1fbd2",
+  "workflowName" : "HTTP_TEST",
+  "runDateTime" : "2026-06-16T21:10:07.9129632",
+  "status" : "success",
+  "durationMs" : 4671,
+  "resultBody" : "[B@665b2d86",
+  "steps" : [ {
+    "nodeId" : "be1fa118-cf04-423c-884c-83199003f0be",
+    "nodeType" : "http",
+    "nodeName" : "Http Outbound",
+    "section" : "processing"
+  }, {
+    "nodeId" : "890cd6bc-a3e4-4073-8699-56685342c82b",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

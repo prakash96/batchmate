@@ -1,0 +1,21 @@
+{
+  "runId" : "run-8610162eb059",
+  "workflowId" : "921a300d-46c6-4fce-a765-74a65018a364",
+  "workflowName" : "New Workflow",
+  "runDateTime" : "2026-06-16T21:26:50.789451",
+  "status" : "success",
+  "durationMs" : 1305,
+  "resultBody" : "[B@406b13aa",
+  "steps" : [ {
+    "nodeId" : "6c211632-16e6-4591-b74c-b2b240cce24b",
+    "nodeType" : "http",
+    "nodeName" : "Http Outbound",
+    "section" : "processing"
+  }, {
+    "nodeId" : "378b0c1c-6e72-4f45-887c-2826f48e67f2",
+    "nodeType" : "log",
+    "nodeName" : "Log Message",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

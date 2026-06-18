@@ -1,0 +1,25 @@
+[21:26:50.822] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:26:50.847] INFO  controller.WorkflowController — Workflow 'New Workflow' run started [runId=run-8610162eb059]
+[21:26:50.850] INFO  workflow.execution — http: GET https://self-signed.badssl.com/
+[21:26:52.125] INFO  workflow.execution — <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="/icons/favicon-red.ico"/>
+  <link rel="apple-touch-icon" href="/icons/icon-red.png"/>
+  <title>self-signed.badssl.com</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>body { background: red; }</style>
+</head>
+<body>
+<div id="content">
+  <h1 style="font-size: 12vw;">
+    self-signed.<br>badssl.com
+  </h1>
+</div>
+
+</body>
+</html>
+
+[21:26:52.127] INFO  controller.WorkflowController — Workflow 'New Workflow' run completed successfully in 1305ms

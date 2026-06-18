@@ -1,7 +1,9 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { useWorkflowStore } from "../../store/workflowStore";
+import { useMetadataStore } from "../../store/metadataStore";
 import { persistentStore } from "../../store/persistentStore";
 import { exportTestReport } from "../../utils/excelReport";
+import { exportPackageExcel, parseExcelFile } from "../../utils/packageExcel";
 import { BASE_URL } from "../../config";
 
 const DragCtx = createContext(null);
@@ -131,11 +133,13 @@ function WorkflowRow({ wf, packageId, isActive, indent = 0 }) {
 }
 
 function PackageRow({ pkg, activeWorkflowId, depth = 0 }) {
-    const { addWorkflowToPackage, addPackage, renamePackage, deletePackage } = useWorkflowStore();
+    const { addWorkflowToPackage, addPackage, renamePackage, deletePackage, updateWorkflow } = useWorkflowStore();
+    const { nodeMetaMap } = useMetadataStore();
     const { dragState, dragOverId, selectedPkgId, onSelectPkg, onDragStart, onDragOver, onDragEnd, handleDropOnPackage } = useContext(DragCtx);
     const [open, setOpen]       = useState(true);
     const [editing, setEditing] = useState(false);
     const [hovering, setHovering] = useState(false);
+    const fileInputRef = useRef(null);
 
     const workflows = pkg.workflows || [];
     const subPkgs   = pkg.packages  || [];
@@ -151,6 +155,37 @@ function PackageRow({ pkg, activeWorkflowId, depth = 0 }) {
         e.preventDefault();
         e.stopPropagation();
         if (pkg.id) handleDropOnPackage(pkg.id);
+    };
+
+    const handleExport = e => {
+        e.stopPropagation();
+        exportPackageExcel(pkg, `${pkg.name || 'package'}.xlsx`);
+    };
+
+    const handleImport = e => {
+        e.stopPropagation();
+        fileInputRef.current?.click();
+    };
+
+    const handleImportFile = async e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = '';
+        try {
+            const rows = await parseExcelFile(file, nodeMetaMap);
+            for (const { name, nodes, edges } of rows) {
+                const newWf = await addWorkflowToPackage(pkg.id, name);
+                await fetch(`${BASE_URL}/workflows/${newWf.id}/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...newWf, workflow: { nodes, edges } }),
+                });
+                updateWorkflow(newWf.id, { workflow: { nodes, edges } });
+            }
+        } catch (err) {
+            console.error('Import failed:', err);
+            alert('Import failed: ' + err.message);
+        }
     };
 
     return (
@@ -210,6 +245,20 @@ function PackageRow({ pkg, activeWorkflowId, depth = 0 }) {
                         <ActionBtn title="Add workflow" onClick={e => { e.stopPropagation(); addWorkflowToPackage(pkg.id); }}>
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         </ActionBtn>
+                        <ActionBtn title="Export to Excel" onClick={handleExport}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </ActionBtn>
+                        <ActionBtn title="Import from Excel" onClick={handleImport}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </ActionBtn>
                         <ActionBtn title="Rename" onClick={e => { e.stopPropagation(); setEditing(true); }}>
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </ActionBtn>
@@ -219,6 +268,14 @@ function PackageRow({ pkg, activeWorkflowId, depth = 0 }) {
                     </span>
                 )}
             </div>
+
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx"
+                style={{ display: "none" }}
+                onChange={handleImportFile}
+            />
 
             {open && (
                 <div>
@@ -421,31 +478,7 @@ export default function PackageTree({ runStatusRefreshKey = 0 }) {
                             onMouseEnter={e => { e.target.style.background = "rgba(59,130,246,0.12)"; e.target.style.color = "#60A5FA"; }}
                             onMouseLeave={e => { e.target.style.background = "var(--surface-2)"; e.target.style.color = "var(--text-4)"; }}
                         >+</button>
-                        <button
-                            onClick={handleRunAll}
-                            title={selectedPkgId ? "Run all workflows in selected package" : "Select a package first"}
-                            disabled={!selectedPkgId || runningAll}
-                            style={{
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                width: 22, height: 22, borderRadius: 4, border: "none",
-                                cursor: selectedPkgId && !runningAll ? "pointer" : "default",
-                                background: "transparent",
-                                color: runningAll ? "#10B981" : selectedPkgId ? "var(--text-4)" : "var(--text-2)",
-                                padding: 0, transition: "all 0.15s",
-                            }}
-                            onMouseEnter={e => { if (selectedPkgId && !runningAll) { e.currentTarget.style.color = "#10B981"; e.currentTarget.style.background = "rgba(16,185,129,0.1)"; }}}
-                            onMouseLeave={e => { e.currentTarget.style.color = runningAll ? "#10B981" : selectedPkgId ? "var(--text-4)" : "var(--text-2)"; e.currentTarget.style.background = "transparent"; }}
-                        >
-                            {runningAll ? (
-                                <div style={{ width: 10, height: 10, border: "1.5px solid currentColor", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }}/>
-                            ) : (
-                                <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor">
-                                    <polygon points="0,0.5 4.5,5.5 0,10.5" opacity="0.65"/>
-                                    <polygon points="5,0.5 9.5,5.5 5,10.5"/>
-                                    <rect x="10" y="0.5" width="1.5" height="10" rx="0.75"/>
-                                </svg>
-                            )}
-                        </button>
+
                         <button
                             onClick={handleReport}
                             title={selectedPkgId ? "Generate report for selected package" : "Select a package first"}

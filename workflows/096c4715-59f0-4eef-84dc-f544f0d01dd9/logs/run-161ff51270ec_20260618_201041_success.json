@@ -1,0 +1,26 @@
+{
+  "runId" : "run-161ff51270ec",
+  "workflowId" : "096c4715-59f0-4eef-84dc-f544f0d01dd9",
+  "workflowName" : "PGP_ENCRYPT_TEST",
+  "runDateTime" : "2026-06-18T20:10:39.4326429",
+  "status" : "success",
+  "durationMs" : 1887,
+  "resultBody" : "filewrite",
+  "steps" : [ {
+    "nodeId" : "fdc5d78a-d39d-45bc-ba1e-7e859d4e8eb0",
+    "nodeType" : "fileread",
+    "nodeName" : "File Read",
+    "section" : "processing"
+  }, {
+    "nodeId" : "8455dc98-0b92-4648-9eae-8a2939d8da9b",
+    "nodeType" : "pgpencrypt",
+    "nodeName" : "PGP Encrypt",
+    "section" : "processing"
+  }, {
+    "nodeId" : "ffc6ca86-a8a3-4837-9327-de3e7ac8765f",
+    "nodeType" : "filewrite",
+    "nodeName" : "File Write",
+    "section" : "processing"
+  } ],
+  "endpointCalls" : [ ]
+}

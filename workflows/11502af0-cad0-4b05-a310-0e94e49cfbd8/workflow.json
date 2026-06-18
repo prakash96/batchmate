@@ -31,7 +31,7 @@
         "width" : 694,
         "height" : 446
       },
-      "selected" : true
+      "selected" : false
     }, {
       "id" : "7885cec1-f9b9-47af-8c98-efe865e8e3a0",
       "type" : "filelist",
@@ -140,7 +140,7 @@
         "width" : 58,
         "height" : 58
       },
-      "selected" : false,
+      "selected" : true,
       "section" : "processing"
     } ],
     "edges" : [ {

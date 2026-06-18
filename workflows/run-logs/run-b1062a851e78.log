@@ -1,0 +1,13 @@
+[21:49:45.725] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:49:45.727] INFO  controller.WorkflowController — Workflow 'Enquiry - Success' run started [runId=run-b1062a851e78]
+[21:49:45.727] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/encrypt
+[21:49:46.654] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/main
+[21:49:47.559] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/decrypt
+[21:49:48.497] INFO  workflow.execution — {
+  "ERROR_CODE": "",
+  "ERROR_DESCRIPTION": "",
+  "REQUEST_REFERENCE_NUMBER": "7ac391b5-35f9-49b0-8541-c31e5cf0bafd",
+  "RESPONSE_STATUS": "0",
+  "TRANSACTION_STATUS": "success"
+}
+[21:49:48.512] INFO  controller.WorkflowController — Workflow 'Enquiry - Success' run completed successfully in 2787ms

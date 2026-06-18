@@ -1,0 +1,12 @@
+[21:45:53.591] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
+[21:45:53.593] INFO  controller.WorkflowController — Workflow 'Enquiry - Success' run started [runId=run-b9c1edd1781f]
+[21:45:53.607] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/encrypt
+[21:45:54.390] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/main
+[21:45:55.315] INFO  workflow.execution — http: POST https://random123.free.beeceptor.com/api/decrypt
+[21:45:56.176] INFO  workflow.execution — {
+  "status": "success",
+  "message": "Decryption successful",
+  "referenceNumber": "b3620863-9124-4075-b262-1becfb808dfa",
+  "decryptedData": "OCDTtKL81LjSyMCR0mRU"
+}
+[21:45:56.177] INFO  controller.WorkflowController — Workflow 'Enquiry - Success' run completed successfully in 2586ms
