@@ -4,15 +4,17 @@ import { useConnectionStore } from '../../store/connectionStore';
 
 const SOURCE_OPTIONS = ['body', 'variable', 'expression', 'literal'];
 
-const TYPE_LABEL = { callRequest: 'Call Request', wait: 'Wait', assertion: 'Assertion', jsoncompare: 'JSON Compare', textcompare: 'Text Compare', dbcheck: 'DB Check' };
+const TYPE_LABEL = { callRequest: 'Call Request', setVariable: 'Set Variable', wait: 'Wait', assertion: 'Assertion', jsoncompare: 'JSON Compare', textcompare: 'Text Compare', dbcheck: 'DB Check' };
 
 /**
- * One unified, freely-reorderable Post-Response list — Call Request steps and Response
- * Validations (Assertion / JSON Compare / Text Compare / DB Check) side by side, in whatever
- * order the user wants. Note: reordering here only changes how the list *reads* — the backend
- * always runs every Validation (as part of the Camel route) before any Call Request step (Java-
- * orchestrated separately), regardless of their listed order — see RequestExecutionService's
- * postResponseChecksOnly/postResponseCallSteps.
+ * One unified, freely-reorderable Post-Response list — Call Request / Set Variable / Wait steps
+ * and Response Validations (Assertion / JSON Compare / Text Compare / DB Check) side by side, in
+ * whatever order the user wants. Note: every Validation still runs (as part of the same Camel
+ * route) before any Call Request/Set Variable step, regardless of listed order — see
+ * RequestExecutionService's postResponseChecksOnly/postResponseOrchestratedSteps. Call Request and
+ * Set Variable DO run in order relative to EACH OTHER, though: a variable set here is available to
+ * every Call Request step listed after it, for that callee's entire pre-request → request →
+ * post-response pipeline (the same "global floor" a real global variable already gets).
  */
 export default function PostResponseFields({ checks, onChange, allRequests, currentRequestId }) {
     const otherRequests = (allRequests || []).filter(r => r.id !== currentRequestId);
@@ -29,6 +31,7 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
     const add = (type) => {
         const base = { type, name: '' };
         if (type === 'callRequest') onChange([...checks, { type: 'callRequest', requestId: '' }]);
+        else if (type === 'setVariable') onChange([...checks, { type: 'setVariable', name: '', expression: '' }]);
         else if (type === 'wait') onChange([...checks, { type: 'wait', name: '', waitTime: 1000 }]);
         else if (type === 'assertion') onChange([...checks, { ...base, logic: 'AND', conditions: [{ left: 'headers.httpResponseCode', operator: '==', right: '200' }], onFail: 'stop' }]);
         else if (type === 'jsoncompare') onChange([...checks, { ...base, leftSource: 'body', leftExpr: '', leftLiteral: '', rightSource: 'literal', rightExpr: '', rightLiteral: '', mode: 'partial', ignoreArrayOrder: true, resultVar: '', onMismatch: 'stop' }]);
@@ -38,7 +41,7 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
 
     return (
         <div>
-            {checks.length === 0 && <div style={{ fontSize: 11, color: C.textFaint, marginBottom: 8, fontStyle: 'italic' }}>No post-response steps yet — add a Call Request, wait, assertion, comparison, or DB check.</div>}
+            {checks.length === 0 && <div style={{ fontSize: 11, color: C.textFaint, marginBottom: 8, fontStyle: 'italic' }}>No post-response steps yet — add a Call Request, Set Variable, wait, assertion, comparison, or DB check.</div>}
             {checks.map((check, i) => (
                 <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: 5, padding: 10, marginBottom: 8, background: C.surface }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -47,7 +50,7 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
                         ) : (
                             <input
                                 style={{ ...inputStyle, fontSize: 11, fontWeight: 700, border: 'none', background: 'transparent', padding: '2px 0', flex: 1 }}
-                                placeholder={TYPE_LABEL[check.type]}
+                                placeholder={check.type === 'setVariable' ? 'variable name' : TYPE_LABEL[check.type]}
                                 value={check.name}
                                 onChange={e => update(i, { name: e.target.value })}
                             />
@@ -63,6 +66,9 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
                             <option value="">Select a request…</option>
                             {otherRequests.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                         </select>
+                    )}
+                    {check.type === 'setVariable' && (
+                        <SetVariableFields check={check} onChange={p => update(i, p)} />
                     )}
                     {check.type === 'wait' && (
                         <WaitFields check={check} onChange={p => update(i, p)} />
@@ -80,6 +86,7 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
             ))}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <button onClick={() => add('callRequest')} style={btnStyle}>+ Call Request</button>
+                <button onClick={() => add('setVariable')} style={btnStyle}>+ Set Variable</button>
                 <button onClick={() => add('wait')} style={btnStyle}>+ Wait</button>
                 <button onClick={() => add('assertion')} style={btnStyle}>+ Assertion</button>
                 <button onClick={() => add('jsoncompare')} style={btnStyle}>+ JSON Compare</button>
@@ -87,6 +94,17 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
                 <button onClick={() => add('dbcheck')} style={btnStyle}>+ DB Check</button>
             </div>
         </div>
+    );
+}
+
+function SetVariableFields({ check, onChange }) {
+    return (
+        <input
+            style={{ ...inputStyle, width: '100%', fontFamily: C.mono }}
+            placeholder='literal value, or ${vars.x} / ${body.x} / ${headers.x} / ${new Date()}'
+            value={check.expression}
+            onChange={e => onChange({ expression: e.target.value })}
+        />
     );
 }
 

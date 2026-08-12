@@ -226,11 +226,12 @@ public class RequestExecutionService {
         }
 
         // Build + deploy the linear Camel route for the Request + Post-Response check sections.
-        // callRequest entries in postResponse are Java-orchestrated (see postResponseChecksOnly's
-        // javadoc) and must not reach the Camel adapter — it only knows the four check node types.
+        // callRequest/setVariable entries in postResponse are Java-orchestrated (see
+        // postResponseChecksOnly's javadoc) and must not reach the Camel adapter — it only knows
+        // the check/wait node types.
         JsonNode postResponse = reqNode.path("postResponse");
         JsonNode postResponseChecks = postResponseChecksOnly(postResponse);
-        List<JsonNode> postResponseCalls = postResponseCallSteps(postResponse);
+        List<JsonNode> postResponseSteps = postResponseOrchestratedSteps(postResponse);
 
         JsonNode requestSection = buildFinalRequestSection(requestConfig, finalHeaders, finalBody);
         String yaml = camelAdapter.convert(requestId, requestSection, postResponseChecks);
@@ -261,14 +262,27 @@ public class RequestExecutionService {
         // Post-response Call Request chain: starts from THIS request's own response (matching
         // "response of main REQUEST, with headers, passed as body/headers to post-response"), and
         // subsequent chained calls (if any) see the prior call's response as "previous". Runs after
-        // every non-callRequest check regardless of listed order — see postResponseChecksOnly's javadoc.
+        // every check regardless of listed order — see postResponseChecksOnly's javadoc. A
+        // "setVariable" step updates postVars, which becomes part of the "global floor" (see run()'s
+        // javadoc) for every callRequest step AFTER it — so a variable set here is available
+        // throughout the callee's ENTIRE pipeline (its own pre-request → request Input tab →
+        // post-response), the same way an actual global variable already is.
         List<Map<String, Object>> postResponseLog = new ArrayList<>();
         Payload postChain = payloadFromResponse(response);
-        for (JsonNode step : postResponseCalls) {
-            CallResult result = executeCallRequestStep(step, postChain, depth, chain, globalVars);
-            postResponseLog.add(result.log);
-            postChain = result.resultPayload;
+        Map<String, Object> postVars = new LinkedHashMap<>(finalVars);
+        for (JsonNode step : postResponseSteps) {
+            if ("setVariable".equals(step.path("type").asText(""))) {
+                postResponseLog.add(runSetVariableStep(step, postChain, postVars));
+            } else {
+                Map<String, Object> effectiveFloor = new LinkedHashMap<>();
+                if (globalVars != null) effectiveFloor.putAll(globalVars);
+                effectiveFloor.putAll(postVars);
+                CallResult result = executeCallRequestStep(step, postChain, depth, chain, effectiveFloor);
+                postResponseLog.add(result.log);
+                postChain = result.resultPayload;
+            }
         }
+        finalVars.putAll(postVars);
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("runId", runId);
@@ -384,31 +398,61 @@ public class RequestExecutionService {
         return new Payload(body, headers);
     }
 
+    /** Post-response types resolved in Java (below), never handed to the Camel adapter. */
+    private static final Set<String> POST_RESPONSE_ORCHESTRATED_TYPES = Set.of("callRequest", "setVariable");
+
     /**
-     * Post-response "callRequest" steps aren't a Camel node type either (same reasoning as
-     * pre-request's) — RequestToCamelAdapter only knows assertion/jsoncompare/textcompare/dbcheck,
-     * so these are filtered out before building the route and run here in Java, strictly AFTER
-     * the whole Camel route (http + every Response Validation check) has completed. That means a
-     * callRequest step always runs after every check, regardless of where it's positioned in the
-     * underlying postResponse list — there is no way to interleave it mid-route.
+     * Post-response "callRequest"/"setVariable" steps aren't Camel node types (same reasoning as
+     * pre-request's callRequest) — RequestToCamelAdapter only knows assertion/jsoncompare/
+     * textcompare/dbcheck/wait, so these are filtered out before building the route and run here
+     * in Java, strictly AFTER the whole Camel route (http + every Response Validation check) has
+     * completed. That means these steps always run after every check, regardless of where they're
+     * positioned in the underlying postResponse list — there is no way to interleave them mid-route
+     * — but they DO run in order relative to EACH OTHER, which is what lets a "setVariable" step
+     * affect a "callRequest" step listed after it.
      */
     private JsonNode postResponseChecksOnly(JsonNode postResponse) {
         if (postResponse == null || !postResponse.isArray()) return postResponse;
         ArrayNode filtered = objectMapper.createArrayNode();
         for (JsonNode c : postResponse) {
-            if (!"callRequest".equals(c.path("type").asText(""))) filtered.add(c);
+            if (!POST_RESPONSE_ORCHESTRATED_TYPES.contains(c.path("type").asText(""))) filtered.add(c);
         }
         return filtered;
     }
 
-    private List<JsonNode> postResponseCallSteps(JsonNode postResponse) {
-        List<JsonNode> calls = new ArrayList<>();
+    private List<JsonNode> postResponseOrchestratedSteps(JsonNode postResponse) {
+        List<JsonNode> steps = new ArrayList<>();
         if (postResponse != null && postResponse.isArray()) {
             for (JsonNode c : postResponse) {
-                if ("callRequest".equals(c.path("type").asText(""))) calls.add(c);
+                if (POST_RESPONSE_ORCHESTRATED_TYPES.contains(c.path("type").asText(""))) steps.add(c);
             }
         }
-        return calls;
+        return steps;
+    }
+
+    /**
+     * Executes a Post-Response "Set Variable" step: evaluates its expression (a whole "${...}"
+     * wrapper returns the raw value — numbers/booleans/objects survive — matching the historical
+     * setVariable semantics; see evalExpressionValue) against the current post-response chain's
+     * body/headers, and writes it into postVars for every step after it to see.
+     */
+    private Map<String, Object> runSetVariableStep(JsonNode step, Payload postChain, Map<String, Object> postVars) {
+        Map<String, Object> log = new LinkedHashMap<>();
+        log.put("type", "setVariable");
+        String name = step.path("name").asText("").trim();
+        try {
+            if (!name.isEmpty()) {
+                Object value = evalExpressionValue(step.path("expression").asText(""), postChain.body, postChain.headers, postVars);
+                postVars.put(name, value);
+                log.put("name", name);
+                log.put("value", value);
+            }
+            log.put("status", "ok");
+        } catch (Exception e) {
+            log.put("status", "error");
+            log.put("error", e.getMessage());
+        }
+        return log;
     }
 
     /**
@@ -445,6 +489,22 @@ public class RequestExecutionService {
         }
         sb.append(template.substring(last));
         return sb.toString();
+    }
+
+    /**
+     * Like evalTemplate, but for a Set Variable step's expression: a whole "${...}" wrapper
+     * returns the RAW evaluated value — numbers/booleans/objects survive — rather than always
+     * stringifying, matching the historical setVariable semantics (a var can hold more than text).
+     * A mixed template or plain literal still behaves exactly like evalTemplate.
+     */
+    private Object evalExpressionValue(String expr, String body, Map<String, String> headers, Map<String, Object> vars) {
+        if (expr == null || expr.isBlank()) return null;
+        if (!expr.contains("${")) return expr;
+        String trimmed = expr.trim();
+        if (trimmed.startsWith("${") && trimmed.endsWith("}") && trimmed.indexOf("${", 2) < 0) {
+            return JsLanguage.evalStandalone(trimmed.substring(2, trimmed.length() - 1), vars, body, headers);
+        }
+        return evalTemplate(expr, body, headers, vars);
     }
 
     /** Builds the {method,url,params,bodyMode,headers,body} shape actually sent, replacing the

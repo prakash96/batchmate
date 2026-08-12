@@ -167,7 +167,7 @@ function SingleRunView({ result }) {
             )}
             {tab === 'Post-Response Log' && (
                 <div>
-                    {(result.postResponseLog || []).length === 0 && <div style={{ fontSize: 11, color: C.textFaint, fontStyle: 'italic' }}>No post-response Call Request steps ran.</div>}
+                    {(result.postResponseLog || []).length === 0 && <div style={{ fontSize: 11, color: C.textFaint, fontStyle: 'italic' }}>No post-response Call Request/Set Variable steps ran.</div>}
                     {(result.postResponseLog || []).map((s, i) => <LogEntry key={i} step={s} />)}
                 </div>
             )}
@@ -179,7 +179,11 @@ function LogEntry({ step: s }) {
     return (
         <div style={{ padding: '6px 0', borderBottom: `1px solid ${C.borderLo}`, fontSize: 11 }}>
             <span style={{ color: s.status === 'ok' ? C.success : C.danger, fontWeight: 700, marginRight: 6 }}>{s.status === 'ok' ? '✓' : '✕'}</span>
-            <span style={{ color: C.textDim }}>Call Request → {s.requestId || '(no target selected)'}</span>
+            <span style={{ color: C.textDim }}>
+                {s.type === 'setVariable'
+                    ? `Set ${s.name || '(no name)'} = ${JSON.stringify(s.value)}`
+                    : `Call Request → ${s.requestId || '(no target selected)'}`}
+            </span>
             {s.error && <div style={{ color: C.danger, marginTop: 2 }}>{s.error}</div>}
             {s.inputBody != null && (
                 <details style={{ marginTop: 4 }}>

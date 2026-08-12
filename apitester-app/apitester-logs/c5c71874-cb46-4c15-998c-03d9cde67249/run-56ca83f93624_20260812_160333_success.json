@@ -1,0 +1,28 @@
+{
+  "runId" : "run-56ca83f93624",
+  "requestId" : "c5c71874-cb46-4c15-998c-03d9cde67249",
+  "status" : "success",
+  "durationMs" : 1058,
+  "preRequestLog" : [ ],
+  "sentBody" : "Got token: ",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "125",
+      "Content-Type" : "text/plain",
+      "Date" : "Wed, 12 Aug 2026 10:33:33 GMT",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding"
+    },
+    "body" : "Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API."
+  },
+  "vars" : { },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

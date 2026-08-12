@@ -1,0 +1,50 @@
+{
+  "runId" : "run-18f9aa17bd36",
+  "requestId" : "f1f29422-dee4-4cca-b22c-c65e55935fcc",
+  "status" : "success",
+  "durationMs" : 624,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "125",
+      "Content-Type" : "text/plain",
+      "Date" : "Wed, 12 Aug 2026 10:35:16 GMT",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding"
+    },
+    "body" : "Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API."
+  },
+  "vars" : {
+    "tokenFromA" : "abc123-secret-token"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ {
+    "type" : "setVariable",
+    "name" : "tokenFromA",
+    "value" : "abc123-secret-token",
+    "status" : "ok"
+  }, {
+    "requestId" : "c5c71874-cb46-4c15-998c-03d9cde67249",
+    "inputBody" : "Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API.",
+    "inputHeaders" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Type" : "text/plain",
+      "Vary" : "Accept-Encoding"
+    },
+    "subRunId" : "run-c7878e3e8960",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API.",
+    "status" : "ok"
+  } ]
+}

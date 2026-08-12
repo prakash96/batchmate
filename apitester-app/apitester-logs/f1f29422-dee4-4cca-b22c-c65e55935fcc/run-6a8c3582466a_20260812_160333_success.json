@@ -1,0 +1,47 @@
+{
+  "runId" : "run-6a8c3582466a",
+  "requestId" : "f1f29422-dee4-4cca-b22c-c65e55935fcc",
+  "status" : "success",
+  "durationMs" : 3251,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "125",
+      "Content-Type" : "text/plain",
+      "Date" : "Wed, 12 Aug 2026 10:33:32 GMT",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding"
+    },
+    "body" : "Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API."
+  },
+  "vars" : { },
+  "checks" : [ ],
+  "postResponseLog" : [ {
+    "type" : "setVariable",
+    "status" : "error",
+    "error" : "JS evaluation failed: org.graalvm.polyglot.PolyglotException: SyntaxError: Unexpected token H in JSON at position 0"
+  }, {
+    "requestId" : "c5c71874-cb46-4c15-998c-03d9cde67249",
+    "inputBody" : "Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API.",
+    "inputHeaders" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Type" : "text/plain",
+      "Vary" : "Accept-Encoding"
+    },
+    "subRunId" : "run-56ca83f93624",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API.",
+    "status" : "ok"
+  } ]
+}
