@@ -124,7 +124,7 @@ public class RequestExecutionService {
         boolean anyFailed = false;
         int index = 0;
         for (JsonNode entry : inputDataSets) {
-            Payload seed = payloadFromEntry(entry);
+            Payload seed = payloadFromEntry(entry, overrideVars);
             Map<String, Object> iterResult = run(requestId, overrideVars, 0, new LinkedHashSet<>(), overrideVars, seed.body, seed.headers);
             Map<String, Object> withIndex = new LinkedHashMap<>(iterResult);
             withIndex.put("iterationIndex", index);
@@ -341,23 +341,29 @@ public class RequestExecutionService {
         }
     }
 
-    /** Converts one raw Input Data Set entry ({body, headers:[{key,value,enabled}]}) into a Payload. */
-    private Payload payloadFromEntry(JsonNode entry) {
+    /**
+     * Converts one raw Input Data Set entry ({body, headers:[{key,value,enabled}]}) into a Payload
+     * — evaluated as a template (same ${...} conventions as the Input tab's own body/header fields,
+     * see evalTemplate) rather than used as a literal, so e.g. "${new Date()}" for a fresh timestamp
+     * per iteration, or "${vars.x}", actually evaluate instead of being sent as literal "${...}"
+     * text (which would otherwise reach Camel's OWN "${...}" Simple language downstream and fail
+     * with "unknown function", since that's a different templating system than this one).
+     * There's no "previous" response yet at this point (it's the very first seed of the chain), so
+     * body/headers bindings are empty here — only ${vars.x} and plain JS (like "new Date()") apply.
+     */
+    private Payload payloadFromEntry(JsonNode entry, Map<String, Object> vars) {
         if (entry == null) return Payload.EMPTY;
-        return new Payload(entry.path("body").asText(""), headersFromRows(entry.path("headers")));
-    }
-
-    /** Same convention as the Request tab's own headers: {key,value,enabled} rows, disabled ones skipped. */
-    private Map<String, String> headersFromRows(JsonNode rows) {
+        String body = evalTemplate(entry.path("body").asText(""), null, Collections.emptyMap(), vars);
         Map<String, String> headers = new LinkedHashMap<>();
+        JsonNode rows = entry.path("headers");
         if (rows.isArray()) {
             for (JsonNode h : rows) {
                 if (!h.path("enabled").asBoolean(true)) continue;
                 String key = h.path("key").asText("").trim();
-                if (!key.isEmpty()) headers.put(key, h.path("value").asText(""));
+                if (!key.isEmpty()) headers.put(key, evalTemplate(h.path("value").asText(""), null, Collections.emptyMap(), vars));
             }
         }
-        return headers;
+        return new Payload(body, headers);
     }
 
     /** Turns a captured response (see captureResponse) into a Payload for the next chain link,
