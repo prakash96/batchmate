@@ -128,17 +128,23 @@ public final class ConversionUtils {
 
     /**
      * After an HTTP call, reads the body as a String — decompressing gzip if Content-Encoding: gzip
-     * is present. Handles the case where Apache HttpClient returns a GZIPInputStream as the body
-     * (stream-caching is disabled so Camel does not decompress it automatically).
+     * is present. Handles both shapes Apache HttpClient hands back depending on response size/
+     * content: an InputStream (stream-caching is disabled so Camel does not decompress it
+     * automatically), AND a raw byte[] (camel-http commonly returns bodies this way instead —
+     * without this branch a byte[] body is left completely unconverted, so any mid-route Simple/JS
+     * expression reading "body" gets JS's array-like String(byte[]) — a comma-joined list of byte
+     * values, e.g. "123,34,97,..." — instead of the actual text).
      */
     public static Map<String, Object> readHttpBody() {
         String script =
             "var _b=exchange.getMessage().getBody();" +
-            "if(_b instanceof java.io.InputStream){" +
+            "var _is=null;" +
+            "if(_b instanceof java.io.InputStream){_is=_b;}" +
+            "else if(_b!=null && _b.getClass && _b.getClass().isArray()){_is=new java.io.ByteArrayInputStream(_b);}" +
+            "if(_is!=null){" +
             "  var _ce=String(exchange.getMessage().getHeader('Content-Encoding')||'');" +
-            "  var _is=_ce.toLowerCase().indexOf('gzip')>=0" +
-            "    ?new java.util.zip.GZIPInputStream(_b)" +
-            "    :_b;" +
+            "  var _gz=_ce.toLowerCase().indexOf('gzip')>=0;" +
+            "  if(_gz)_is=new java.util.zip.GZIPInputStream(_is);" +
             "  var _isr=new java.io.InputStreamReader(_is,'UTF-8');" +
             "  var _br=new java.io.BufferedReader(_isr);" +
             "  var _sb=new java.lang.StringBuilder();" +
@@ -146,7 +152,7 @@ public final class ConversionUtils {
             "  while((_ln=_br.readLine())!==null){_sb.append(_ln).append('\\n');}" +
             "  _br.close();" +
             "  exchange.getMessage().setBody(_sb.toString().trim());" +
-            "  if(_ce)exchange.getMessage().removeHeader('Content-Encoding');" +
+            "  if(_gz)exchange.getMessage().removeHeader('Content-Encoding');" +
             "}";
         return scriptStep("js", script);
     }
