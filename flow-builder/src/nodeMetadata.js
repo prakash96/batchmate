@@ -278,6 +278,8 @@ export const SIDEBAR_GROUP_ORDER = [
     "Local File",
     "SFTP",
     "FTP / FTPS",
+    "AS2",
+    "Messaging",
     "Cloud Storage",
     "Security",
     "Compression",

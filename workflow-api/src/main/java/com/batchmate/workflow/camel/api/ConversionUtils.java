@@ -163,29 +163,28 @@ public final class ConversionUtils {
     }
 
     public static List<Map<String, Object>> pollEnrich(String uri, String resultVar) {
+        return pollEnrich(uri, resultVar, 60_000L);
+    }
+
+    public static List<Map<String, Object>> pollEnrich(String uri, String resultVar, long timeoutMs) {
         boolean dynamic = uri.contains("${");
         Map<String, Object> pollBody = new LinkedHashMap<>();
         pollBody.put("expression", dynamic ? Map.of("simple", uri) : Map.of("constant", uri));
-        pollBody.put("timeout", 5000L);
+        pollBody.put("timeout", timeoutMs);
         Map<String, Object> poll = new LinkedHashMap<>();
         poll.put("pollEnrich", pollBody);
 
-        // Camel file/ftp/sftp components deliver a GenericFile wrapper as the body.
-        // convertBodyTo(String) only calls toString() on it, printing "GenericFile[path]".
-        // This script detects GenericFile and reads the actual content via Files.readString().
-        Map<String, Object> readContent = scriptStep("js",
-            "var _b=exchange.getMessage().getBody();" +
-            "if(_b!==null&&String(_b.getClass().getName()).includes('GenericFile')){" +
-            "var Files=Java.type('java.nio.file.Files');" +
-            "var Paths=Java.type('java.nio.file.Paths');" +
-            "var _gf=_b.getFile();" +
-            "var _path=_gf!=null?String(_gf.getAbsolutePath()):String(_b.getAbsoluteFilePath());" +
-            "exchange.getMessage().setBody(Files.readString(Paths.get(_path)));" +
-            "}");
+        // Camel's FTP/SFTP type converter turns GenericFile/RemoteFile into a streaming
+        // InputStream backed by the locally-downloaded temp file. Camel cleans up the
+        // temp file after the route completes according to the noop/delete/move URI option.
+        Map<String, Object> convertBody = new LinkedHashMap<>();
+        convertBody.put("type", "java.io.InputStream");
+        Map<String, Object> convert = new LinkedHashMap<>();
+        convert.put("convertBodyTo", convertBody);
 
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(poll);
-        steps.add(readContent);
+        steps.add(convert);
         if (resultVar != null && !resultVar.isEmpty())
             steps.add(setVarExpr(resultVar, Map.of("simple", "${body}")));
         return steps;
@@ -495,7 +494,8 @@ public final class ConversionUtils {
         int    port     = data.path("port").asInt(22);
         String username = data.path("username").asText("").trim();
         String password = data.path("password").asText("").trim();
-        return scheme + "://" + credentials(username, password) + host + ":" + port + remotePath;
+        return scheme + "://" + credentials(username, password) + host + ":" + port + remotePath
+                + "?preferredAuthentications=publickey,keyboard-interactive,password";
     }
 
     public static String ftpUri(String scheme, JsonNode data, String remotePath) {

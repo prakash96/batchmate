@@ -1,8 +1,0 @@
-[17:08:13.406] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[17:08:13.410] INFO  controller.WorkflowController — Workflow 'File to Sftp' run started [runId=run-f3ff019ca780]
-[17:08:13.435] INFO  workflow.execution — filelist: Listing directory C:/files
-[17:08:14.730] INFO  workflow.execution — fileread: Reading C:\files\readme.txt
-[17:08:14.903] INFO  workflow.execution — readme.txt
-[17:08:14.903] INFO  workflow.execution — fileread: Reading C:\files\readme.txt.pgp.txt
-[17:08:14.919] INFO  workflow.execution — readme.txt.pgp.txt
-[17:08:14.919] INFO  controller.WorkflowController — Workflow 'File to Sftp' run completed successfully in 1513ms

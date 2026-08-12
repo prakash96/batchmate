@@ -1,0 +1,22 @@
+{
+  "runId" : "run-c91ae0509673",
+  "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+  "status" : "failed",
+  "error" : "No such host is known (null)",
+  "durationMs" : 2769,
+  "preRequestLog" : [ ],
+  "response" : {
+    "status" : null,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "client_id" : "null",
+      "client_secret" : "null"
+    },
+    "body" : "{\n  \"RESPONSE\": \"ipwGlYdnZREp9m7NvUx1\",\n  \"DIGI_SIGN\": \"FJfAmZ5i7WI698wgpgOREIvBLsWY2xOU\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:17:29.176+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;rXeA64fO1weRMx3nrajmhkATrrLY0rMA&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;ed7ea13c-d752-48ae-a0c9-a855857d3dd4&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0MTgwMjIsImV4cCI6MTc4NjQ1ODc3NSwibmJmIjoxNzY1NzMyNTA2LCJpc3MiOiJLcmVpZ2VyIC0gS2xpbmciLCJzdWIiOiJmNjZiN2I1Ni00MmM0LTQ0MTUtYWUzNi02NDI3NTE5MDhkZDQiLCJhdWQiOiJhZjgzZDgwMy02NDBlLTRhNzAtODRkMC0yZmZmNzI5MTk2NWUiLCJqdGkiOiIwYTE5M2YxZi01OWUxLTRiM2UtODRiNC01YzVkODU1MGQ5ZjkifQ.aatxdITgsg3eErMOQDmbLEyK2cYmi7AfXOsFXD2meH1L8lKRIVVksMXdhScJ5Frv&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "requestBody" : "{\n  \"RESPONSE\": \"ipwGlYdnZREp9m7NvUx1\",\n  \"DIGI_SIGN\": \"FJfAmZ5i7WI698wgpgOREIvBLsWY2xOU\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:17:29.176+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;rXeA64fO1weRMx3nrajmhkATrrLY0rMA&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;ed7ea13c-d752-48ae-a0c9-a855857d3dd4&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0MTgwMjIsImV4cCI6MTc4NjQ1ODc3NSwibmJmIjoxNzY1NzMyNTA2LCJpc3MiOiJLcmVpZ2VyIC0gS2xpbmciLCJzdWIiOiJmNjZiN2I1Ni00MmM0LTQ0MTUtYWUzNi02NDI3NTE5MDhkZDQiLCJhdWQiOiJhZjgzZDgwMy02NDBlLTRhNzAtODRkMC0yZmZmNzI5MTk2NWUiLCJqdGkiOiIwYTE5M2YxZi01OWUxLTRiM2UtODRiNC01YzVkODU1MGQ5ZjkifQ.aatxdITgsg3eErMOQDmbLEyK2cYmi7AfXOsFXD2meH1L8lKRIVVksMXdhScJ5Frv&quot;\n}\"\n}"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

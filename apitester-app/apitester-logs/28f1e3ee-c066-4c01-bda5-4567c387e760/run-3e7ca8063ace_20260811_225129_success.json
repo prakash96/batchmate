@@ -1,0 +1,71 @@
+{
+  "runId" : "run-3e7ca8063ace",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "success",
+  "durationMs" : 781,
+  "preRequestLog" : [ {
+    "type" : "setVariable",
+    "name" : "payload",
+    "value" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "status" : "ok"
+  }, {
+    "type" : "callRequest",
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputs" : [ {
+      "value" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+      "name" : "requestBody"
+    }, {
+      "value" : "random123.free.beeceptor.com",
+      "name" : "sitHost"
+    } ],
+    "subRunId" : "run-c0c90daf50b2",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"jvYn7EeW5gCBbOUgjEuzHJWmrblM0Bin\",\n  \"REQUEST_REFERENCE_NUMBER\": \"d131bb50-6e85-4384-9870-c130883955ee\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0NDI5MTIsImV4cCI6MTc4NjQ2MjEyOCwibmJmIjoxNzU1ODIzMDQzLCJpc3MiOiJLdXBoYWwsIFRoaWVsIGFuZCBLZXJ0em1hbm4iLCJzdWIiOiJkZTZkNmE4ZC03ZGQ4LTRiMzUtOWZmNC00NGU1NWFkYzFjYmYiLCJhdWQiOiIzOTUxOTM5MC00M2U1LTRjYWUtOTAxNy03NDdmMzY3OWEyOTYiLCJqdGkiOiIzOGQ5ZThlNC05ZTIwLTRhYjEtYTRlMS0yNjJiY2YzMjU4MTkifQ.W41CZ9W35LbUuGLKGfaiFuLFaYkjLTC4yso6KcDS7JZLCFVKhJUgQwmKDwMqtmat\"\n}",
+    "mapped" : [ {
+      "value" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"jvYn7EeW5gCBbOUgjEuzHJWmrblM0Bin\",\n  \"REQUEST_REFERENCE_NUMBER\": \"d131bb50-6e85-4384-9870-c130883955ee\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0NDI5MTIsImV4cCI6MTc4NjQ2MjEyOCwibmJmIjoxNzU1ODIzMDQzLCJpc3MiOiJLdXBoYWwsIFRoaWVsIGFuZCBLZXJ0em1hbm4iLCJzdWIiOiJkZTZkNmE4ZC03ZGQ4LTRiMzUtOWZmNC00NGU1NWFkYzFjYmYiLCJhdWQiOiIzOTUxOTM5MC00M2U1LTRjYWUtOTAxNy03NDdmMzY3OWEyOTYiLCJqdGkiOiIzOGQ5ZThlNC05ZTIwLTRhYjEtYTRlMS0yNjJiY2YzMjU4MTkifQ.W41CZ9W35LbUuGLKGfaiFuLFaYkjLTC4yso6KcDS7JZLCFVKhJUgQwmKDwMqtmat\"\n}",
+      "variable" : "encryptedBody",
+      "path" : "body"
+    } ],
+    "status" : "ok"
+  } ],
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "842",
+      "Content-Type" : "application/json",
+      "Date" : "Tue, 11 Aug 2026 17:21:27 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "body" : "{\n  \"RESPONSE\": \"bYk16RxIbjUj9m7D9mqR\",\n  \"DIGI_SIGN\": \"2i5XkJuZtQFhSRgBg0SBcjAXpZX0rCqI\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:21:27.956+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;jvYn7EeW5gCBbOUgjEuzHJWmrblM0Bin&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;d131bb50-6e85-4384-9870-c130883955ee&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0NDI5MTIsImV4cCI6MTc4NjQ2MjEyOCwibmJmIjoxNzU1ODIzMDQzLCJpc3MiOiJLdXBoYWwsIFRoaWVsIGFuZCBLZXJ0em1hbm4iLCJzdWIiOiJkZTZkNmE4ZC03ZGQ4LTRiMzUtOWZmNC00NGU1NWFkYzFjYmYiLCJhdWQiOiIzOTUxOTM5MC00M2U1LTRjYWUtOTAxNy03NDdmMzY3OWEyOTYiLCJqdGkiOiIzOGQ5ZThlNC05ZTIwLTRhYjEtYTRlMS0yNjJiY2YzMjU4MTkifQ.W41CZ9W35LbUuGLKGfaiFuLFaYkjLTC4yso6KcDS7JZLCFVKhJUgQwmKDwMqtmat&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "encryptedBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"jvYn7EeW5gCBbOUgjEuzHJWmrblM0Bin\",\n  \"REQUEST_REFERENCE_NUMBER\": \"d131bb50-6e85-4384-9870-c130883955ee\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0NDI5MTIsImV4cCI6MTc4NjQ2MjEyOCwibmJmIjoxNzU1ODIzMDQzLCJpc3MiOiJLdXBoYWwsIFRoaWVsIGFuZCBLZXJ0em1hbm4iLCJzdWIiOiJkZTZkNmE4ZC03ZGQ4LTRiMzUtOWZmNC00NGU1NWFkYzFjYmYiLCJhdWQiOiIzOTUxOTM5MC00M2U1LTRjYWUtOTAxNy03NDdmMzY3OWEyOTYiLCJqdGkiOiIzOGQ5ZThlNC05ZTIwLTRhYjEtYTRlMS0yNjJiY2YzMjU4MTkifQ.W41CZ9W35LbUuGLKGfaiFuLFaYkjLTC4yso6KcDS7JZLCFVKhJUgQwmKDwMqtmat\"\n}",
+    "encryptionClientId" : "afdsfdf",
+    "payload" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "lafjdfkjd"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ {
+    "type" : "callRequest",
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+    "inputs" : [ {
+      "value" : "{\n  \"RESPONSE\": \"bYk16RxIbjUj9m7D9mqR\",\n  \"DIGI_SIGN\": \"2i5XkJuZtQFhSRgBg0SBcjAXpZX0rCqI\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:21:27.956+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;jvYn7EeW5gCBbOUgjEuzHJWmrblM0Bin&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;d131bb50-6e85-4384-9870-c130883955ee&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0NDI5MTIsImV4cCI6MTc4NjQ2MjEyOCwibmJmIjoxNzU1ODIzMDQzLCJpc3MiOiJLdXBoYWwsIFRoaWVsIGFuZCBLZXJ0em1hbm4iLCJzdWIiOiJkZTZkNmE4ZC03ZGQ4LTRiMzUtOWZmNC00NGU1NWFkYzFjYmYiLCJhdWQiOiIzOTUxOTM5MC00M2U1LTRjYWUtOTAxNy03NDdmMzY3OWEyOTYiLCJqdGkiOiIzOGQ5ZThlNC05ZTIwLTRhYjEtYTRlMS0yNjJiY2YzMjU4MTkifQ.W41CZ9W35LbUuGLKGfaiFuLFaYkjLTC4yso6KcDS7JZLCFVKhJUgQwmKDwMqtmat&quot;\n}\"\n}",
+      "name" : "requestBody"
+    } ],
+    "subRunId" : "run-c88c99c3b21b",
+    "subStatus" : "failed",
+    "subResponseStatus" : null,
+    "subResponseBody" : "{\n  \"RESPONSE\": \"bYk16RxIbjUj9m7D9mqR\",\n  \"DIGI_SIGN\": \"2i5XkJuZtQFhSRgBg0SBcjAXpZX0rCqI\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:21:27.956+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;jvYn7EeW5gCBbOUgjEuzHJWmrblM0Bin&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;d131bb50-6e85-4384-9870-c130883955ee&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0NDI5MTIsImV4cCI6MTc4NjQ2MjEyOCwibmJmIjoxNzU1ODIzMDQzLCJpc3MiOiJLdXBoYWwsIFRoaWVsIGFuZCBLZXJ0em1hbm4iLCJzdWIiOiJkZTZkNmE4ZC03ZGQ4LTRiMzUtOWZmNC00NGU1NWFkYzFjYmYiLCJhdWQiOiIzOTUxOTM5MC00M2U1LTRjYWUtOTAxNy03NDdmMzY3OWEyOTYiLCJqdGkiOiIzOGQ5ZThlNC05ZTIwLTRhYjEtYTRlMS0yNjJiY2YzMjU4MTkifQ.W41CZ9W35LbUuGLKGfaiFuLFaYkjLTC4yso6KcDS7JZLCFVKhJUgQwmKDwMqtmat&quot;\n}\"\n}",
+    "mapped" : [ ],
+    "status" : "ok"
+  } ]
+}

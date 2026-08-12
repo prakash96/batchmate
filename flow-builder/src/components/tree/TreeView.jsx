@@ -443,16 +443,19 @@ export default function TreeView() {
     };
 
     /* ── add node to a container or scope parent ── */
-    const handleAdd = (parentId, meta) => {
-        const siblings = (childrenMap[parentId] || []);
-        const x = 30 + siblings.length * 90;
+    const handleAdd = (parentId, meta, sectionType) => {
+        const allSiblings = (childrenMap[parentId] || []);
+        const sectionSiblings = sectionType
+            ? allSiblings.filter(k => k.data?.section === sectionType)
+            : allSiblings.filter(k => (k.data?.section || "processing") !== "processingFailed");
+        const x = 30 + sectionSiblings.length * 90;
         const y = 30;
 
         const newNode = {
             id: crypto.randomUUID(),
             type: meta.type,
             position: { x, y },
-            data: { ...(meta.defaultData || {}), name: meta.sidebarLabel || meta.label },
+            data: { ...(meta.defaultData || {}), name: meta.sidebarLabel || meta.label, ...(sectionType ? { section: sectionType } : {}) },
             style: { width: Math.max(meta.width || 58, 58), height: Math.max(meta.height || 58, 58) },
             parentId,
             extent: "parent",
@@ -483,90 +486,98 @@ export default function TreeView() {
 
             {/* Sections */}
             <div style={{ flex: 1, overflowY: "auto", padding: "8px 6px" }}>
-                {containers.map(c => {
-                    const ctype = c.data?.containerType || "processing";
-                    const label = c.data?.title || SECTION_LABEL[ctype] || ctype;
-                    const color = SECTION_COLOR[ctype] || "#93c5fd";
-                    const kids = childrenMap[c.id] || [];
-                    const pickerOpen = openPicker === c.id;
+                {containers.flatMap(c => {
+                    const allKids = childrenMap[c.id] || [];
+                    const processingKids = allKids.filter(k => (k.data?.section || "processing") !== "processingFailed");
+                    const errorKids = allKids.filter(k => k.data?.section === "processingFailed");
 
-                    return (
-                        <div
-                            key={c.id}
-                            style={{ marginBottom: 16 }}
-                            onDragOver={e => e.preventDefault()}
-                            onDrop={e => {
-                                e.preventDefault();
-                                const libType = e.dataTransfer.getData("application/reactflow");
-                                if (libType) {
-                                    const meta = nodeMetaMap[libType];
-                                    if (meta) handleAdd(c.id, meta);
-                                }
-                            }}
-                        >
-                            {/* Section header row */}
-                            <div style={{
-                                display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "3px 6px", borderBottom: "1px solid #1e293b", marginBottom: 4
-                            }}>
-                                <span style={{
-                                    fontSize: 10, fontWeight: 700, color,
-                                    textTransform: "uppercase", letterSpacing: "0.06em"
+                    return [
+                        { sectionType: "processing", kids: processingKids },
+                        { sectionType: "processingFailed", kids: errorKids },
+                    ].map(({ sectionType, kids }) => {
+                        const label = SECTION_LABEL[sectionType] || sectionType;
+                        const color = SECTION_COLOR[sectionType] || "#93c5fd";
+                        const pickerId = `${c.id}-${sectionType}`;
+                        const pickerOpen = openPicker === pickerId;
+
+                        return (
+                            <div
+                                key={pickerId}
+                                style={{ marginBottom: 16 }}
+                                onDragOver={e => e.preventDefault()}
+                                onDrop={e => {
+                                    e.preventDefault();
+                                    const libType = e.dataTransfer.getData("application/reactflow");
+                                    if (libType) {
+                                        const meta = nodeMetaMap[libType];
+                                        if (meta) handleAdd(c.id, meta, sectionType === "processingFailed" ? "processingFailed" : undefined);
+                                    }
+                                }}
+                            >
+                                {/* Section header row */}
+                                <div style={{
+                                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                                    padding: "3px 6px", borderBottom: "1px solid #1e293b", marginBottom: 4
                                 }}>
-                                    {label}
-                                    <span style={{ fontSize: 9, fontWeight: 400, color: "#CBD5E1", marginLeft: 6 }}>
-                                        {kids.length} node{kids.length !== 1 ? "s" : ""}
+                                    <span style={{
+                                        fontSize: 10, fontWeight: 700, color,
+                                        textTransform: "uppercase", letterSpacing: "0.06em"
+                                    }}>
+                                        {label}
+                                        <span style={{ fontSize: 9, fontWeight: 400, color: "#CBD5E1", marginLeft: 6 }}>
+                                            {kids.length} node{kids.length !== 1 ? "s" : ""}
+                                        </span>
                                     </span>
-                                </span>
-                                <button
-                                    onClick={() => setOpenPicker(pickerOpen ? null : c.id)}
-                                    style={{
-                                        fontSize: 15, lineHeight: 1, padding: "0 5px",
-                                        background: pickerOpen ? "rgba(45,108,223,0.25)" : "rgba(255,255,255,0.05)",
-                                        border: "1px solid #334155", color: "#94a3b8",
-                                        borderRadius: 3, cursor: "pointer",
-                                    }}
-                                    title="Add node"
-                                >+</button>
-                            </div>
+                                    <button
+                                        onClick={() => setOpenPicker(pickerOpen ? null : pickerId)}
+                                        style={{
+                                            fontSize: 15, lineHeight: 1, padding: "0 5px",
+                                            background: pickerOpen ? "rgba(45,108,223,0.25)" : "rgba(255,255,255,0.05)",
+                                            border: "1px solid #334155", color: "#94a3b8",
+                                            borderRadius: 3, cursor: "pointer",
+                                        }}
+                                        title="Add node"
+                                    >+</button>
+                                </div>
 
-                            {/* Node type picker */}
-                            {pickerOpen && (
-                                <div style={{ marginBottom: 6, paddingLeft: 4, paddingRight: 4 }}>
-                                    <AddNodePicker
-                                        containerType={ctype}
-                                        onAdd={(meta) => handleAdd(c.id, meta)}
-                                        onClose={() => setOpenPicker(null)}
+                                {/* Node type picker */}
+                                {pickerOpen && (
+                                    <div style={{ marginBottom: 6, paddingLeft: 4, paddingRight: 4 }}>
+                                        <AddNodePicker
+                                            containerType={sectionType}
+                                            onAdd={(meta) => handleAdd(c.id, meta, sectionType === "processingFailed" ? "processingFailed" : undefined)}
+                                            onClose={() => setOpenPicker(null)}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Node rows */}
+                                {kids.length === 0 && !pickerOpen && (
+                                    <div style={{ padding: "4px 20px", fontSize: 10, color: "#334155", fontStyle: "italic" }}>
+                                        Empty — click + to add a node
+                                    </div>
+                                )}
+                                {kids.map(child => (
+                                    <TreeNodeRow
+                                        key={child.id}
+                                        node={child}
+                                        depth={0}
+                                        childrenMap={childrenMap}
+                                        selectedNodeId={selectedNodeId}
+                                        onSelect={handleSelect}
+                                        onDelete={handleDelete}
+                                        containerType={sectionType}
+                                        onAddChild={(parentId, meta) => handleAdd(parentId, meta, sectionType === "processingFailed" ? "processingFailed" : undefined)}
+                                        onAddConditionChild={handleAddConditionChild}
+                                        onDropLibraryNode={(parentId, type) => {
+                                            const meta = nodeMetaMap[type];
+                                            if (meta) handleAdd(parentId || c.id, meta, sectionType === "processingFailed" ? "processingFailed" : undefined);
+                                        }}
                                     />
-                                </div>
-                            )}
-
-                            {/* Node rows */}
-                            {kids.length === 0 && !pickerOpen && (
-                                <div style={{ padding: "4px 20px", fontSize: 10, color: "#334155", fontStyle: "italic" }}>
-                                    Empty — click + to add a node
-                                </div>
-                            )}
-                            {kids.map(child => (
-                                <TreeNodeRow
-                                    key={child.id}
-                                    node={child}
-                                    depth={0}
-                                    childrenMap={childrenMap}
-                                    selectedNodeId={selectedNodeId}
-                                    onSelect={handleSelect}
-                                    onDelete={handleDelete}
-                                    containerType={ctype}
-                                    onAddChild={(parentId, meta) => handleAdd(parentId, meta)}
-                                    onAddConditionChild={handleAddConditionChild}
-                                    onDropLibraryNode={(parentId, type) => {
-                                        const meta = nodeMetaMap[type];
-                                        if (meta) handleAdd(parentId || c.id, meta);
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    );
+                                ))}
+                            </div>
+                        );
+                    });
                 })}
 
                 {/* Orphaned nodes */}

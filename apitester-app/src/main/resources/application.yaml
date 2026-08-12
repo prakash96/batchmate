@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+camel:
+  springboot:
+    stream-caching-enabled: false
+
+spring:
+  application:
+    name: apitester
+
+plugins:
+  dir: plugins
+
+requests:
+  # Absolute paths, pre-created outside target/ on purpose: PathResolver only honors the
+  # configured value if it already exists (see PathResolver.resolveDir), so a relative path
+  # here would fall back to "next to the jar" (i.e. inside target/) and get wiped by `mvn clean`.
+  base-dir: C:/batchmate/batchmate/apitester-app/apitester-data
+  logs-dir: C:/batchmate/batchmate/apitester-app/apitester-logs
+
+metadata:
+  dir: apitester-metadata
+
+connections:
+  file: ${metadata.dir}/connections.json

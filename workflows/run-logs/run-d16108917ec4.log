@@ -1,4 +1,0 @@
-[22:24:43.304] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[22:24:43.305] INFO  controller.WorkflowController — Workflow 'Email Test' run started [runId=run-d16108917ec4]
-[22:24:43.322] INFO  workflow.execution — workflow: null
-[22:24:43.322] INFO  controller.WorkflowController — Workflow 'Email Test' run completed successfully in 18ms

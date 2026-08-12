@@ -137,5 +137,31 @@
       { "key": "smtpPassword", "label": "Password",  "type": "password", "placeholder": "••••••••" },
       { "key": "smtpTls",      "label": "Use TLS",   "type": "checkbox" }
     ]
+  },
+  "ibmmq": {
+    "label": "IBM MQ",
+    "icon": "📨",
+    "fields": [
+      { "key": "host",         "label": "Host",          "type": "text",     "placeholder": "mq.example.com",        "required": true },
+      { "key": "port",         "label": "Port",          "type": "number",   "placeholder": "1414" },
+      { "key": "channel",      "label": "Channel",       "type": "text",     "placeholder": "SYSTEM.DEF.SVRCONN",    "required": true },
+      { "key": "queueManager", "label": "Queue Manager", "type": "text",     "placeholder": "QM1",                   "required": true },
+      { "key": "username",     "label": "Username",      "type": "text",     "placeholder": "mquser" },
+      { "key": "password",     "label": "Password",      "type": "password", "placeholder": "••••••••" }
+    ]
+  },
+  "as2": {
+    "label": "AS2",
+    "icon": "🔄",
+    "fields": [
+      { "key": "host",       "label": "Partner Host",         "type": "text",     "placeholder": "as2.partner.com",    "required": true },
+      { "key": "port",       "label": "Port",                 "type": "number",   "placeholder": "4080" },
+      { "key": "useHttps",   "label": "Use HTTPS",            "type": "checkbox" },
+      { "key": "requestUri", "label": "Request URI",          "type": "text",     "placeholder": "/as2" },
+      { "key": "as2From",    "label": "AS2-From (Our ID)",    "type": "text",     "placeholder": "BELK",              "required": true },
+      { "key": "as2To",      "label": "AS2-To (Partner ID)",  "type": "text",     "placeholder": "VENDOR",            "required": true },
+      { "key": "from",       "label": "Sender Email",         "type": "text",     "placeholder": "edi@company.com" },
+      { "key": "clientFqdn", "label": "Our FQDN",             "type": "text",     "placeholder": "batchmate.company.com" }
+    ]
   }
 }

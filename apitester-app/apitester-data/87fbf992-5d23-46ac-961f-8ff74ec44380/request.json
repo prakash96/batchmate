@@ -1,0 +1,24 @@
+{
+  "id" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+  "collectionId" : "0108ba9b-76be-41c9-b299-b356afa18b67",
+  "name" : "DECRYPTION",
+  "description" : "",
+  "preRequest" : [ ],
+  "request" : {
+    "method" : "POST",
+    "url" : "https://${vars.sitHost}/api/decrypt",
+    "params" : [ ],
+    "headers" : [ {
+      "key" : "client_id",
+      "value" : "${vars.encryptionClientId}",
+      "enabled" : true
+    }, {
+      "key" : "client_secret",
+      "value" : "${vars.encryptionClientSecret}",
+      "enabled" : true
+    } ],
+    "bodyMode" : "raw-json",
+    "body" : "${body}"
+  },
+  "postResponse" : [ ]
+}

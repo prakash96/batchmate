@@ -226,6 +226,20 @@ public class NodeConverterRegistry {
      * Uses reflection so the app module has no compile-time dependency on plugin classes.
      */
     private void configureComponent(String scheme, Component comp, URLClassLoader cl) {
+        if ("sftp".equals(scheme)) {
+            try {
+                // Set global JSch static config via the plugin classloader — this covers both
+                // SftpHelper (direct JSch sessions) and the Camel SFTP component (which uses
+                // the same JSch class from the same classloader).
+                Class<?> jschClass = cl.loadClass("com.jcraft.jsch.JSch");
+                java.lang.reflect.Method setConfig = jschClass.getMethod("setConfig", String.class, String.class);
+                setConfig.invoke(null, "GSSAPIAuthentication", "no");
+                setConfig.invoke(null, "PreferredAuthentications", "publickey,keyboard-interactive,password");
+                log.info("Configured JSch to disable Kerberos/GSSAPI for SFTP");
+            } catch (Exception e) {
+                log.warn("Could not configure JSch for SFTP: {}", e.getMessage());
+            }
+        }
         if ("ftp".equals(scheme) || "ftps".equals(scheme)) {
             try {
                 java.lang.reflect.Method getConf = comp.getClass().getMethod("getConfiguration");

@@ -47,6 +47,8 @@ public class SftpPlugin implements NodeConverterPlugin {
                 Session session = jsch.getSession(user, host, port);
                 if (!pass.isEmpty()) session.setPassword(pass);
                 session.setConfig("StrictHostKeyChecking", "no");
+                session.setConfig("GSSAPIAuthentication", "no");
+                session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
                 session.connect(10_000);
                 session.disconnect();
                 return new TestResult(true, "Connected to " + host + ":" + port);
@@ -56,71 +58,59 @@ public class SftpPlugin implements NodeConverterPlugin {
         });
     }
 
-    // ── Read (pollEnrich via Camel SFTP consumer) ─────────────────────────────
+    // ── Read (via SftpHelper bean — streams temp file, deletes on close) ─────
 
     private List<Map<String, Object>> convertSftpRead(JsonNode data) {
-        String dir          = ConversionUtils.uiToSimple(data.path("remoteDirectory").asText("/").trim());
-        String pattern      = data.path("filePattern").asText("").trim();
+        String host         = data.path("host").asText("localhost");
+        String port         = String.valueOf(data.path("port").asInt(22));
+        String user         = data.path("username").asText("").trim();
+        String pass         = data.path("password").asText("").trim();
+        String remoteDir    = ConversionUtils.uiToSimple(data.path("remoteDirectory").asText("/").trim());
+        String filePattern  = data.path("filePattern").asText("").trim();
         String resultVar    = data.path("resultVar").asText("").trim();
         boolean deleteAfter = data.path("deleteAfterDownload").asBoolean(false);
-        String moveTo       = data.path("moveToPath").asText("").trim();
-        String privKey      = data.path("privateKeyFile").asText("").trim();
-        String privKeyPass  = data.path("privateKeyPassphrase").asText("").trim();
+        String moveTo       = ConversionUtils.uiToSimple(data.path("moveToPath").asText("").trim());
 
-        String uri = ConversionUtils.sftpUri("sftp", data, dir);
-        String sep = uri.contains("?") ? "&" : "?";
-        if (!pattern.isEmpty()) { uri += sep + "fileName=" + ConversionUtils.uiToSimple(pattern); sep = "&"; }
-        if (!privKey.isEmpty()) {
-            uri += sep + "privateKeyFile=" + privKey; sep = "&";
-            if (!privKeyPass.isEmpty()) uri += "&privateKeyFilePassphrase=" + privKeyPass;
-        }
-        if (!moveTo.isEmpty()) {
-            uri += sep + "move=" + moveTo;
-        } else if (deleteAfter) {
-            uri += sep + "delete=true";
-        } else {
-            uri += sep + "noop=true";
-        }
-        uri += "&idempotent=false&disconnect=true";
-        String host = data.path("host").asText("localhost");
-        int    port = data.path("port").asInt(22);
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(ConversionUtils.logMsg("sftpread: Connecting to " + host + ":" + port));
-        steps.add(ConversionUtils.logMsg("sftpread: Reading " + dir + (pattern.isEmpty() ? "" : "/" + pattern)));
-        steps.addAll(ConversionUtils.pollEnrich(uri, resultVar));
-        steps.add(ConversionUtils.stripCamelHeaders());
+        steps.add(ConversionUtils.logMsg("sftpread: Reading " + remoteDir + (filePattern.isEmpty() ? "" : "/" + filePattern)));
+        steps.add(ConversionUtils.setVarExpr("_op_host",        Map.of("constant", host)));
+        steps.add(ConversionUtils.setVarExpr("_op_port",        Map.of("constant", port)));
+        steps.add(ConversionUtils.setVarExpr("_op_user",        Map.of("constant", user)));
+        steps.add(ConversionUtils.setVarExpr("_op_pass",        Map.of("constant", pass)));
+        steps.add(ConversionUtils.setVarExpr("_op_path",        ConversionUtils.simpleOrConstant(remoteDir)));
+        steps.add(ConversionUtils.setVarExpr("_op_filter",      ConversionUtils.simpleOrConstant(ConversionUtils.uiToSimple(filePattern))));
+        steps.add(ConversionUtils.setVarExpr("_op_deleteAfter", Map.of("constant", String.valueOf(deleteAfter))));
+        steps.add(ConversionUtils.setVarExpr("_op_moveTo",      ConversionUtils.simpleOrConstant(moveTo)));
+        steps.add(ConversionUtils.setVarExpr("_op_var",         Map.of("constant", resultVar)));
+        steps.add(beanStep("sftpHelper", "read"));
         return steps;
     }
 
-    // ── Write (Camel SFTP producer) ───────────────────────────────────────────
+    // ── Write (via SftpHelper bean) ───────────────────────────────────────────
 
     private List<Map<String, Object>> convertSftpWrite(JsonNode data) {
-        String dir         = ConversionUtils.uiToSimple(data.path("remoteDirectory").asText("/").trim());
+        String host        = data.path("host").asText("localhost");
+        String port        = String.valueOf(data.path("port").asInt(22));
+        String user        = data.path("username").asText("").trim();
+        String pass        = data.path("password").asText("").trim();
+        String remoteDir   = ConversionUtils.uiToSimple(data.path("remoteDirectory").asText("/").trim());
         String fileName    = ConversionUtils.uiToSimple(data.path("fileName").asText("output.txt").trim());
-        boolean overwrite  = data.path("overwriteExisting").asBoolean(false);
         boolean autoCreate = data.path("autoCreateFolders").asBoolean(true);
         String tempSuffix  = data.path("tempFileSuffix").asText("").trim();
-        String privKey     = data.path("privateKeyFile").asText("").trim();
-        String privKeyPass = data.path("privateKeyPassphrase").asText("").trim();
 
-        String uri = ConversionUtils.sftpUri("sftp", data, dir);
-        String sep = uri.contains("?") ? "&" : "?";
-        uri += sep + "fileName=" + fileName; sep = "&";
-        if (autoCreate)            uri += "&autoCreate=true";
-        if (overwrite)             uri += "&fileExist=Override";
-        if (!tempSuffix.isEmpty()) uri += "&tempFileName=" + tempSuffix;
-        if (!privKey.isEmpty()) {
-            uri += "&privateKeyFile=" + privKey;
-            if (!privKeyPass.isEmpty()) uri += "&privateKeyFilePassphrase=" + privKeyPass;
-        }
-        uri += "&disconnect=true";
-
-        String host = data.path("host").asText("localhost");
-        int    port = data.path("port").asInt(22);
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(ConversionUtils.logMsg("sftpwrite: Connecting to " + host + ":" + port));
-        steps.add(ConversionUtils.logMsg("sftpwrite: Writing " + dir + "/" + fileName));
-        steps.add(uri.contains("${") ? ConversionUtils.toDStep(uri) : ConversionUtils.toStep(uri, null));
+        steps.add(ConversionUtils.logMsg("sftpwrite: Writing " + remoteDir + "/" + fileName));
+        steps.add(ConversionUtils.setVarExpr("_op_host",       Map.of("constant", host)));
+        steps.add(ConversionUtils.setVarExpr("_op_port",       Map.of("constant", port)));
+        steps.add(ConversionUtils.setVarExpr("_op_user",       Map.of("constant", user)));
+        steps.add(ConversionUtils.setVarExpr("_op_pass",       Map.of("constant", pass)));
+        steps.add(ConversionUtils.setVarExpr("_op_dir",        ConversionUtils.simpleOrConstant(remoteDir)));
+        steps.add(ConversionUtils.setVarExpr("_op_filename",   ConversionUtils.simpleOrConstant(fileName)));
+        steps.add(ConversionUtils.setVarExpr("_op_autoCreate", Map.of("constant", String.valueOf(autoCreate))));
+        steps.add(ConversionUtils.setVarExpr("_op_tempSuffix", Map.of("constant", tempSuffix)));
+        steps.add(beanStep("sftpHelper", "write"));
         return steps;
     }
 

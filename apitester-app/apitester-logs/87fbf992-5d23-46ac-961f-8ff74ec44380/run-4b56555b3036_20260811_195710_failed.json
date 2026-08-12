@@ -1,0 +1,20 @@
+{
+  "runId" : "run-4b56555b3036",
+  "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+  "status" : "failed",
+  "error" : "No such host is known (null)",
+  "durationMs" : 2869,
+  "preRequestLog" : [ ],
+  "response" : {
+    "status" : null,
+    "headers" : {
+      "Accept-Encoding" : "identity"
+    },
+    "body" : "{\n  \"RESPONSE\": \"QzEEeP4hKyFOzYPJy2Lc\",\n  \"DIGI_SIGN\": \"VIi8lmhLjqqiklWZ4AhPuL3XI0XM6Rrw\",\n  \"RESPONSE_DATE\": \"2026-08-11T14:27:08.119+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;3F11dZ8Hlc4W7TSRHQoWAGJQxmPZwfKU&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;7e91905c-0de9-4029-9235-bd8e28d5aa1a&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0MzM1NjgsImV4cCI6MTc4NjQ1NDc1NCwibmJmIjoxNzcxNTcxNDQ0LCJpc3MiOiJQcm9oYXNrYSAtIFdpbGxtcyIsInN1YiI6ImUxNjE3OWJmLWU1M2EtNGZhNC1iMTk5LTM1ZmUwMDk1NDQwYSIsImF1ZCI6IjBhZTYyYWZhLTMyOGUtNGE3Ni1hMTBjLTEyMjQzNmI0YjA2MyIsImp0aSI6IjZjMzE4OTUyLThmOGItNGRkMC05Njc1LWMwNzVkMjgyNzkxYyJ9.Ccdcsz4yyM7fyxMpzLM51IJXgsFyuTdFMbOaSX3JP2ugQusI5ol0qQuwkW9d0a9F&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "requestBody" : "{\n  \"RESPONSE\": \"QzEEeP4hKyFOzYPJy2Lc\",\n  \"DIGI_SIGN\": \"VIi8lmhLjqqiklWZ4AhPuL3XI0XM6Rrw\",\n  \"RESPONSE_DATE\": \"2026-08-11T14:27:08.119+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;3F11dZ8Hlc4W7TSRHQoWAGJQxmPZwfKU&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;7e91905c-0de9-4029-9235-bd8e28d5aa1a&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0MzM1NjgsImV4cCI6MTc4NjQ1NDc1NCwibmJmIjoxNzcxNTcxNDQ0LCJpc3MiOiJQcm9oYXNrYSAtIFdpbGxtcyIsInN1YiI6ImUxNjE3OWJmLWU1M2EtNGZhNC1iMTk5LTM1ZmUwMDk1NDQwYSIsImF1ZCI6IjBhZTYyYWZhLTMyOGUtNGE3Ni1hMTBjLTEyMjQzNmI0YjA2MyIsImp0aSI6IjZjMzE4OTUyLThmOGItNGRkMC05Njc1LWMwNzVkMjgyNzkxYyJ9.Ccdcsz4yyM7fyxMpzLM51IJXgsFyuTdFMbOaSX3JP2ugQusI5ol0qQuwkW9d0a9F&quot;\n}\"\n}"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

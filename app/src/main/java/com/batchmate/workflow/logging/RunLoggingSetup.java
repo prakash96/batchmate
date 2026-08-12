@@ -15,7 +15,7 @@ import java.nio.file.Path;
 
 /**
  * Registers the RunLogAppender with relevant loggers so every workflow run
- * gets its own log file under {workflows.base-dir}/run-logs/.
+ * gets its own log file under {workflows.logs-dir}/run-logs/.
  *
  * Loggers attached:
  *   org.apache.camel   — Camel route/component INFO logs
@@ -24,14 +24,14 @@ import java.nio.file.Path;
 @Component
 public class RunLoggingSetup {
 
-    @Value("${workflows.base-dir:../workflows}")
-    private String baseDirConfig;
+    @Value("${workflows.logs-dir:workflow-logs}")
+    private String logsDirConfig;
 
     private Path runLogsDir;
 
     @PostConstruct
     public void init() throws IOException {
-        runLogsDir = PathResolver.resolveDir(baseDirConfig, "workflows").resolve("run-logs");
+        runLogsDir = PathResolver.resolveDir(logsDirConfig, "workflow-logs").resolve("run-logs");
         Files.createDirectories(runLogsDir);
 
         LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Convenience wrapper for apitester-app: builds the frontend (apitester-ui), syncs it into
+# apitester-app/src/main/resources/static, stops any running instance on port 8082, does a
+# clean Java-only rebuild, and starts it again. Safe to run anytime — apitester-app's data
+# lives in apitester-app/apitester-data (outside target/), so a clean build never touches it.
+# Run from Git Bash: ./mvnwapitest
+set -e
+cd "$(dirname "$0")"
+
+echo "=== Building frontend (apitester-ui) ==="
+(cd apitester-ui && npm run build)
+
+echo "=== Syncing frontend build into apitester-app/src/main/resources/static ==="
+rm -rf apitester-app/src/main/resources/static/assets
+rm -f apitester-app/src/main/resources/static/index.html
+cp -r apitester-ui/dist/. apitester-app/src/main/resources/static/
+
+echo "=== Stopping any apitester-app already running on port 8082 ==="
+PID=$(netstat -ano 2>/dev/null | grep ':8082' | grep LISTENING | awk '{print $5}' | head -1)
+if [ -n "$PID" ]; then
+    echo "Stopping PID $PID..."
+    powershell -NoProfile -Command "Stop-Process -Id $PID -Force" 2>/dev/null || true
+fi
+
+echo "=== Building apitester-app (clean package, skip tests, Java only) ==="
+./mvnw.cmd -pl apitester-app -am clean package -DskipTests
+
+echo "=== Starting apitester-app ==="
+cd apitester-app
+nohup java -jar ./target/apitester-app-0.0.1-SNAPSHOT.jar > apitester-app.log 2>&1 &
+disown
+
+echo
+echo "Started. Logs: apitester-app/apitester-app.log"
+echo "App:    http://localhost:8082"

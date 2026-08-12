@@ -1,8 +1,0 @@
-[21:26:50.789] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[21:26:50.789] INFO  controller.WorkflowController — Workflow 'FTP_INBOUND_TEST' run started [runId=run-b47a8e072c0b]
-[21:26:50.836] INFO  workflow.execution — ftplist: Connecting to test.rebex.net:21
-[21:26:50.884] INFO  workflow.execution — ftplist: Listing /pub/example
-[21:26:52.741] INFO  workflow.execution — ftpread: Connecting to test.rebex.net:21
-[21:26:52.742] INFO  workflow.execution — ftpread: Reading /pub/example/readme.txt
-[21:26:56.385] INFO  workflow.execution — filewrite: Writing to C:/files/ftp/readme.txt
-[21:26:56.401] INFO  controller.WorkflowController — Workflow 'FTP_INBOUND_TEST' run completed successfully in 5612ms

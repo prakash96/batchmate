@@ -1,5 +1,0 @@
-[20:38:36.566] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[20:38:36.711] INFO  controller.WorkflowController — Workflow 'HTTP_TEST' run started [runId=run-b9b263a56576]
-[20:38:36.715] INFO  workflow.execution — http: GET https://random123.free.beeceptor.com//todos
-[20:38:39.012] INFO  workflow.execution — Hey ya! Great to see you here. Btw, nothing is configured for this request path. Create a rule and start building a mock API.
-[20:38:39.017] INFO  controller.WorkflowController — Workflow 'HTTP_TEST' run completed successfully in 2451ms

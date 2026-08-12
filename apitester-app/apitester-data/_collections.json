@@ -1,0 +1,11 @@
+[ {
+  "id" : "0eb69a46-e3a1-4d19-8ddc-ad191f74a1fc",
+  "name" : "My Collection",
+  "folders" : [ {
+    "id" : "0108ba9b-76be-41c9-b299-b356afa18b67",
+    "name" : "common",
+    "folders" : [ ],
+    "variables" : { }
+  } ],
+  "variables" : { }
+} ]

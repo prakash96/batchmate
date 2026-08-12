@@ -1,0 +1,30 @@
+{
+  "runId" : "run-8c894ec24484",
+  "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+  "status" : "success",
+  "durationMs" : 316,
+  "preRequestLog" : [ ],
+  "response" : {
+    "status" : 429,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "client_id" : "null",
+      "client_secret" : "null",
+      "Content-Length" : "62",
+      "Content-Type" : "text/plain; charset=utf-8",
+      "Date" : "Tue, 11 Aug 2026 17:28:28 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "429",
+      "httpResponseText" : "Too Many Requests"
+    },
+    "body" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/"
+  },
+  "vars" : {
+    "requestBody" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "sitHost" : "random123.free.beeceptor.com"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

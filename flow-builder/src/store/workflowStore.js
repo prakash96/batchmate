@@ -101,7 +101,7 @@ export const useWorkflowStore = create((set, get) => ({
     setSelectedNodeId: (id) =>
         set(state => ({ selectedNodeId: state.selectedNodeId === id ? null : id })),
 
-    updateNodeData: (nodeId, newData) =>
+    updateNodeData: (nodeId, newData) => {
         set(state => {
             const updatedNodes = state.nodes.map(n =>
                 n.id === nodeId ? { ...n, data: { ...n.data, ...newData } } : n
@@ -111,7 +111,10 @@ export const useWorkflowStore = create((set, get) => ({
                 workflow: { nodes: structuredClone(updatedNodes), edges: structuredClone(state.edges) }
             });
             return { nodes: updatedNodes, packages: newPackages, workflows: flattenWorkflows(newPackages) };
-        }),
+        });
+        const { validationIssues, expandedRowId, runValidation } = get();
+        if (validationIssues !== null && expandedRowId) runValidation(expandedRowId);
+    },
 
     onNodesChange: (changes) =>
         set(state => ({ nodes: applyNodeChanges(changes, state.nodes) })),
@@ -179,18 +182,33 @@ export const useWorkflowStore = create((set, get) => ({
     pasteWorkflow: async (targetPackageId) => {
         const { clipboardWorkflow } = get();
         if (!clipboardWorkflow || !targetPackageId) return;
-        const newWf = await get().addWorkflowToPackage(targetPackageId, `Copy of ${clipboardWorkflow.name}`);
-        await fetch(`${BASE_URL}/workflows/${newWf.id}/save`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...newWf, workflow: { nodes: clipboardWorkflow.nodes, edges: clipboardWorkflow.edges } }),
-        });
+
+        const workflowId = crypto.randomUUID();
+        const newWf = {
+            id: workflowId,
+            packageId: targetPackageId,
+            name: `Copy of ${clipboardWorkflow.name}`,
+            description: "",
+            inputBody: {},
+            inputHeaders: {},
+            workflow: {
+                nodes: structuredClone(clipboardWorkflow.nodes),
+                edges: structuredClone(clipboardWorkflow.edges),
+            },
+        };
+
+        // Insert into state immediately with copied nodes — no intermediate empty state
         set(state => {
-            const packages = updateWorkflowInPackages(state.packages, newWf.id, {
-                workflow: { nodes: structuredClone(clipboardWorkflow.nodes), edges: structuredClone(clipboardWorkflow.edges) }
-            });
+            const packages = injectWorkflow(state.packages, targetPackageId, newWf);
             return { packages, workflows: flattenWorkflows(packages) };
         });
+
+        // Persist to backend
+        await fetch(`${BASE_URL}/workflows/${workflowId}/save`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newWf),
+        }).catch(console.error);
     },
 
     // ── Package + workflow list state ─────────────────────────────────────────

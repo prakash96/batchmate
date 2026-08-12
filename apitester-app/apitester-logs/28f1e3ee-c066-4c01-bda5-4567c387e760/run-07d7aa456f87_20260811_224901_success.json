@@ -1,0 +1,71 @@
+{
+  "runId" : "run-07d7aa456f87",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "success",
+  "durationMs" : 613,
+  "preRequestLog" : [ {
+    "type" : "setVariable",
+    "name" : "payload",
+    "value" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "status" : "ok"
+  }, {
+    "type" : "callRequest",
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputs" : [ {
+      "value" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+      "name" : "requestBody"
+    }, {
+      "value" : "random123.free.beeceptor.com",
+      "name" : "sitHost"
+    } ],
+    "subRunId" : "run-0c9351cf3105",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"sPP4NrywqbJtCLVC0fA3NSwT8kUb0MGA\",\n  \"REQUEST_REFERENCE_NUMBER\": \"c9d31c36-6c1b-4830-a87a-63318fa7dd70\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpYXQiOjE3ODY0NjI4OTAsImV4cCI6MTc4NjUzNzgwMCwibmJmIjoxODEyNzI5OTY1LCJpc3MiOiJBYmJvdHQgLSBXYWVsY2hpIiwic3ViIjoiZDczNDA4Y2EtZmJkNi00NGE3LWJjNTQtMDJlNzAzMWJhOTU2IiwiYXVkIjoiYzA4YTZkZGMtYjkzYS00MDhhLWEyOGUtOTRkZjYzOGU1NDUxIiwianRpIjoiNTE0ZDg5YTgtOTcyOC00MTZjLWJlZTAtM2UyN2YwZTg0Yzg2In0.sgeRu23rhcM6J8PKB5XgCtINq9TuUj7NPwleVeHYDHMKURjAf7PZs6ewcSHOYvVh\"\n}",
+    "mapped" : [ {
+      "value" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"sPP4NrywqbJtCLVC0fA3NSwT8kUb0MGA\",\n  \"REQUEST_REFERENCE_NUMBER\": \"c9d31c36-6c1b-4830-a87a-63318fa7dd70\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpYXQiOjE3ODY0NjI4OTAsImV4cCI6MTc4NjUzNzgwMCwibmJmIjoxODEyNzI5OTY1LCJpc3MiOiJBYmJvdHQgLSBXYWVsY2hpIiwic3ViIjoiZDczNDA4Y2EtZmJkNi00NGE3LWJjNTQtMDJlNzAzMWJhOTU2IiwiYXVkIjoiYzA4YTZkZGMtYjkzYS00MDhhLWEyOGUtOTRkZjYzOGU1NDUxIiwianRpIjoiNTE0ZDg5YTgtOTcyOC00MTZjLWJlZTAtM2UyN2YwZTg0Yzg2In0.sgeRu23rhcM6J8PKB5XgCtINq9TuUj7NPwleVeHYDHMKURjAf7PZs6ewcSHOYvVh\"\n}",
+      "variable" : "encryptedBody",
+      "path" : "body"
+    } ],
+    "status" : "ok"
+  } ],
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "826",
+      "Content-Type" : "application/json",
+      "Date" : "Tue, 11 Aug 2026 17:18:59 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "body" : "{\n  \"RESPONSE\": \"3g4lZxGOLidfTuLHXQe3\",\n  \"DIGI_SIGN\": \"BA0uNi3gU1GpyqRb3GPPWg1okw3zCvbr\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:18:59.534+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;sPP4NrywqbJtCLVC0fA3NSwT8kUb0MGA&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;c9d31c36-6c1b-4830-a87a-63318fa7dd70&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpYXQiOjE3ODY0NjI4OTAsImV4cCI6MTc4NjUzNzgwMCwibmJmIjoxODEyNzI5OTY1LCJpc3MiOiJBYmJvdHQgLSBXYWVsY2hpIiwic3ViIjoiZDczNDA4Y2EtZmJkNi00NGE3LWJjNTQtMDJlNzAzMWJhOTU2IiwiYXVkIjoiYzA4YTZkZGMtYjkzYS00MDhhLWEyOGUtOTRkZjYzOGU1NDUxIiwianRpIjoiNTE0ZDg5YTgtOTcyOC00MTZjLWJlZTAtM2UyN2YwZTg0Yzg2In0.sgeRu23rhcM6J8PKB5XgCtINq9TuUj7NPwleVeHYDHMKURjAf7PZs6ewcSHOYvVh&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "encryptedBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"sPP4NrywqbJtCLVC0fA3NSwT8kUb0MGA\",\n  \"REQUEST_REFERENCE_NUMBER\": \"c9d31c36-6c1b-4830-a87a-63318fa7dd70\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpYXQiOjE3ODY0NjI4OTAsImV4cCI6MTc4NjUzNzgwMCwibmJmIjoxODEyNzI5OTY1LCJpc3MiOiJBYmJvdHQgLSBXYWVsY2hpIiwic3ViIjoiZDczNDA4Y2EtZmJkNi00NGE3LWJjNTQtMDJlNzAzMWJhOTU2IiwiYXVkIjoiYzA4YTZkZGMtYjkzYS00MDhhLWEyOGUtOTRkZjYzOGU1NDUxIiwianRpIjoiNTE0ZDg5YTgtOTcyOC00MTZjLWJlZTAtM2UyN2YwZTg0Yzg2In0.sgeRu23rhcM6J8PKB5XgCtINq9TuUj7NPwleVeHYDHMKURjAf7PZs6ewcSHOYvVh\"\n}",
+    "encryptionClientId" : "afdfsdfd",
+    "payload" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ {
+    "type" : "callRequest",
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+    "inputs" : [ {
+      "value" : "{\n  \"RESPONSE\": \"3g4lZxGOLidfTuLHXQe3\",\n  \"DIGI_SIGN\": \"BA0uNi3gU1GpyqRb3GPPWg1okw3zCvbr\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:18:59.534+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;sPP4NrywqbJtCLVC0fA3NSwT8kUb0MGA&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;c9d31c36-6c1b-4830-a87a-63318fa7dd70&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpYXQiOjE3ODY0NjI4OTAsImV4cCI6MTc4NjUzNzgwMCwibmJmIjoxODEyNzI5OTY1LCJpc3MiOiJBYmJvdHQgLSBXYWVsY2hpIiwic3ViIjoiZDczNDA4Y2EtZmJkNi00NGE3LWJjNTQtMDJlNzAzMWJhOTU2IiwiYXVkIjoiYzA4YTZkZGMtYjkzYS00MDhhLWEyOGUtOTRkZjYzOGU1NDUxIiwianRpIjoiNTE0ZDg5YTgtOTcyOC00MTZjLWJlZTAtM2UyN2YwZTg0Yzg2In0.sgeRu23rhcM6J8PKB5XgCtINq9TuUj7NPwleVeHYDHMKURjAf7PZs6ewcSHOYvVh&quot;\n}\"\n}",
+      "name" : "requestBody"
+    } ],
+    "subRunId" : "run-7d76348b09b6",
+    "subStatus" : "failed",
+    "subResponseStatus" : null,
+    "subResponseBody" : "{\n  \"RESPONSE\": \"3g4lZxGOLidfTuLHXQe3\",\n  \"DIGI_SIGN\": \"BA0uNi3gU1GpyqRb3GPPWg1okw3zCvbr\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:18:59.534+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;sPP4NrywqbJtCLVC0fA3NSwT8kUb0MGA&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;c9d31c36-6c1b-4830-a87a-63318fa7dd70&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpYXQiOjE3ODY0NjI4OTAsImV4cCI6MTc4NjUzNzgwMCwibmJmIjoxODEyNzI5OTY1LCJpc3MiOiJBYmJvdHQgLSBXYWVsY2hpIiwic3ViIjoiZDczNDA4Y2EtZmJkNi00NGE3LWJjNTQtMDJlNzAzMWJhOTU2IiwiYXVkIjoiYzA4YTZkZGMtYjkzYS00MDhhLWEyOGUtOTRkZjYzOGU1NDUxIiwianRpIjoiNTE0ZDg5YTgtOTcyOC00MTZjLWJlZTAtM2UyN2YwZTg0Yzg2In0.sgeRu23rhcM6J8PKB5XgCtINq9TuUj7NPwleVeHYDHMKURjAf7PZs6ewcSHOYvVh&quot;\n}\"\n}",
+    "mapped" : [ ],
+    "status" : "ok"
+  } ]
+}

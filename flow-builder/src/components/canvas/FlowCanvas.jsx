@@ -202,11 +202,14 @@ function pointToSegmentHit(px, py, ax, ay, bx, by, threshold) {
     return dist < threshold ? t : null;
 }
 
-function findEdgeNearDrop(position, edges, nodes, threshold = 60) {
+function findEdgeNearDrop(position, edges, nodes, threshold = 60, sectionType) {
+    const dropSection = sectionType || "processing";
     for (const edge of edges) {
         const src = nodes.find(n => n.id === edge.source);
         const tgt = nodes.find(n => n.id === edge.target);
         if (!src || !tgt) continue;
+        if ((src.data?.section || "processing") !== dropSection) continue;
+        if ((tgt.data?.section || "processing") !== dropSection) continue;
         const sa = getAbsolutePosition(src, nodes);
         const ta = getAbsolutePosition(tgt, nodes);
         const sw = src.measured?.width ?? src.style?.width ?? 58;
@@ -224,10 +227,12 @@ function findEdgeNearDrop(position, edges, nodes, threshold = 60) {
     return null;
 }
 
-function findPredecessorNode(position, parentId, nodes) {
+function findPredecessorNode(position, parentId, nodes, sectionType) {
+    const dropSection = sectionType || "processing";
     let best = null, bestDist = Infinity;
     for (const node of nodes) {
         if (node.parentId !== parentId || isContainer(node)) continue;
+        if ((node.data?.section || "processing") !== dropSection) continue;
         const abs = getAbsolutePosition(node, nodes);
         const cx = abs.x + (node.measured?.width ?? node.style?.width ?? 58) / 2;
         const cy = abs.y + (node.measured?.height ?? node.style?.height ?? 58) / 2;
@@ -501,14 +506,15 @@ export default function FlowCanvas({ expandedRowId, layoutKey }) {
             extent: parent ? "parent" : undefined
         };
 
-        const nearEdge = findEdgeNearDrop(position, edges, nodes);
+        const droppedSection = newNode.data?.section || "processing";
+        const nearEdge = findEdgeNearDrop(position, edges, nodes, 60, droppedSection);
         let nextEdges;
         if (nearEdge) {
             nextEdges = edges
                 .filter(e => e.id !== nearEdge.id)
                 .concat([makeEdge(nearEdge.source, newNode.id), makeEdge(newNode.id, nearEdge.target)]);
         } else {
-            const predecessor = findPredecessorNode(position, parent?.id, nodes);
+            const predecessor = findPredecessorNode(position, parent?.id, nodes, droppedSection);
             nextEdges = predecessor ? [...edges, makeEdge(predecessor.id, newNode.id)] : edges;
         }
 

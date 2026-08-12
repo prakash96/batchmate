@@ -123,9 +123,10 @@ public class WorkflowController {
     @PostMapping("/{workflowId}/run")
     public ResponseEntity<Map<String, Object>> runWorkflow(
             @PathVariable String workflowId,
+            @RequestParam(value = "async", defaultValue = "false") boolean async,
             @RequestBody(required = false) Map<String, Object> requestBody) {
         @SuppressWarnings("unchecked")
-        final Map<String, Object> globalVars = requestBody != null && requestBody.get("globalVariables") instanceof Map
+        final Map<String, Object> requestVars = requestBody != null && requestBody.get("globalVariables") instanceof Map
             ? (Map<String, Object>) requestBody.get("globalVariables")
             : Collections.emptyMap();
 
@@ -135,10 +136,22 @@ public class WorkflowController {
         // Extract workflow node list for step logging
         String workflowName = "Unknown";
         List<Map<String, Object>> workflowNodes = new ArrayList<>();
+        Map<String, Object> configVars = new LinkedHashMap<>();
         try {
             JsonNode wf = findWorkflow(workflowId);
             if (wf != null) {
                 workflowName = wf.path("name").asText("Unnamed");
+
+                // Load saved workflow config (default variables set via the UI config modal).
+                // These are applied on every trigger so external POST callers don't have to
+                // repeat them. Request-body vars override config defaults.
+                JsonNode config = wf.path("config");
+                if (config.isObject()) {
+                    config.fields().forEachRemaining(e -> {
+                        JsonNode v = e.getValue();
+                        configVars.put(e.getKey(), v.isTextual() ? v.asText() : v.toString());
+                    });
+                }
                 JsonNode nodes = wf.path("workflow").path("nodes");
                 Set<String> skipTypes = new HashSet<>(Arrays.asList("section", "workflowcontainer", "errorscope"));
                 if (nodes.isArray()) {
@@ -158,16 +171,28 @@ public class WorkflowController {
             }
         } catch (IOException ignored) {}
 
-        // Store initial "running" state and kick off async execution
+        // Merge: saved config is the baseline; request vars override
+        final Map<String, Object> finalVars = new LinkedHashMap<>(configVars);
+        finalVars.putAll(requestVars);
+
+        final String finalWorkflowName = workflowName;
+        final List<Map<String, Object>> finalNodes = workflowNodes;
+
+        if (!async) {
+            // Synchronous — block until complete, return full result directly
+            Map<String, Object> result = executeRun(workflowId, runId, runDateTime, finalWorkflowName, finalNodes, finalVars);
+            runResults.put(runId, result);
+            return ResponseEntity.ok(result);
+        }
+
+        // Asynchronous — return runId immediately, execute in background
         Map<String, Object> initial = new LinkedHashMap<>();
         initial.put("runId",  runId);
         initial.put("status", "running");
         runResults.put(runId, initial);
 
-        final String finalWorkflowName = workflowName;
-        final List<Map<String, Object>> finalNodes = workflowNodes;
         Future<?> future = runExecutor.submit(() ->
-            runResults.put(runId, executeRun(workflowId, runId, runDateTime, finalWorkflowName, finalNodes, globalVars)));
+            runResults.put(runId, executeRun(workflowId, runId, runDateTime, finalWorkflowName, finalNodes, finalVars)));
         activeRuns.put(runId, future);
 
         return ResponseEntity.ok(initial);

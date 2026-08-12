@@ -1,0 +1,60 @@
+{
+  "runId" : "run-7adad664b88a",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "success",
+  "durationMs" : 903,
+  "preRequestLog" : [ {
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputBody" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "inputHeaders" : { },
+    "subRunId" : "run-bdffecf232fc",
+    "subStatus" : "success",
+    "subResponseStatus" : 429,
+    "subResponseBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "status" : "ok"
+  } ],
+  "response" : {
+    "status" : 429,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "client_id" : "afdsfdf",
+      "client_secret" : "lafjdfkjd",
+      "Content-Length" : "62",
+      "Content-Type" : "text/plain; charset=utf-8",
+      "Date" : "Tue, 11 Aug 2026 19:36:16 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "429",
+      "httpResponseText" : "Too Many Requests"
+    },
+    "body" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdsfdf",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "lafjdfkjd"
+  },
+  "checks" : [ {
+    "name" : "",
+    "type" : "assertion",
+    "passed" : true
+  } ],
+  "postResponseLog" : [ {
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+    "inputBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "inputHeaders" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "client_id" : "afdsfdf",
+      "client_secret" : "lafjdfkjd",
+      "Content-Type" : "text/plain; charset=utf-8"
+    },
+    "subRunId" : "run-91a1c03e6d6d",
+    "subStatus" : "success",
+    "subResponseStatus" : 429,
+    "subResponseBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "status" : "ok"
+  } ]
+}

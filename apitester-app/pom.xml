@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.batchmate.workflow</groupId>
+        <artifactId>workflow-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>apitester-app</artifactId>
+    <packaging>jar</packaging>
+    <name>apitester-app</name>
+
+    <!--
+        Standalone API-testing tool (Postman-style collections/requests). Reuses the same
+        Camel engine + NodeConverterPlugin/ServiceLoader plugin architecture as workflow-app,
+        but only loads the two plugin jars it actually needs at runtime:
+          - workflow-plugin-core-nodes  (http, setvariable, assertion, jsoncompare, textcompare)
+          - workflow-plugin-db          (dbexecute, + bundled JDBC drivers)
+        See RequestConverterRegistry (adapted from app's NodeConverterRegistry).
+    -->
+
+    <!-- The frontend (apitester-ui) is built and synced into src/main/resources/static
+         OUTSIDE this Maven build now — see mvnwapitest/mvnwapitest.cmd at the repo root.
+         This module's own build is Java-only; resources/static is just a normal classpath
+         resource by the time `mvn package` runs, copied by the standard resources plugin
+         like any other file under src/main/resources. -->
+
+    <dependencies>
+
+        <!-- API module (NodeConverter, NodeConverterPlugin, ConversionUtils) -->
+        <dependency>
+            <groupId>com.batchmate.workflow</groupId>
+            <artifactId>workflow-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Full web stack -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Camel extras -->
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-yaml-dsl</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-direct-starter</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-jackson-starter</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+
+        <!-- GraalVM JS engine — provides the "js" ScriptEngine via JSR-223 -->
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+            <version>${graalvm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <version>${graalvm.version}</version>
+        </dependency>
+
+        <!-- Connection pooling + JDBC Camel component for DataSourceRegistry.
+             JDBC drivers are bundled in workflow-plugin-db and registered at runtime via DriverShim. -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jdbc</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!-- Fat JAR — plugins and JDBC drivers are NOT bundled (plugins load separately) -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals><goal>repackage</goal></goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Copy plugin JARs to target/plugins/ alongside the fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-plugins</id>
+                        <phase>package</phase>
+                        <goals><goal>copy</goal></goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/plugins</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.batchmate.workflow</groupId>
+                                    <artifactId>workflow-plugin-core-nodes</artifactId>
+                                    <version>${project.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.batchmate.workflow</groupId>
+                                    <artifactId>workflow-plugin-db</artifactId>
+                                    <version>${project.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

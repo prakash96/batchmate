@@ -1,0 +1,53 @@
+{
+  "id" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "collectionId" : "0eb69a46-e3a1-4d19-8ddc-ad191f74a1fc",
+  "name" : "Main",
+  "description" : "",
+  "inputDataSets" : [ {
+    "body" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "headers" : [ ]
+  }, {
+    "body" : "{\"CIF\": \"000002222222\", \"REQUEST_REFERENCE_NUMBER\": \"EDGE_CASE_001\"}",
+    "headers" : [ ]
+  } ],
+  "preRequest" : [ {
+    "type" : "callRequest",
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7"
+  } ],
+  "request" : {
+    "method" : "POST",
+    "url" : "https://${vars.sitHost}/api/main",
+    "params" : [ ],
+    "headers" : [ {
+      "key" : "client_id",
+      "value" : "${vars.mainClientId}",
+      "enabled" : true
+    }, {
+      "key" : "client_secret",
+      "value" : "${vars.mainClientSecret}",
+      "enabled" : true
+    }, {
+      "key" : "AccessToken",
+      "value" : "${body.ACCESS_TOKEN}",
+      "enabled" : true
+    } ],
+    "bodyMode" : "raw-json",
+    "body" : "${body}",
+    "inputSource" : "dataset"
+  },
+  "postResponse" : [ {
+    "type" : "assertion",
+    "name" : "",
+    "logic" : "AND",
+    "conditions" : [ {
+      "left" : "headers.httpResponseCode",
+      "operator" : "==",
+      "right" : "429"
+    } ],
+    "onFail" : "stop"
+  }, {
+    "type" : "callRequest",
+    "name" : "",
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380"
+  } ]
+}

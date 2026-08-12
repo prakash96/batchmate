@@ -29,13 +29,16 @@ public class WorkflowService {
     private static final Logger log = LoggerFactory.getLogger(WorkflowService.class);
 
     private static final String WORKFLOW_FILE = "workflow.json";
-    private static final String LOGS_DIR      = "logs";
     private static final DateTimeFormatter LOG_TS = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
     @Value("${workflows.base-dir:../workflows}")
     private String baseDir;
 
+    @Value("${workflows.logs-dir:workflow-logs}")
+    private String logsDirConfig;
+
     private Path resolvedBaseDir;
+    private Path resolvedLogsDir;
 
     private final ObjectMapper objectMapper;
 
@@ -46,7 +49,9 @@ public class WorkflowService {
     @PostConstruct
     public void init() {
         resolvedBaseDir = PathResolver.resolveDir(baseDir, "workflows");
+        resolvedLogsDir = PathResolver.resolveDir(logsDirConfig, "workflow-logs");
         log.info("Workflows dir → {}", resolvedBaseDir.toAbsolutePath());
+        log.info("Logs dir      → {}", resolvedLogsDir.toAbsolutePath());
     }
 
     // ── Workflow ─────────────────────────────────────────────────────────────
@@ -82,7 +87,7 @@ public class WorkflowService {
     // ── Logs ─────────────────────────────────────────────────────────────────
 
     public void saveLog(String workflowId, String runId, String status, JsonNode payload) throws IOException {
-        Path logsDir = workflowDir(workflowId).resolve(LOGS_DIR);
+        Path logsDir = resolvedLogsDir.resolve(workflowId);
         Files.createDirectories(logsDir);
         String timestamp = LocalDateTime.now().format(LOG_TS);
         String filename  = runId + "_" + timestamp + "_" + status + ".json";
@@ -91,13 +96,11 @@ public class WorkflowService {
     }
 
     public List<JsonNode> listAllLogs() throws IOException {
-        if (!Files.exists(resolvedBaseDir)) return Collections.emptyList();
+        if (!Files.exists(resolvedLogsDir)) return Collections.emptyList();
         List<JsonNode> all = new java.util.ArrayList<>();
-        try (Stream<Path> wfDirs = Files.list(resolvedBaseDir)) {
+        try (Stream<Path> wfDirs = Files.list(resolvedLogsDir)) {
             wfDirs.filter(Files::isDirectory).forEach(dir -> {
-                Path logsDir = dir.resolve(LOGS_DIR);
-                if (!Files.exists(logsDir)) return;
-                try (Stream<Path> files = Files.list(logsDir)) {
+                try (Stream<Path> files = Files.list(dir)) {
                     files.filter(p -> p.getFileName().toString().endsWith(".json"))
                          .forEach(p -> {
                              try { all.add(objectMapper.readTree(p.toFile())); }
@@ -110,7 +113,7 @@ public class WorkflowService {
     }
 
     public List<JsonNode> listLogs(String workflowId) throws IOException {
-        Path logsDir = workflowDir(workflowId).resolve(LOGS_DIR);
+        Path logsDir = resolvedLogsDir.resolve(workflowId);
         if (!Files.exists(logsDir)) {
             return Collections.emptyList();
         }

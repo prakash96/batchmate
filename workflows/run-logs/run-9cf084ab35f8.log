@@ -1,7 +1,0 @@
-[13:12:49.650] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[13:12:49.666] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run started [runId=run-9cf084ab35f8]
-[13:12:49.689] INFO  workflow.execution — gcslist: Listing gs://batchmatetest
-[13:12:52.722] INFO  workflow.execution — firewall.txt
-[13:12:52.762] INFO  workflow.execution — gcsread: Reading gs://batchmatetest/firewall.txt
-[13:12:55.658] INFO  workflow.execution — filewrite: Writing to c:/files/gcs/<original name>
-[13:12:55.658] INFO  controller.WorkflowController — Workflow 'GCS_TEST' run completed successfully in 6008ms

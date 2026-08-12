@@ -1,0 +1,133 @@
+/* Global design tokens + interaction polish. Components still carry their own inline
+ * styles (see theme.js) for layout/color — this file adds what inline styles can't do:
+ * hover/focus states, transitions, scrollbars, selection color. Mirrors theme.js's palette
+ * so the two stay visually in sync. */
+
+:root {
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --surface: #f1f5f9;
+    --border: #cbd5e1;
+    --border-lo: #e2e8f0;
+    --text: #0f172a;
+    --text-dim: #475569;
+    --text-faint: #94a3b8;
+    --accent: #2d6cdf;
+    --accent-2: #7c3aed;
+    --accent-dim: rgba(45, 108, 223, 0.12);
+    --success: #10b981;
+    --danger: #ef4444;
+    --warn: #eab308;
+    --radius: 8px;
+    --radius-sm: 6px;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 10px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.14), 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body, #root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    background: var(--accent-dim);
+    color: var(--text);
+}
+
+/* Thin, modern scrollbars everywhere instead of the OS default. */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-faint);
+    background-clip: content-box;
+}
+
+/* Every button/input/select/textarea in this app is a plain semantic element (no CSS
+ * classes needed) — styling them by tag lets this apply app-wide in one place. */
+button {
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease,
+                box-shadow .15s ease, transform .1s ease, filter .15s ease;
+}
+button:hover:not(:disabled) {
+    filter: brightness(0.97);
+    box-shadow: var(--shadow-sm);
+}
+button:active:not(:disabled) {
+    transform: translateY(1px);
+    filter: brightness(0.94);
+}
+button:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+input, select, textarea {
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+input:hover:not(:disabled), select:hover:not(:disabled), textarea:hover:not(:disabled) {
+    border-color: var(--text-faint) !important;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+a {
+    color: var(--accent);
+}
+
+/* Modal overlays (ConnectionsPanel/GlobalVarsPanel) fade + rise in rather than popping. */
+@keyframes overlay-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes modal-rise-in {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.at-overlay {
+    animation: overlay-fade-in .12s ease-out;
+}
+.at-modal {
+    animation: modal-rise-in .16s cubic-bezier(.2,.9,.3,1.1);
+}
+
+/* Collapsible section content expanding. */
+@keyframes section-in {
+    from { opacity: 0; transform: translateY(-2px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.at-section-body {
+    animation: section-in .12s ease-out;
+}

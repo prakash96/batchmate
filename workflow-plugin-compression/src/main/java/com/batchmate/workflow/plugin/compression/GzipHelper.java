@@ -3,6 +3,7 @@ package com.batchmate.workflow.plugin.compression;
 import org.apache.camel.Exchange;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -10,17 +11,14 @@ import java.util.zip.GZIPOutputStream;
 public class GzipHelper {
 
     public void compress(Exchange exchange) throws IOException {
-        Object body = exchange.getMessage().getBody();
-        byte[] input;
-        if (body instanceof byte[]) {
-            input = (byte[]) body;
-        } else {
-            String s = body != null ? body.toString() : "";
-            input = s.getBytes(StandardCharsets.UTF_8);
-        }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (GZIPOutputStream gz = new GZIPOutputStream(baos)) {
-            gz.write(input);
+        // Streams straight from the source (including a fresh file-read GenericFile) into the
+        // gzip output instead of first buffering the whole input into a byte[] — halves peak
+        // memory for large payloads and fixes GenericFile/InputStream bodies, which previously
+        // fell through to Object.toString() here and silently compressed garbage.
+        try (InputStream in = toInputStream(exchange.getMessage().getBody(), StandardCharsets.UTF_8);
+             GZIPOutputStream gz = new GZIPOutputStream(baos)) {
+            in.transferTo(gz);
         }
         exchange.getMessage().setBody(baos.toByteArray());
     }
@@ -28,7 +26,7 @@ public class GzipHelper {
     public void decompress(Exchange exchange) throws IOException {
         Object body = exchange.getMessage().getBody();
         StringBuilder sb = new StringBuilder();
-        try (GZIPInputStream gz = new GZIPInputStream(toInputStream(body));
+        try (GZIPInputStream gz = new GZIPInputStream(toInputStream(body, StandardCharsets.ISO_8859_1));
              BufferedReader br = new BufferedReader(new InputStreamReader(gz, StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) sb.append(line).append('\n');
@@ -36,7 +34,12 @@ public class GzipHelper {
         exchange.getMessage().setBody(sb.toString().trim());
     }
 
-    private static InputStream toInputStream(Object body) throws IOException {
+    /**
+     * stringCharset only applies to the plain-String fallback branch, so each caller keeps its
+     * original encoding: compress() used UTF-8 for String bodies, decompress() used ISO-8859-1
+     * for a lossless byte round-trip — swapping either would silently corrupt non-ASCII content.
+     */
+    private static InputStream toInputStream(Object body, Charset stringCharset) throws IOException {
         if (body instanceof InputStream) return (InputStream) body;
         if (body instanceof byte[])     return new ByteArrayInputStream((byte[]) body);
 
@@ -54,9 +57,9 @@ public class GzipHelper {
             } catch (Exception ignored) {}
         }
 
-        // String body: ISO-8859-1 preserves all byte values 0-255 for a lossless round-trip
+        // String body fallback — charset is caller-specific (see toInputStream javadoc above)
         return new ByteArrayInputStream(body != null
-                ? body.toString().getBytes(StandardCharsets.ISO_8859_1)
+                ? body.toString().getBytes(stringCharset)
                 : new byte[0]);
     }
 }

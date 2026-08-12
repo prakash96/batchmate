@@ -78,7 +78,7 @@ const VALIDATORS = {
     filemove: (data) => {
         const e = [];
         if (!data.sourcePath?.trim()) e.push("Source path is required");
-        if (!data.destPath?.trim()) e.push("Destination path is required");
+        if (!data.destinationPath?.trim()) e.push("Destination path is required");
         return e;
     },
     fileexists: (data) => (!data.filePath?.trim() ? ["File path is required"] : []),

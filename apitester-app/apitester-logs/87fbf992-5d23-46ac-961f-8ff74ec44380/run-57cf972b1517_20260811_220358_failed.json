@@ -1,0 +1,20 @@
+{
+  "runId" : "run-57cf972b1517",
+  "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+  "status" : "failed",
+  "error" : "No such host is known (null)",
+  "durationMs" : 2797,
+  "preRequestLog" : [ ],
+  "response" : {
+    "status" : null,
+    "headers" : {
+      "Accept-Encoding" : "identity"
+    },
+    "body" : "{\n  \"RESPONSE\": \"H99CF7qJjRsCizToeSbK\",\n  \"DIGI_SIGN\": \"OFqPq6SGuFmd6ErHH7I5m4yYQYzRQIcd\",\n  \"RESPONSE_DATE\": \"2026-08-11T16:33:56.607+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;sPFcP3awBUnYV1h1SVTTho7lDRlX5QEN&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;437163ff-1381-499a-81d6-5fbf280b5527&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0NjU1ODEsImV4cCI6MTc4NjU0Nzk2MiwibmJmIjoxNzc0Nzc3NjgzLCJpc3MiOiJCbG9jaywgQmF0eiBhbmQgTml0enNjaGUiLCJzdWIiOiI2YjVlZjEyMi0zMzZjLTRiNzctYWIxOS1jYzc1MGU0Mjk0YWEiLCJhdWQiOiI5MzM2Y2RkMi04MDVmLTQ4MGYtYjgxZi03MTMxYjdlYTMyYjgiLCJqdGkiOiJiYTgxM2JjYS0xN2U0LTQ1ZjQtOTUwMi0yYzI2MDI4YjRkNzAifQ.eUrtamAX4NVuS4TEkudzuKunObjxTtZaSOUHnz3eshvA9snuFFicxPe2wCNy672f&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "requestBody" : "{\n  \"RESPONSE\": \"H99CF7qJjRsCizToeSbK\",\n  \"DIGI_SIGN\": \"OFqPq6SGuFmd6ErHH7I5m4yYQYzRQIcd\",\n  \"RESPONSE_DATE\": \"2026-08-11T16:33:56.607+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;sPFcP3awBUnYV1h1SVTTho7lDRlX5QEN&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;437163ff-1381-499a-81d6-5fbf280b5527&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY0NjU1ODEsImV4cCI6MTc4NjU0Nzk2MiwibmJmIjoxNzc0Nzc3NjgzLCJpc3MiOiJCbG9jaywgQmF0eiBhbmQgTml0enNjaGUiLCJzdWIiOiI2YjVlZjEyMi0zMzZjLTRiNzctYWIxOS1jYzc1MGU0Mjk0YWEiLCJhdWQiOiI5MzM2Y2RkMi04MDVmLTQ4MGYtYjgxZi03MTMxYjdlYTMyYjgiLCJqdGkiOiJiYTgxM2JjYS0xN2U0LTQ1ZjQtOTUwMi0yYzI2MDI4YjRkNzAifQ.eUrtamAX4NVuS4TEkudzuKunObjxTtZaSOUHnz3eshvA9snuFFicxPe2wCNy672f&quot;\n}\"\n}"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

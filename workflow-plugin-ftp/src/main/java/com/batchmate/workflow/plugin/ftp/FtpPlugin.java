@@ -60,64 +60,72 @@ public class FtpPlugin implements NodeConverterPlugin {
         });
     }
 
-    // ── Read (pollEnrich via Camel FTP/FTPS consumer) ─────────────────────────
+    // ── Read (via FtpHelper bean — streams temp file, deletes on close) ──────
 
     private List<Map<String, Object>> convertFtpRead(JsonNode data) {
-        String dir          = ConversionUtils.uiToSimple(data.path("remoteDirectory").asText("/").trim());
-        String pattern      = data.path("filePattern").asText("").trim();
+        String host         = data.path("host").asText("localhost");
+        String port         = String.valueOf(data.path("port").asInt(21));
+        String user         = data.path("username").asText("").trim();
+        String pass         = data.path("password").asText("").trim();
+        String remoteDir    = ConversionUtils.uiToSimple(data.path("remoteDirectory").asText("/").trim());
+        String filePattern  = data.path("filePattern").asText("").trim();
         String security     = data.path("securityMode").asText("none");
         String resultVar    = data.path("resultVar").asText("").trim();
         boolean deleteAfter = data.path("deleteAfterDownload").asBoolean(false);
-        String moveTo       = data.path("moveToPath").asText("").trim();
+        String moveTo       = ConversionUtils.uiToSimple(data.path("moveToPath").asText("").trim());
 
-        String scheme = "none".equals(security) ? "ftp" : "ftps";
-        String uri = ConversionUtils.ftpUri(scheme, data, dir);
-        String sep = uri.contains("?") ? "&" : "?";
-        if (!pattern.isEmpty())          { uri += sep + "fileName=" + ConversionUtils.uiToSimple(pattern); sep = "&"; }
-        if ("implicit".equals(security)) { uri += sep + "implicit=true";       sep = "&"; }
-        if (!moveTo.isEmpty()) {
-            uri += sep + "move=" + moveTo;
-        } else if (deleteAfter) {
-            uri += sep + "delete=true";
-        } else {
-            uri += sep + "noop=true";
-        }
-        uri += "&idempotent=false";
-        String host = data.path("host").asText("localhost");
-        int    port = data.path("port").asInt(21);
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(ConversionUtils.logMsg("ftpread: Connecting to " + host + ":" + port));
-        steps.add(ConversionUtils.logMsg("ftpread: Reading " + dir + (pattern.isEmpty() ? "" : "/" + pattern)));
-        steps.addAll(ConversionUtils.pollEnrich(uri, resultVar));
-        steps.add(ConversionUtils.stripCamelHeaders());
+        steps.add(ConversionUtils.logMsg("ftpread: Reading " + remoteDir + (filePattern.isEmpty() ? "" : "/" + filePattern)));
+        steps.add(ConversionUtils.setVarExpr("_op_host",        Map.of("constant", host)));
+        steps.add(ConversionUtils.setVarExpr("_op_port",        Map.of("constant", port)));
+        steps.add(ConversionUtils.setVarExpr("_op_user",        Map.of("constant", user)));
+        steps.add(ConversionUtils.setVarExpr("_op_pass",        Map.of("constant", pass)));
+        steps.add(ConversionUtils.setVarExpr("_op_path",        ConversionUtils.simpleOrConstant(remoteDir)));
+        steps.add(ConversionUtils.setVarExpr("_op_filter",      ConversionUtils.simpleOrConstant(ConversionUtils.uiToSimple(filePattern))));
+        steps.add(ConversionUtils.setVarExpr("_op_security",    Map.of("constant", security)));
+        steps.add(ConversionUtils.setVarExpr("_op_deleteAfter", Map.of("constant", String.valueOf(deleteAfter))));
+        steps.add(ConversionUtils.setVarExpr("_op_moveTo",      ConversionUtils.simpleOrConstant(moveTo)));
+        steps.add(ConversionUtils.setVarExpr("_op_var",         Map.of("constant", resultVar)));
+        steps.add(beanStep("ftpHelper", "read"));
         return steps;
     }
 
-    // ── Write (Camel FTP/FTPS producer) ──────────────────────────────────────
+    private static Map<String, Object> beanStep(String ref, String method) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("ref", ref);
+        body.put("method", method);
+        Map<String, Object> step = new LinkedHashMap<>();
+        step.put("bean", body);
+        return step;
+    }
+
+    // ── Write (via FtpHelper bean) ────────────────────────────────────────────
 
     private List<Map<String, Object>> convertFtpWrite(JsonNode data) {
-        String dir        = ConversionUtils.uiToSimple(data.path("remoteDirectory").asText("/").trim());
-        String fileName   = ConversionUtils.uiToSimple(data.path("fileName").asText("output.txt").trim());
-        String security   = data.path("securityMode").asText("none");
-        boolean overwrite = data.path("overwriteExisting").asBoolean(false);
-        boolean autoCreate = data.path("autoCreateFolders").asBoolean(false);
-        String tempSuffix = data.path("tempFileSuffix").asText("").trim();
+        String host        = data.path("host").asText("localhost");
+        String port        = String.valueOf(data.path("port").asInt(21));
+        String user        = data.path("username").asText("").trim();
+        String pass        = data.path("password").asText("").trim();
+        String security    = data.path("securityMode").asText("none");
+        String remoteDir   = ConversionUtils.uiToSimple(data.path("remoteDirectory").asText("/").trim());
+        String fileName    = ConversionUtils.uiToSimple(data.path("fileName").asText("output.txt").trim());
+        boolean autoCreate = data.path("autoCreateFolders").asBoolean(true);
+        String tempSuffix  = data.path("tempFileSuffix").asText("").trim();
 
-        String scheme = "none".equals(security) ? "ftp" : "ftps";
-        String uri = ConversionUtils.ftpUri(scheme, data, dir);
-        String sep = uri.contains("?") ? "&" : "?";
-        uri += sep + "fileName=" + fileName; sep = "&";
-        if ("implicit".equals(security)) uri += "&implicit=true";
-        if (autoCreate)            uri += "&autoCreate=true";
-        if (overwrite)             uri += "&fileExist=Override";
-        if (!tempSuffix.isEmpty()) uri += "&tempFileName=" + tempSuffix;
-
-        String host = data.path("host").asText("localhost");
-        int    port = data.path("port").asInt(21);
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(ConversionUtils.logMsg("ftpwrite: Connecting to " + host + ":" + port));
-        steps.add(ConversionUtils.logMsg("ftpwrite: Writing " + dir + "/" + fileName));
-        steps.add(uri.contains("${") ? ConversionUtils.toDStep(uri) : ConversionUtils.toStep(uri, null));
+        steps.add(ConversionUtils.logMsg("ftpwrite: Writing " + remoteDir + "/" + fileName));
+        steps.add(ConversionUtils.setVarExpr("_op_host",       Map.of("constant", host)));
+        steps.add(ConversionUtils.setVarExpr("_op_port",       Map.of("constant", port)));
+        steps.add(ConversionUtils.setVarExpr("_op_user",       Map.of("constant", user)));
+        steps.add(ConversionUtils.setVarExpr("_op_pass",       Map.of("constant", pass)));
+        steps.add(ConversionUtils.setVarExpr("_op_security",   Map.of("constant", security)));
+        steps.add(ConversionUtils.setVarExpr("_op_dir",        ConversionUtils.simpleOrConstant(remoteDir)));
+        steps.add(ConversionUtils.setVarExpr("_op_filename",   ConversionUtils.simpleOrConstant(fileName)));
+        steps.add(ConversionUtils.setVarExpr("_op_autoCreate", Map.of("constant", String.valueOf(autoCreate))));
+        steps.add(ConversionUtils.setVarExpr("_op_tempSuffix", Map.of("constant", tempSuffix)));
+        steps.add(beanStep("ftpHelper", "write"));
         return steps;
     }
 

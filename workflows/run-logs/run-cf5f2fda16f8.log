@@ -1,4 +1,0 @@
-[23:44:11.367] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[23:44:11.400] INFO  controller.WorkflowController — Workflow 'Compression Test' run started [runId=run-cf5f2fda16f8]
-[23:44:11.402] INFO  workflow.execution — H4sIAAAAAAAAAAvJyCxWAKLixNyCnFSFktTiEgA9vkC4EwAAAA==
-[23:44:11.408] INFO  controller.WorkflowController — Workflow 'Compression Test' run completed successfully in 41ms

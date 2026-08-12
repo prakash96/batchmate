@@ -1,0 +1,72 @@
+{
+  "runId" : "run-c991835b7f8e",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "success",
+  "durationMs" : 604,
+  "preRequestLog" : [ {
+    "type" : "setVariable",
+    "name" : "payload",
+    "value" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "status" : "ok"
+  }, {
+    "type" : "callRequest",
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputs" : [ {
+      "value" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+      "name" : "requestBody"
+    }, {
+      "value" : "random123.free.beeceptor.com",
+      "name" : "sitHost"
+    } ],
+    "subRunId" : "run-8c894ec24484",
+    "subStatus" : "success",
+    "subResponseStatus" : 429,
+    "subResponseBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "mapped" : [ {
+      "value" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+      "variable" : "encryptedBody",
+      "path" : "body"
+    } ],
+    "status" : "ok"
+  } ],
+  "response" : {
+    "status" : 429,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "62",
+      "Content-Type" : "text/plain; charset=utf-8",
+      "Date" : "Tue, 11 Aug 2026 17:28:28 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "429",
+      "httpResponseText" : "Too Many Requests"
+    },
+    "body" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/"
+  },
+  "vars" : {
+    "encryptedBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "encryptionClientId" : "afdsfdf",
+    "payload" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "lafjdfkjd"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ {
+    "type" : "callRequest",
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+    "inputs" : [ {
+      "value" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+      "name" : "requestBody"
+    }, {
+      "value" : "random123.free.beeceptor.com",
+      "name" : "sitHost"
+    } ],
+    "subRunId" : "run-617ade745544",
+    "subStatus" : "success",
+    "subResponseStatus" : 429,
+    "subResponseBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "mapped" : [ ],
+    "status" : "ok"
+  } ]
+}

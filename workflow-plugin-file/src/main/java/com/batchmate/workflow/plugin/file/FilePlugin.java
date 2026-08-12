@@ -110,10 +110,23 @@ public class FilePlugin implements NodeConverterPlugin {
         pollStep.put("pollEnrich", pollBody);
 
         steps.add(pollStep);
+        String onSuccess = data.path("onSuccess").asText("none").trim();
+
+        // pollEnrich leaves body as a lazy GenericFile referencing the original path.
+        // For move/delete: read all bytes into the body now — before the file operation
+        // and before resultVar is captured — so no open handle blocks Windows rename
+        // and the body remains valid after the source file is gone.
+        if ("move".equals(onSuccess) || "delete".equals(onSuccess)) {
+            steps.add(ConversionUtils.scriptStep("js",
+                "var Files=Java.type('java.nio.file.Files');" +
+                "var Paths=Java.type('java.nio.file.Paths');" +
+                "var _ap=String(exchange.getMessage().getHeader('CamelFileAbsolutePath'));" +
+                "exchange.getMessage().setBody(Files.readAllBytes(Paths.get(_ap)));"));
+        }
+
         if (!resultVar.isEmpty())
             steps.add(ConversionUtils.setVarExpr(resultVar, Map.of("simple", "${body}")));
 
-        String onSuccess = data.path("onSuccess").asText("none").trim();
         if ("delete".equals(onSuccess)) {
             steps.add(ConversionUtils.scriptStep("js",
                 "var Files=Java.type('java.nio.file.Files');" +
@@ -171,6 +184,19 @@ public class FilePlugin implements NodeConverterPlugin {
         String logTarget = fileName.isEmpty() ? directory + "/<original name>" : directory + "/" + fileName;
         List<Map<String, Object>> steps = new ArrayList<>();
         steps.add(ConversionUtils.logMsg("filewrite: Writing to " + logTarget));
+
+        // Serialize List/Map bodies (e.g. JDBC results) to JSON — file producer only handles String/bytes.
+        steps.add(ConversionUtils.scriptStep("js",
+            "var _b=exchange.getMessage().getBody();" +
+            "if(_b instanceof java.util.List||_b instanceof java.util.Map){" +
+            "  try{" +
+            "    var _OM=Java.type('com.fasterxml.jackson.databind.ObjectMapper');" +
+            "    exchange.getMessage().setBody(new _OM().writeValueAsString(_b));" +
+            "  }catch(_e){" +
+            "    exchange.getMessage().setBody(String(_b));" +
+            "  }" +
+            "}"));
+
         steps.add(uri.contains("${") ? ConversionUtils.toDStep(uri) : ConversionUtils.toStep(uri, null));
 
         if (!resultVar.isEmpty()) {

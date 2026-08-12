@@ -5865,5 +5865,528 @@
         ]
       }
     ]
+  },
+  {
+    "type": "stringtobytearray",
+    "label": "String to Byte Array",
+    "icon": "",
+    "nodeClass": "converter",
+    "group": "Type Converters",
+    "sidebarLabel": "Str → Bytes",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "String to Byte Array",
+      "charset": "UTF-8"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Options",
+        "open": true,
+        "fields": [
+          {
+            "key": "charset",
+            "label": "Character Set",
+            "type": "select",
+            "options": [
+              {
+                "value": "UTF-8",
+                "label": "UTF-8"
+              },
+              {
+                "value": "UTF-16",
+                "label": "UTF-16"
+              },
+              {
+                "value": "ISO-8859-1",
+                "label": "ISO-8859-1"
+              },
+              {
+                "value": "US-ASCII",
+                "label": "US-ASCII"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "byteArray"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "as2send",
+    "label": "AS2 Send",
+    "icon": "",
+    "nodeClass": "output",
+    "group": "AS2",
+    "sidebarLabel": "Send",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "AS2 Send",
+      "port": 4080,
+      "useHttps": false,
+      "requestUri": "/as2",
+      "as2Version": "1.1",
+      "contentType": "application/EDI-X12",
+      "messageStructure": "PLAIN"
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Partner Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "as2"
+          },
+          {
+            "key": "host",
+            "label": "Partner Host",
+            "type": "text",
+            "placeholder": "as2.partner.com",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "4080",
+            "min": 1,
+            "max": 65535,
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "useHttps",
+            "label": "Use HTTPS",
+            "type": "checkbox",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "requestUri",
+            "label": "Request URI",
+            "type": "text",
+            "placeholder": "/as2",
+            "showWhen": { "key": "connectionId", "empty": true }
+          }
+        ]
+      },
+      {
+        "title": "AS2 Identity",
+        "open": true,
+        "fields": [
+          {
+            "key": "as2From",
+            "label": "AS2-From (Our ID)",
+            "type": "text",
+            "placeholder": "BELK",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "as2To",
+            "label": "AS2-To (Partner ID)",
+            "type": "text",
+            "placeholder": "VENDOR",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "subject",
+            "label": "Message Subject",
+            "type": "text",
+            "placeholder": "EDI Order  or  ${vars.orderType}"
+          },
+          {
+            "key": "from",
+            "label": "From Email (optional)",
+            "type": "text",
+            "placeholder": "edi@company.com",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "clientFqdn",
+            "label": "Our FQDN",
+            "type": "text",
+            "placeholder": "batchmate.company.com",
+            "showWhen": { "key": "connectionId", "empty": true }
+          }
+        ]
+      },
+      {
+        "title": "Content",
+        "open": true,
+        "fields": [
+          {
+            "key": "contentType",
+            "label": "Content Type",
+            "type": "select",
+            "options": [
+              { "value": "application/EDI-X12", "label": "EDI X12" },
+              { "value": "application/EDIFACT", "label": "EDIFACT" },
+              { "value": "application/edi-consent", "label": "EDI Consent" },
+              { "value": "application/xml", "label": "XML" },
+              { "value": "text/plain", "label": "Plain Text" }
+            ]
+          },
+          {
+            "key": "fileName",
+            "label": "File Name",
+            "type": "text",
+            "placeholder": "order.edi  or  ${vars.fileName}"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "open": false,
+        "fields": [
+          {
+            "key": "messageStructure",
+            "label": "Message Structure",
+            "type": "select",
+            "options": [
+              { "value": "PLAIN", "label": "Plain (no signing / no encryption)" },
+              { "value": "SIGNED", "label": "Signed (SHA-256 with RSA)" }
+            ]
+          },
+          {
+            "key": "signingAlgorithm",
+            "label": "Signing Algorithm",
+            "type": "select",
+            "options": [
+              { "value": "SHA256WITHRSA", "label": "SHA-256 with RSA (recommended)" },
+              { "value": "SHA384WITHRSA", "label": "SHA-384 with RSA" },
+              { "value": "SHA512WITHRSA", "label": "SHA-512 with RSA" },
+              { "value": "SHA1WITHRSA",   "label": "SHA-1 with RSA (legacy)" }
+            ],
+            "showWhen": { "key": "messageStructure", "value": "SIGNED" }
+          },
+          {
+            "key": "keystorePath",
+            "label": "Keystore Path (PKCS12 .p12)",
+            "type": "text",
+            "placeholder": "/certs/signing.p12  or  ${vars.keystorePath}",
+            "showWhen": { "key": "messageStructure", "value": "SIGNED" }
+          },
+          {
+            "key": "keystorePassword",
+            "label": "Keystore Password",
+            "type": "password",
+            "showWhen": { "key": "messageStructure", "value": "SIGNED" }
+          },
+          {
+            "key": "keyAlias",
+            "label": "Key Alias (leave blank to use first entry)",
+            "type": "text",
+            "placeholder": "signing-key",
+            "showWhen": { "key": "messageStructure", "value": "SIGNED" }
+          }
+        ]
+      },
+      {
+        "title": "MDN",
+        "open": false,
+        "fields": [
+          {
+            "key": "mdnEmail",
+            "label": "Async MDN Email (leave blank for synchronous MDN)",
+            "type": "text",
+            "placeholder": "edi@company.com"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Result In Variable",
+            "type": "text",
+            "placeholder": "as2Result"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mqpublish",
+    "label": "MQ Publish",
+    "icon": "",
+    "nodeClass": "output",
+    "group": "Messaging",
+    "sidebarLabel": "MQ Publish",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "MQ Publish",
+      "port": 1414,
+      "channel": "SYSTEM.DEF.SVRCONN",
+      "destType": "QUEUE",
+      "persistent": true,
+      "expiry": 0,
+      "priority": -1
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "ibmmq",
+            "placeholder": "Select IBM MQ connection..."
+          },
+          {
+            "key": "host",
+            "label": "Host",
+            "type": "text",
+            "placeholder": "mq.example.com",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "1414",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "channel",
+            "label": "Channel",
+            "type": "text",
+            "placeholder": "SYSTEM.DEF.SVRCONN",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "queueManager",
+            "label": "Queue Manager",
+            "type": "text",
+            "placeholder": "QM1",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "mquser",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "••••••••",
+            "showWhen": { "key": "connectionId", "empty": true }
+          }
+        ]
+      },
+      {
+        "title": "Destination",
+        "open": true,
+        "fields": [
+          {
+            "key": "destType",
+            "label": "Destination Type",
+            "type": "select",
+            "options": [
+              { "value": "QUEUE", "label": "Queue" },
+              { "value": "TOPIC", "label": "Topic" }
+            ]
+          },
+          {
+            "key": "destName",
+            "label": "Queue / Topic Name",
+            "type": "text",
+            "placeholder": "MY.QUEUE or topic/name"
+          }
+        ]
+      },
+      {
+        "title": "Message Options",
+        "open": false,
+        "fields": [
+          {
+            "key": "persistent",
+            "label": "Persistent",
+            "type": "checkbox"
+          },
+          {
+            "key": "expiry",
+            "label": "Expiry (seconds, 0 = unlimited)",
+            "type": "number",
+            "placeholder": "0"
+          },
+          {
+            "key": "priority",
+            "label": "Priority (0-9, -1 = default)",
+            "type": "number",
+            "placeholder": "-1"
+          },
+          {
+            "key": "correlationId",
+            "label": "Correlation ID",
+            "type": "text",
+            "placeholder": "optional"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Message ID In Variable",
+            "type": "text",
+            "placeholder": "mqMsgId"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "mqconsume",
+    "label": "MQ Consume",
+    "icon": "",
+    "nodeClass": "input",
+    "group": "Messaging",
+    "sidebarLabel": "MQ Consume",
+    "width": 40,
+    "height": 40,
+    "defaultData": {
+      "name": "MQ Consume",
+      "port": 1414,
+      "channel": "SYSTEM.DEF.SVRCONN",
+      "waitInterval": 0
+    },
+    "zones": [
+      "processing",
+      "processingFailed"
+    ],
+    "sections": [
+      {
+        "title": "Connection",
+        "open": true,
+        "fields": [
+          {
+            "key": "connectionId",
+            "label": "Saved Connection",
+            "type": "connection",
+            "connectionType": "ibmmq",
+            "placeholder": "Select IBM MQ connection..."
+          },
+          {
+            "key": "host",
+            "label": "Host",
+            "type": "text",
+            "placeholder": "mq.example.com",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "port",
+            "label": "Port",
+            "type": "number",
+            "placeholder": "1414",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "channel",
+            "label": "Channel",
+            "type": "text",
+            "placeholder": "SYSTEM.DEF.SVRCONN",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "queueManager",
+            "label": "Queue Manager",
+            "type": "text",
+            "placeholder": "QM1",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "username",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "mquser",
+            "showWhen": { "key": "connectionId", "empty": true }
+          },
+          {
+            "key": "password",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "••••••••",
+            "showWhen": { "key": "connectionId", "empty": true }
+          }
+        ]
+      },
+      {
+        "title": "Queue",
+        "open": true,
+        "fields": [
+          {
+            "key": "destName",
+            "label": "Queue Name",
+            "type": "text",
+            "placeholder": "MY.QUEUE"
+          },
+          {
+            "key": "waitInterval",
+            "label": "Wait Timeout (seconds, 0 = no wait)",
+            "type": "number",
+            "placeholder": "0"
+          }
+        ]
+      },
+      {
+        "title": "Filter",
+        "open": false,
+        "fields": [
+          {
+            "key": "correlationId",
+            "label": "Match Correlation ID",
+            "type": "text",
+            "placeholder": "optional"
+          }
+        ]
+      },
+      {
+        "title": "Output",
+        "open": true,
+        "fields": [
+          {
+            "key": "resultVar",
+            "label": "Store Message Body In Variable",
+            "type": "text",
+            "placeholder": "mqMessage"
+          }
+        ]
+      }
+    ]
   }
 ]

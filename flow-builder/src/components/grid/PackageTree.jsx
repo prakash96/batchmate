@@ -4,6 +4,7 @@ import { useMetadataStore } from "../../store/metadataStore";
 import { persistentStore } from "../../store/persistentStore";
 import { exportTestReport } from "../../utils/excelReport";
 import { exportPackageExcel, parseExcelFile } from "../../utils/packageExcel";
+import { readFileAsText, buildPackagesFromSwagger } from "../../utils/swaggerImport";
 import { BASE_URL } from "../../config";
 
 const DragCtx = createContext(null);
@@ -139,7 +140,9 @@ function PackageRow({ pkg, activeWorkflowId, depth = 0 }) {
     const [open, setOpen]       = useState(true);
     const [editing, setEditing] = useState(false);
     const [hovering, setHovering] = useState(false);
+    const [importingSwagger, setImportingSwagger] = useState(false);
     const fileInputRef = useRef(null);
+    const swaggerInputRef = useRef(null);
 
     const workflows = pkg.workflows || [];
     const subPkgs   = pkg.packages  || [];
@@ -185,6 +188,45 @@ function PackageRow({ pkg, activeWorkflowId, depth = 0 }) {
         } catch (err) {
             console.error('Import failed:', err);
             alert('Import failed: ' + err.message);
+        }
+    };
+
+    const handleImportSwagger = e => {
+        e.stopPropagation();
+        swaggerInputRef.current?.click();
+    };
+
+    const handleImportSwaggerFile = async e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = '';
+        setImportingSwagger(true);
+        try {
+            const text = await readFileAsText(file);
+            const tagGroups = buildPackagesFromSwagger(text);
+            let caseCount = 0;
+            for (const group of tagGroups) {
+                if (group.workflows.length === 0) continue;
+                const targetPkg = tagGroups.length === 1
+                    ? pkg
+                    : await addPackage(group.name, pkg.id);
+                for (const { name, nodes, edges } of group.workflows) {
+                    const newWf = await addWorkflowToPackage(targetPkg.id, name);
+                    await fetch(`${BASE_URL}/workflows/${newWf.id}/save`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...newWf, workflow: { nodes, edges } }),
+                    });
+                    updateWorkflow(newWf.id, { workflow: { nodes, edges } });
+                    caseCount += 1;
+                }
+            }
+            if (caseCount === 0) alert('No operations with response definitions were found in this spec.');
+        } catch (err) {
+            console.error('Swagger import failed:', err);
+            alert('Swagger import failed: ' + err.message);
+        } finally {
+            setImportingSwagger(false);
         }
     };
 
@@ -259,6 +301,13 @@ function PackageRow({ pkg, activeWorkflowId, depth = 0 }) {
                                 <line x1="12" y1="3" x2="12" y2="15"/>
                             </svg>
                         </ActionBtn>
+                        <ActionBtn title={importingSwagger ? "Importing…" : "Import Swagger / OpenAPI — auto-generates test workflows"} onClick={importingSwagger ? undefined : handleImportSwagger}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>
+                                <polyline points="15 4 15 9 20 9"/>
+                                <path d="M9 15.5l1.8 1.8L14.5 13"/>
+                            </svg>
+                        </ActionBtn>
                         <ActionBtn title="Rename" onClick={e => { e.stopPropagation(); setEditing(true); }}>
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </ActionBtn>
@@ -275,6 +324,13 @@ function PackageRow({ pkg, activeWorkflowId, depth = 0 }) {
                 accept=".xlsx"
                 style={{ display: "none" }}
                 onChange={handleImportFile}
+            />
+            <input
+                ref={swaggerInputRef}
+                type="file"
+                accept=".json,.yaml,.yml"
+                style={{ display: "none" }}
+                onChange={handleImportSwaggerFile}
             />
 
             {open && (

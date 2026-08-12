@@ -1,0 +1,22 @@
+{
+  "runId" : "run-e91d27f42beb",
+  "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+  "status" : "failed",
+  "error" : "No such host is known (null)",
+  "durationMs" : 2737,
+  "preRequestLog" : [ ],
+  "response" : {
+    "status" : null,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "client_id" : "null",
+      "client_secret" : "null"
+    },
+    "body" : "{\n  \"RESPONSE\": \"4FRUR58qe6KZumzPXrMZ\",\n  \"DIGI_SIGN\": \"MZStgYVTFAMUDxHf4HkZiLWBVkmY3svM\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:20:08.026+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;qrCclhX2cM6zPqbVC3u5gh8uNxENDWt7&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;7301905b-4f22-4985-87dd-9cb4c5745347&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODYzOTIzNTAsImV4cCI6MTc4NjQzOTY3MiwibmJmIjoxNzkyNzY5MDU0LCJpc3MiOiJPJ0tvbiBhbmQgU29ucyIsInN1YiI6IjlmNDM4NDg3LWI5OTctNGZkMS1iNDljLWFmN2M4M2ZiMWFiNiIsImF1ZCI6IjEzZjA4NzBiLTBhZGEtNDUxZi1hYzQ4LWIwZDliMzk3ZDJkNiIsImp0aSI6ImIzNjRhMmY5LWRmNWYtNDc1Zi1hOWZjLTU2YjE4ZDgxMWE0MSJ9.r3JnUcxAGCIuy8CKhGtb5i9tnfrWbkF4lG5jLl4OysrsiIJLGSBToazlmluvmMUA&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "requestBody" : "{\n  \"RESPONSE\": \"4FRUR58qe6KZumzPXrMZ\",\n  \"DIGI_SIGN\": \"MZStgYVTFAMUDxHf4HkZiLWBVkmY3svM\",\n  \"RESPONSE_DATE\": \"2026-08-11T17:20:08.026+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;qrCclhX2cM6zPqbVC3u5gh8uNxENDWt7&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;7301905b-4f22-4985-87dd-9cb4c5745347&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODYzOTIzNTAsImV4cCI6MTc4NjQzOTY3MiwibmJmIjoxNzkyNzY5MDU0LCJpc3MiOiJPJ0tvbiBhbmQgU29ucyIsInN1YiI6IjlmNDM4NDg3LWI5OTctNGZkMS1iNDljLWFmN2M4M2ZiMWFiNiIsImF1ZCI6IjEzZjA4NzBiLTBhZGEtNDUxZi1hYzQ4LWIwZDliMzk3ZDJkNiIsImp0aSI6ImIzNjRhMmY5LWRmNWYtNDc1Zi1hOWZjLTU2YjE4ZDgxMWE0MSJ9.r3JnUcxAGCIuy8CKhGtb5i9tnfrWbkF4lG5jLl4OysrsiIJLGSBToazlmluvmMUA&quot;\n}\"\n}"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

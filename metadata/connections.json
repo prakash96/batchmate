@@ -58,4 +58,17 @@
     "serviceAccountKeyFile" : "C:\\files\\gcp\\batchmate-498518-f022a6eabb35.json"
   },
   "id" : "conn-1780685960114-nykjk"
+}, {
+  "name" : "As2 Test",
+  "type" : "as2",
+  "config" : {
+    "host" : "testas2.mendelson-e-c.com",
+    "port" : 8444,
+    "requestUri" : "/as2/HttpReceiver",
+    "useHttps" : true,
+    "as2From" : "mycompanyAS2",
+    "as2To" : "mendelsontestAS2",
+    "from" : "bhanuprksh96@gmail.com"
+  },
+  "id" : "conn-1782751547645-93s6x"
 } ]

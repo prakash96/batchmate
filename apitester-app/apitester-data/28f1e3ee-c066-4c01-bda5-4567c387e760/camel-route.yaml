@@ -1,0 +1,47 @@
+# Camel YAML DSL — generated for request: 28f1e3ee-c066-4c01-bda5-4567c387e760
+
+  - route:
+      id: 28f1e3ee-c066-4c01-bda5-4567c387e760
+      from:
+        uri: direct:28f1e3ee-c066-4c01-bda5-4567c387e760
+      steps:
+        - log:
+            message: 'http: POST https://${exchangeProperty.sitHost}/api/main?throwExceptionOnFailure=${exchangeProperty.__throwOff}'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('Accept-Encoding','identity');
+        - setBody:
+            expression:
+              constant: '429 - Too Many Requests. Refer: https://beeceptor.com/pricing/'
+        - script:
+            expression:
+              js: var _h = JSON.parse('{"client_id":"main-id-1","client_secret":"main-secret-1","AccessToken":""}');
+                Object.keys(_h).forEach(function(k){ exchange.getMessage().getHeaders().put(k,
+                String(_h[k])); });
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('CamelHttpMethod','POST');exchange.setProperty('_httpUrl',
+                String('https://' + exchange.getProperties().get('sitHost') + '/api/main?throwExceptionOnFailure='
+                + exchange.getProperties().get('__throwOff')));
+        - toD:
+            uri: ${exchangeProperty._httpUrl}
+        - script:
+            expression:
+              js: var _b=exchange.getMessage().getBody();if(_b instanceof java.io.InputStream){  var
+                _ce=String(exchange.getMessage().getHeader('Content-Encoding')||'');  var
+                _is=_ce.toLowerCase().indexOf('gzip')>=0    ?new java.util.zip.GZIPInputStream(_b)    :_b;  var
+                _isr=new java.io.InputStreamReader(_is,'UTF-8');  var _br=new java.io.BufferedReader(_isr);  var
+                _sb=new java.lang.StringBuilder();  var _ln;  while((_ln=_br.readLine())!==null){_sb.append(_ln).append('\n');}  _br.close();  exchange.getMessage().setBody(_sb.toString().trim());  if(_ce)exchange.getMessage().removeHeader('Content-Encoding');}
+        - script:
+            expression:
+              js: var _m=exchange.getMessage();var _ks=_m.getHeaders().keySet().toArray();for(var
+                _i=0;_i<_ks.length;_i++){  var _k=String(_ks[_i]);  if(_k.startsWith('CamelHttp')){    var
+                _nk=_k.substring(5,6).toLowerCase()+_k.substring(6);    _m.getHeaders().put(_nk,_m.getHeaders().get(_k));  }}
+        - script:
+            expression:
+              js: 'var _failures=[];var _l0=(exchange.getMessage().getHeaders().get(''httpResponseCode''));var
+                _r0=(429);if(!(String(_l0)===String(_r0)))_failures.push(''Condition
+                1: ''+''actual="''+String(_l0)+''"  expected == "''+String(_r0)+''"'');if(_failures.length>0)throw
+                new Error(''Assertion failed:\n''+_failures.join(''\n''));'

@@ -9,8 +9,15 @@ import java.util.*;
 
 public class NotificationPlugin implements NodeConverterPlugin {
 
+    private final NotificationHelper notificationHelper = new NotificationHelper();
+
     @Override
     public String pluginId() { return "notification"; }
+
+    @Override
+    public Map<String, Object> beans() {
+        return Collections.singletonMap("notificationHelper", notificationHelper);
+    }
 
     @Override
     public Map<String, NodeConverter> converters() {
@@ -43,7 +50,27 @@ public class NotificationPlugin implements NodeConverterPlugin {
         String body       = data.path("body").asText("").trim();
         String bodyFormat = data.path("bodyFormat").asText("html").trim();
 
+        // Attachment config
+        boolean attachBody = data.path("attachBody").asBoolean(false);
+        String attachBodyFileName = data.path("attachBodyFileName").asText("").trim();
+        if (attachBodyFileName.isEmpty()) attachBodyFileName = "attachment.bin";
+
+        String attachVar = data.path("attachVariable").asText("").trim();
+        String attachVarFileName = data.path("attachVariableFileName").asText("").trim();
+        if (attachVarFileName.isEmpty() && !attachVar.isEmpty()) attachVarFileName = attachVar + ".bin";
+
         List<Map<String, Object>> steps = new ArrayList<>();
+
+        // Capture attachment sources BEFORE setBody overwrites the exchange body
+        if (attachBody) {
+            steps.add(ConversionUtils.setVarExpr("_smtp_ab_content", Map.of("simple", "${body}")));
+            steps.add(ConversionUtils.setVarExpr("_smtp_ab_name",    Map.of("constant", attachBodyFileName)));
+        }
+        if (!attachVar.isEmpty()) {
+            steps.add(ConversionUtils.setVarExpr("_smtp_av_content",
+                Map.of("simple", "${exchangeProperty." + attachVar + "}")));
+            steps.add(ConversionUtils.setVarExpr("_smtp_av_name", Map.of("constant", attachVarFileName)));
+        }
 
         // Body — setBody with expression evaluation so ${vars.x} is resolved
         if (!body.isEmpty()) {
@@ -64,6 +91,11 @@ public class NotificationPlugin implements NodeConverterPlugin {
         if (!fromAddr.isEmpty()) {
             String fromFull = fromName.isEmpty() ? fromAddr : fromName + " <" + fromAddr + ">";
             steps.add(mailHeader("from", fromFull));
+        }
+
+        // Build CamelMailAttachments header via the helper bean
+        if (attachBody || !attachVar.isEmpty()) {
+            steps.add(beanStep("notificationHelper", "buildAttachments"));
         }
 
         // URI carries only connection/auth/TLS/format — no subject/recipients.
@@ -92,6 +124,15 @@ public class NotificationPlugin implements NodeConverterPlugin {
         body.put("expression", ConversionUtils.simpleOrConstant(value));
         Map<String, Object> step = new LinkedHashMap<>();
         step.put("setHeader", body);
+        return step;
+    }
+
+    private static Map<String, Object> beanStep(String ref, String method) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("ref", ref);
+        body.put("method", method);
+        Map<String, Object> step = new LinkedHashMap<>();
+        step.put("bean", body);
         return step;
     }
 

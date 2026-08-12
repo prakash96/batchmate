@@ -37,7 +37,10 @@
         <module>workflow-plugin-security</module>
         <module>workflow-plugin-compression</module>
         <module>workflow-plugin-converter</module>
+        <module>workflow-plugin-as2</module>
+        <module>workflow-plugin-ibmmq</module>
         <module>app</module>
+        <module>apitester-app</module>
     </modules>
 
     <!-- ========================= -->

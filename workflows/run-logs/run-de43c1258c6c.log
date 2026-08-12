@@ -1,5 +1,0 @@
-[00:09:35.835] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[00:09:35.839] INFO  controller.WorkflowController — Workflow 'CONFIG_TEST' run started [runId=run-de43c1258c6c]
-[00:09:35.843] INFO  workflow.execution — jsonconfig: Loading variables from C:\files\config/CONFIG_TEST.json
-[00:09:36.199] INFO  workflow.execution — sftp
-[00:09:36.199] INFO  controller.WorkflowController — Workflow 'CONFIG_TEST' run completed successfully in 364ms

@@ -1,4 +1,0 @@
-[21:26:50.976] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[21:26:50.978] INFO  controller.WorkflowController — Workflow 'EMAIL_TEST' run started [runId=run-91f9e845e4c9]
-[21:26:50.978] INFO  workflow.execution — smtp: Sending email to bhanuprksh96@gmail.com
-[21:26:54.877] INFO  controller.WorkflowController — Workflow 'EMAIL_TEST' run completed successfully in 3901ms

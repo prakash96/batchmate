@@ -1,4 +1,0 @@
-[00:11:19.335] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[00:11:19.335] INFO  controller.WorkflowController — Workflow 'CONFIG_TEST' run started [runId=run-f384baf33352]
-[00:11:19.335] INFO  workflow.execution — /pub/example
-[00:11:19.335] INFO  controller.WorkflowController — Workflow 'CONFIG_TEST' run completed successfully in 0ms

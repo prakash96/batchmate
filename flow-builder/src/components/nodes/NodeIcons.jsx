@@ -11,8 +11,9 @@ export const NODE_COLORS = {
     jsoncompare:   "#EAB308",
     dbexecute:     "#6366F1",
     textcompare:   "#EC4899",
-    base64encode:  "#F59E0B",
-    base64decode:  "#D97706",
+    base64encode:     "#F59E0B",
+    base64decode:     "#D97706",
+    stringtobytearray: "#0D9488",
 };
 
 export const GROUP_COLORS = {
@@ -26,6 +27,8 @@ export const GROUP_COLORS = {
     "Database":      "#8B5CF6",
     "AWS":           "#F97316",
     "Core":          "#6366F1",
+    "AS2":           "#14B8A6",
+    "Messaging":     "#8B5CF6",
 };
 
 export const nodeColor = (type) => NODE_COLORS[type] ?? "#6b7280";
@@ -120,6 +123,35 @@ const ICONS = {
             <rect x="2" y="7" width="20" height="10" rx="2"/>
             <path d="M7 11v2M10 11v2M13 11v2M16 11v2"/>
             <path d="M15 20l-2 2-2-2M13 22v-3"/>
+        </svg>
+    ),
+    stringtobytearray: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 8h5M5.5 8v8"/>
+            <path d="M11 12h2.5"/>
+            <path d="M12.5 9.5 15 12l-2.5 2.5"/>
+            <rect x="16" y="6"  width="5" height="4" rx="1"/>
+            <rect x="16" y="13" width="5" height="4" rx="1"/>
+        </svg>
+    ),
+    as2send: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z"/>
+            <path d="M22 2 11 13"/>
+        </svg>
+    ),
+    mqpublish: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="7" width="20" height="10" rx="2"/>
+            <path d="M6 11h4M6 14h2"/>
+            <path d="M16 9l2 2-2 2"/>
+        </svg>
+    ),
+    mqconsume: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="7" width="20" height="10" rx="2"/>
+            <path d="M6 11h4M6 14h2"/>
+            <path d="M18 9l-2 2 2 2"/>
         </svg>
     ),
     _default: (

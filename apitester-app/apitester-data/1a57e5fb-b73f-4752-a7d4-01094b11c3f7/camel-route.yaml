@@ -1,0 +1,41 @@
+# Camel YAML DSL — generated for request: 1a57e5fb-b73f-4752-a7d4-01094b11c3f7
+
+  - route:
+      id: 1a57e5fb-b73f-4752-a7d4-01094b11c3f7
+      from:
+        uri: direct:1a57e5fb-b73f-4752-a7d4-01094b11c3f7
+      steps:
+        - log:
+            message: 'http: POST https://${exchangeProperty.sitHost}/api/encrypt?throwExceptionOnFailure=${exchangeProperty.__throwOff}'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('Accept-Encoding','identity');
+        - setBody:
+            expression:
+              constant: '{"CIF": "000002222222", "REQUEST_REFERENCE_NUMBER": "EDGE_CASE_001"}'
+        - script:
+            expression:
+              js: var _h = JSON.parse('{"client_id":"afdsfdf","client_secret":"lafjdfkjd"}');
+                Object.keys(_h).forEach(function(k){ exchange.getMessage().getHeaders().put(k,
+                String(_h[k])); });
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('CamelHttpMethod','POST');exchange.setProperty('_httpUrl',
+                String('https://' + exchange.getProperties().get('sitHost') + '/api/encrypt?throwExceptionOnFailure='
+                + exchange.getProperties().get('__throwOff')));
+        - toD:
+            uri: ${exchangeProperty._httpUrl}
+        - script:
+            expression:
+              js: var _b=exchange.getMessage().getBody();if(_b instanceof java.io.InputStream){  var
+                _ce=String(exchange.getMessage().getHeader('Content-Encoding')||'');  var
+                _is=_ce.toLowerCase().indexOf('gzip')>=0    ?new java.util.zip.GZIPInputStream(_b)    :_b;  var
+                _isr=new java.io.InputStreamReader(_is,'UTF-8');  var _br=new java.io.BufferedReader(_isr);  var
+                _sb=new java.lang.StringBuilder();  var _ln;  while((_ln=_br.readLine())!==null){_sb.append(_ln).append('\n');}  _br.close();  exchange.getMessage().setBody(_sb.toString().trim());  if(_ce)exchange.getMessage().removeHeader('Content-Encoding');}
+        - script:
+            expression:
+              js: var _m=exchange.getMessage();var _ks=_m.getHeaders().keySet().toArray();for(var
+                _i=0;_i<_ks.length;_i++){  var _k=String(_ks[_i]);  if(_k.startsWith('CamelHttp')){    var
+                _nk=_k.substring(5,6).toLowerCase()+_k.substring(6);    _m.getHeaders().put(_nk,_m.getHeaders().get(_k));  }}

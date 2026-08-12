@@ -179,6 +179,11 @@
                                 <copy todir="${project.basedir}/src/main/resources/static" overwrite="true">
                                     <fileset dir="${project.basedir}/../flow-builder/dist"/>
                                 </copy>
+                                <!-- Also write directly to target/classes so the JAR gets fresh assets
+                                     even when maven-resources-plugin ran before this task -->
+                                <copy todir="${project.build.outputDirectory}/static" overwrite="true">
+                                    <fileset dir="${project.basedir}/../flow-builder/dist"/>
+                                </copy>
                             </target>
                         </configuration>
                     </execution>
@@ -272,6 +277,16 @@
                                 <artifactItem>
                                     <groupId>com.batchmate.workflow</groupId>
                                     <artifactId>workflow-plugin-converter</artifactId>
+                                    <version>${project.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.batchmate.workflow</groupId>
+                                    <artifactId>workflow-plugin-as2</artifactId>
+                                    <version>${project.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.batchmate.workflow</groupId>
+                                    <artifactId>workflow-plugin-ibmmq</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
                             </artifactItems>

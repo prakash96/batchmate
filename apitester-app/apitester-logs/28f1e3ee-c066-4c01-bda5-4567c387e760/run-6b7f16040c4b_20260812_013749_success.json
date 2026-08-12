@@ -1,0 +1,72 @@
+{
+  "runId" : "run-6b7f16040c4b",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "success",
+  "durationMs" : 1556,
+  "preRequestLog" : [ {
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputBody" : "{\"CIF\": \"000002222222\", \"REQUEST_REFERENCE_NUMBER\": \"EDGE_CASE_001\"}",
+    "inputHeaders" : { },
+    "subRunId" : "run-998c3e22cd67",
+    "subStatus" : "success",
+    "subResponseStatus" : 429,
+    "subResponseBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "status" : "ok"
+  } ],
+  "sentBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+  "sentHeaders" : {
+    "Accept-Encoding" : "identity",
+    "Access-Control-Allow-Origin" : "*",
+    "Alt-Svc" : "h3=\":443\"; ma=2592000",
+    "Content-Type" : "text/plain; charset=utf-8",
+    "client_id" : "",
+    "client_secret" : "",
+    "AccessToken" : ""
+  },
+  "response" : {
+    "status" : 429,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "AccessToken" : "",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "client_id" : "",
+      "client_secret" : "",
+      "Content-Length" : "62",
+      "Content-Type" : "text/plain; charset=utf-8",
+      "Date" : "Tue, 11 Aug 2026 20:07:50 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "429",
+      "httpResponseText" : "Too Many Requests"
+    },
+    "body" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ {
+    "name" : "",
+    "type" : "assertion",
+    "passed" : true
+  } ],
+  "postResponseLog" : [ {
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+    "inputBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "inputHeaders" : {
+      "Accept-Encoding" : "identity",
+      "Access-Control-Allow-Origin" : "*",
+      "AccessToken" : "",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "client_id" : "",
+      "client_secret" : "",
+      "Content-Type" : "text/plain; charset=utf-8"
+    },
+    "subRunId" : "run-7e4d3ffb9800",
+    "subStatus" : "success",
+    "subResponseStatus" : 429,
+    "subResponseBody" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/",
+    "status" : "ok"
+  } ]
+}

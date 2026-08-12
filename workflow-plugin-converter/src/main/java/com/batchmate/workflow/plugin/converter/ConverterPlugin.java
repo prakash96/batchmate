@@ -21,8 +21,9 @@ public class ConverterPlugin implements NodeConverterPlugin {
         m.put("stringtojson",   this::convertStringToJson);
         m.put("xmltojson",      this::convertXmlToJson);
         m.put("jsontoxml",      this::convertJsonToXml);
-        m.put("streamtostring", this::convertStreamToString);
-        m.put("stringtostream", this::convertStringToStream);
+        m.put("streamtostring",   this::convertStreamToString);
+        m.put("stringtostream",   this::convertStringToStream);
+        m.put("stringtobytearray", this::convertStringToByteArray);
         return m;
     }
 
@@ -139,6 +140,26 @@ public class ConverterPlugin implements NodeConverterPlugin {
             "exchange.getMessage().setBody(_stream);" +
             (resultVar.isEmpty() ? "" : "exchange.setProperty('" + ConversionUtils.escapeJs(resultVar) + "',_stream);");
         return List.of(ConversionUtils.scriptStep("js", script));
+    }
+
+    // ── String to Byte Array ──────────────────────────────────────────────────
+
+    private List<Map<String, Object>> convertStringToByteArray(JsonNode data) {
+        String charset   = data.path("charset").asText("UTF-8").trim();
+        if (charset.isEmpty()) charset = "UTF-8";
+        String resultVar = data.path("resultVar").asText("").trim();
+
+        List<Map<String, Object>> steps = new ArrayList<>();
+        Map<String, Object> convertStep = new LinkedHashMap<>();
+        Map<String, Object> convertBody = new LinkedHashMap<>();
+        convertBody.put("type", "byte[]");
+        convertBody.put("charset", charset);
+        convertStep.put("convertBodyTo", convertBody);
+        steps.add(convertStep);
+        if (!resultVar.isEmpty()) {
+            steps.add(ConversionUtils.setVarExpr(resultVar, Map.of("simple", "${body}")));
+        }
+        return steps;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

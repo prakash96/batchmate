@@ -1,5 +1,0 @@
-[00:55:30.878] INFO  controller.WorkflowController — ─────────────────────────────────────────────────────
-[00:55:30.878] INFO  controller.WorkflowController — Workflow 'HTTP_TEST' run started [runId=run-618eb304bef9]
-[00:55:30.883] INFO  workflow.execution — http: GET https://random123.free.beeceptor.com//todos
-[00:55:31.199] INFO  workflow.execution — null
-[00:55:31.199] INFO  controller.WorkflowController — Workflow 'HTTP_TEST' run completed successfully in 321ms
