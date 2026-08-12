@@ -1,0 +1,37 @@
+{
+  "runId" : "run-c14a2229d4a0",
+  "requestId" : "46f4a51a-65bd-4a92-8d28-ad271c52c7e2",
+  "status" : "success",
+  "durationMs" : 408,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "access-control-allow-credentials" : "true",
+      "access-control-allow-origin" : "*",
+      "content-length" : "53",
+      "Content-Type" : "application/json; charset=utf-8",
+      "date" : "Wed, 12 Aug 2026 11:38:30 GMT",
+      "fly-request-id" : "01KZTW8JMKGW8XQ7925AZTA4VS-sin",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "server" : "Fly/505080ed8 (2026-08-11)",
+      "via" : "1.1 fly.io, 1.1 fly.io"
+    },
+    "body" : "{\n  \"uuid\": \"e71f2865-576f-48aa-92ed-4d7ac72b98c5\"\n}\n"
+  },
+  "vars" : {
+    "capturedUuid" : "e71f2865-576f-48aa-92ed-4d7ac72b98c5"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ {
+    "type" : "setVariable",
+    "name" : "capturedUuid",
+    "value" : "e71f2865-576f-48aa-92ed-4d7ac72b98c5",
+    "status" : "ok"
+  } ]
+}

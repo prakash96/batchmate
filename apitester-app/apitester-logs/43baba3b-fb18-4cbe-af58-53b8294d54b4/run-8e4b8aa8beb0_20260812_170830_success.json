@@ -1,0 +1,49 @@
+{
+  "runId" : "run-8e4b8aa8beb0",
+  "requestId" : "43baba3b-fb18-4cbe-af58-53b8294d54b4",
+  "status" : "success",
+  "durationMs" : 984,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "access-control-allow-credentials" : "true",
+      "access-control-allow-origin" : "*",
+      "content-length" : "649",
+      "Content-Type" : "application/json; charset=utf-8",
+      "date" : "Wed, 12 Aug 2026 11:38:29 GMT",
+      "fly-request-id" : "01KZTW8J7843J4XZ9VJTYE71X6-sin",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "server" : "Fly/505080ed8 (2026-08-11)",
+      "via" : "1.1 fly.io, 1.1 fly.io"
+    },
+    "body" : "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept-Encoding\": [\n      \"identity\"\n    ],\n    \"Connection\": [\n      \"Keep-Alive\"\n    ],\n    \"Host\": [\n      \"httpbingo.org\"\n    ],\n    \"User-Agent\": [\n      \"Apache-HttpClient/4.5.14 (Java/11.0.25)\"\n    ],\n    \"Via\": [\n      \"1.1 fly.io, 1.1 fly.io\"\n    ],\n    \"X-Forwarded-For\": [\n      \"27.60.44.113, 66.241.125.232\"\n    ],\n    \"X-Forwarded-Port\": [\n      \"443\"\n    ],\n    \"X-Forwarded-Proto\": [\n      \"https\"\n    ],\n    \"X-Forwarded-Ssl\": [\n      \"on\"\n    ],\n    \"X-Request-Start\": [\n      \"t=1786534709480464\"\n    ]\n  },\n  \"method\": \"GET\",\n  \"origin\": \"27.60.44.113\",\n  \"url\": \"https://httpbingo.org/get\"\n}\n"
+  },
+  "vars" : {
+    "capturedUuid" : "e71f2865-576f-48aa-92ed-4d7ac72b98c5"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ {
+    "requestId" : "46f4a51a-65bd-4a92-8d28-ad271c52c7e2",
+    "inputBody" : "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept-Encoding\": [\n      \"identity\"\n    ],\n    \"Connection\": [\n      \"Keep-Alive\"\n    ],\n    \"Host\": [\n      \"httpbingo.org\"\n    ],\n    \"User-Agent\": [\n      \"Apache-HttpClient/4.5.14 (Java/11.0.25)\"\n    ],\n    \"Via\": [\n      \"1.1 fly.io, 1.1 fly.io\"\n    ],\n    \"X-Forwarded-For\": [\n      \"27.60.44.113, 66.241.125.232\"\n    ],\n    \"X-Forwarded-Port\": [\n      \"443\"\n    ],\n    \"X-Forwarded-Proto\": [\n      \"https\"\n    ],\n    \"X-Forwarded-Ssl\": [\n      \"on\"\n    ],\n    \"X-Request-Start\": [\n      \"t=1786534709480464\"\n    ]\n  },\n  \"method\": \"GET\",\n  \"origin\": \"27.60.44.113\",\n  \"url\": \"https://httpbingo.org/get\"\n}\n",
+    "inputHeaders" : {
+      "Accept-Encoding" : "identity",
+      "access-control-allow-credentials" : "true",
+      "access-control-allow-origin" : "*",
+      "Content-Type" : "application/json; charset=utf-8",
+      "fly-request-id" : "01KZTW8J7843J4XZ9VJTYE71X6-sin",
+      "server" : "Fly/505080ed8 (2026-08-11)",
+      "via" : "1.1 fly.io, 1.1 fly.io"
+    },
+    "subRunId" : "run-c14a2229d4a0",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"uuid\": \"e71f2865-576f-48aa-92ed-4d7ac72b98c5\"\n}\n",
+    "status" : "ok"
+  } ]
+}

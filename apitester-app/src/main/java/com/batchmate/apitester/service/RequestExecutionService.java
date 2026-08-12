@@ -88,11 +88,19 @@ public class RequestExecutionService {
         static final Payload EMPTY = new Payload(null, null);
     }
 
-    /** A Call Request step's log entry plus the payload its callee returned, for chaining. */
+    /** A Call Request step's log entry, the payload its callee returned (for chaining), and the
+     *  callee's own final vars (including whatever ITS post-response Set Variable steps set) —
+     *  merged back into the caller's vars so a variable set in a called request's post-response
+     *  is available to the caller afterward, not just within the callee itself. */
     private static final class CallResult {
         final Map<String, Object> log;
         final Payload resultPayload;
-        CallResult(Map<String, Object> log, Payload resultPayload) { this.log = log; this.resultPayload = resultPayload; }
+        final Map<String, Object> subVars;
+        CallResult(Map<String, Object> log, Payload resultPayload, Map<String, Object> subVars) {
+            this.log = log;
+            this.resultPayload = resultPayload;
+            this.subVars = subVars;
+        }
     }
 
     /**
@@ -202,6 +210,10 @@ public class RequestExecutionService {
                 CallResult result = executeCallRequestStep(step, preChain, depth, chain, globalVars);
                 preRequestLog.add(result.log);
                 preChain = result.resultPayload;
+                // Variables set in the CALLEE's own post-response flow back up into this request's
+                // own vars immediately, so they're visible to this request's Input tab templates
+                // (finalBody/finalHeaders below), the request itself, and its own post-response.
+                vars.putAll(result.subVars);
             }
         }
         // Input tab: the Pre-Request chain's final payload is bound as "body"/"headers" (raw,
@@ -280,6 +292,10 @@ public class RequestExecutionService {
                 CallResult result = executeCallRequestStep(step, postChain, depth, chain, effectiveFloor);
                 postResponseLog.add(result.log);
                 postChain = result.resultPayload;
+                // Variables set in the CALLEE's own post-response flow back up into this request's
+                // own postVars, so they're visible to subsequent post-response steps here AND end up
+                // in this request's own final "vars" below — propagating up the caller chain too.
+                postVars.putAll(result.subVars);
             }
         }
         finalVars.putAll(postVars);
@@ -311,16 +327,18 @@ public class RequestExecutionService {
     /**
      * Executes one Call Request step: chains from the previous step's response, calls the target
      * request with that as its outgoing body/headers, and returns the callee's response as the
-     * payload for whatever comes next in the chain. On failure, the previous payload is passed
-     * through unchanged (so a broken call doesn't wipe out a chain state — the failure itself is
-     * still logged via "subError").
+     * payload for whatever comes next in the chain, PLUS the callee's own final vars (so a
+     * variable the callee's post-response set — bound to the callee's OWN response — flows back
+     * up into the caller's vars too, not just forward to steps after it within the callee). On
+     * failure, the previous payload/vars are passed through unchanged (so a broken call doesn't
+     * wipe out a chain state — the failure itself is still logged via "subError").
      */
     private CallResult executeCallRequestStep(JsonNode step, Payload previousPayload,
                                                int depth, Set<String> chain, Map<String, Object> globalVars) {
         Map<String, Object> log = new LinkedHashMap<>();
         String targetId = step.path("requestId").asText("").trim();
         log.put("requestId", targetId);
-        if (targetId.isEmpty()) return new CallResult(log, previousPayload);
+        if (targetId.isEmpty()) return new CallResult(log, previousPayload, Collections.emptyMap());
 
         Payload input = previousPayload != null ? previousPayload : Payload.EMPTY;
         log.put("inputBody", input.body);
@@ -333,10 +351,14 @@ public class RequestExecutionService {
             log.put("subStatus", subResult.get("status"));
 
             Payload resultPayload;
+            Map<String, Object> subVars;
             if ("success".equals(subResult.get("status"))) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> subResponse = (Map<String, Object>) subResult.get("response");
                 resultPayload = payloadFromResponse(subResponse);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> vars = (Map<String, Object>) subResult.get("vars");
+                subVars = vars != null ? vars : Collections.emptyMap();
                 log.put("subResponseStatus", subResponse != null ? subResponse.get("status") : null);
                 log.put("subResponseBody", subResponse != null ? subResponse.get("body") : null);
             } else {
@@ -345,13 +367,14 @@ public class RequestExecutionService {
                 // instead of a misleading "response".
                 log.put("subError", subResult.get("error"));
                 resultPayload = previousPayload;
+                subVars = Collections.emptyMap();
             }
             log.put("status", "ok");
-            return new CallResult(log, resultPayload);
+            return new CallResult(log, resultPayload, subVars);
         } catch (Exception e) {
             log.put("status", "error");
             log.put("error", e.getMessage());
-            return new CallResult(log, previousPayload);
+            return new CallResult(log, previousPayload, Collections.emptyMap());
         }
     }
 

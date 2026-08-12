@@ -1,0 +1,44 @@
+{
+  "runId" : "run-4bc834512212",
+  "requestId" : "43baba3b-fb18-4cbe-af58-53b8294d54b4",
+  "status" : "success",
+  "durationMs" : 1861,
+  "preRequestLog" : [ {
+    "requestId" : "46f4a51a-65bd-4a92-8d28-ad271c52c7e2",
+    "inputBody" : null,
+    "inputHeaders" : null,
+    "subRunId" : "run-e9d338af93e5",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"uuid\": \"1e158a72-ee25-494f-a386-d2136e81e593\"\n}\n",
+    "status" : "ok"
+  } ],
+  "sentBody" : "1e158a72-ee25-494f-a386-d2136e81e593",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "cf-cache-status" : "DYNAMIC",
+      "CF-RAY" : "a29f31178c2c0028-BOM",
+      "Connection" : "keep-alive",
+      "Content-Length" : "334",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Date" : "Wed, 12 Aug 2026 11:38:05 GMT",
+      "etag" : "W/\"14e-M8oqG9t5o5OPNJ8z90ZNaxtmExc\"",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Server" : "cloudflare",
+      "Set-Cookie" : "[sails.sid=s%3Aw2lB6pbsYFcbIgUu_3I7GNTt9bJFHnuw.j2pZ%2Fti98QtbIxBDIVKAijeQxYRD%2Bc01Tx9d%2F%2B3TMzE; Path=/; HttpOnly, __cf_bm=8jk5MBVhPuuVh1l48Z1dfTbarHZwGtju3W4YpXNNIZc-1786534685.368707-1.0.1.1-tKLFdz0aJODFCUdoxj_oAzdiZCvRz_r4FxQ6K6oJ3sBvpdbrck94FcvVw8BKYcQMB5XMpbWh60x9XodLZaZk7Lx9BX4xRzG1tAzRsaeL8WGEUZ6pEGH_2HvnmjJaFK8t; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Wed, 12 Aug 2026 12:08:05 GMT, _cfuvid=z.08wcZMVRP5MG33dI.VneLvKItbmDK6PaVXutCLtQw-1786534685.368707-1.0.1.1-xhi9PjlMD_0pwge5VcXs0RYacMeDXglCN0OAzCkQj7Y; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com]",
+      "vary" : "Accept-Encoding",
+      "x-envoy-upstream-service-time" : "5"
+    },
+    "body" : "{\"args\":{},\"data\":\"1e158a72-ee25-494f-a386-d2136e81e593\",\"files\":{},\"form\":{},\"headers\":{\"host\":\"postman-echo.com\",\"x-forwarded-proto\":\"https\",\"content-length\":\"36\",\"user-agent\":\"Apache-HttpClient/4.5.14 (Java/11.0.25)\",\"accept-encoding\":\"gzip, br\",\"content-type\":\"application/json\"},\"json\":null,\"url\":\"https://postman-echo.com/post\"}"
+  },
+  "vars" : {
+    "capturedUuid" : "1e158a72-ee25-494f-a386-d2136e81e593"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}
