@@ -1,0 +1,39 @@
+{
+  "runId" : "run-8bd763ec2c31",
+  "requestId" : "526d8d71-ad44-4eac-952c-446bdfe97d02",
+  "status" : "failed",
+  "error" : "JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Assertion failed:\nCondition 1: actual=\"[object Object]\"  expected == \"nomatch\"",
+  "durationMs" : 669,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "cf-cache-status" : "DYNAMIC",
+      "CF-RAY" : "a2a5823ceb243b3d-BOM",
+      "Connection" : "keep-alive",
+      "Content-Length" : "445",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Date" : "Thu, 13 Aug 2026 06:02:03 GMT",
+      "etag" : "W/\"1bd-Dg277ZTlvd9c+yLRNMQdL1R8rSg\"",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Server" : "cloudflare",
+      "Set-Cookie" : "[sails.sid=s%3AfaRG88jjIeTyVVw2Q-jUB-9Cmo2_At9G.uuF8kmPkA7L7eT6pyvCJuhH8QglFvhnFDAS5Lwzx5Jk; Path=/; HttpOnly, __cf_bm=wo9rrX49F1atNOeK0KI0optPtolplBYHakmAJKNg0.8-1786600923.6639597-1.0.1.1-47RZZpQQI5vVPiCUz4Q0qG3FbFQ5AG4UR_b4qpfBkohBExe3biw3Ko9p.QaT1.Lwaq1e59J7TtiGRArUDWDxNJkOyCTbLthFoCMcxfFKIQyCPSsEJ4KlUCGFm_PYrzQd; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 06:32:03 GMT]",
+      "vary" : "Accept-Encoding",
+      "x-envoy-upstream-service-time" : "5"
+    },
+    "body" : "{\"args\":{\"foo\":\"bar\"},\"headers\":{\"host\":\"postman-echo.com\",\"x-forwarded-proto\":\"https\",\"accept-encoding\":\"gzip, br\",\"user-agent\":\"Apache-HttpClient/4.5.14 (Java/11.0.25)\",\"cookie\":\"_cfuvid=bETUCZu2lGAV7pDJDSgQaa3MwYrpmGNhsu8_rl3uuZM-1786600905.5040457-1.0.1.1-cphkK7Mlub6QJN8Mh2BGK6xfCSaHwLOnTHdEI4fdRx8; sails.sid=s%3AAbRwtcPLkvXNotbqubNhLfZc0Zp1tqoB.fB47BwFW3O8o%2B1Yj6BolLlh9ijdIwpQENmlNP6ilzrI\"},\"url\":\"https://postman-echo.com/get?foo=bar\"}"
+  },
+  "vars" : { },
+  "checks" : [ {
+    "name" : "field check",
+    "type" : "assertion",
+    "passed" : false,
+    "message" : "JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Assertion failed:\nCondition 1: actual=\"[object Object]\"  expected == \"nomatch\""
+  } ],
+  "postResponseLog" : [ ]
+}

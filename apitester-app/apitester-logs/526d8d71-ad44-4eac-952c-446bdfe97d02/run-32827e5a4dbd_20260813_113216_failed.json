@@ -1,0 +1,39 @@
+{
+  "runId" : "run-32827e5a4dbd",
+  "requestId" : "526d8d71-ad44-4eac-952c-446bdfe97d02",
+  "status" : "failed",
+  "error" : "JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Assertion failed:\nCondition 1: actual=\"https://postman-echo.com/get?foo=bar\"  expected == \"nomatch\"",
+  "durationMs" : 486,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "cf-cache-status" : "DYNAMIC",
+      "CF-RAY" : "a2a58283a9a43b3d-BOM",
+      "Connection" : "keep-alive",
+      "Content-Length" : "443",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Date" : "Thu, 13 Aug 2026 06:02:15 GMT",
+      "etag" : "W/\"1bb-m8g97a0aoBbmQb4Iui8w7z3of+E\"",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Server" : "cloudflare",
+      "Set-Cookie" : "[sails.sid=s%3Ar8bVp7HLGIC_Res1aBEKjQPkXHor5wnh.K36%2FOZp0J7Fuc5A6MRBEBRNrlaEurVCR1RQonx4DHos; Path=/; HttpOnly, __cf_bm=ZB72vFLtS1rHxVWdkT41IdPyBGklXiL_SHHN0.CWRlg-1786600934.9891574-1.0.1.1-MAsoR12O2PYWy1oVn50ShjNqMrdtgqDBmEHb_8bhGDNw88UJSrqVaYS1fydvjlyug5xv8Selav6DrPkPo8urRTxpTgbqci16sQLkX5kvPVpqtPNJyIBbuVio8sHr8iH0; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 06:32:15 GMT]",
+      "vary" : "Accept-Encoding",
+      "x-envoy-upstream-service-time" : "5"
+    },
+    "body" : "{\"args\":{\"foo\":\"bar\"},\"headers\":{\"host\":\"postman-echo.com\",\"x-forwarded-proto\":\"https\",\"accept-encoding\":\"gzip, br\",\"user-agent\":\"Apache-HttpClient/4.5.14 (Java/11.0.25)\",\"cookie\":\"_cfuvid=bETUCZu2lGAV7pDJDSgQaa3MwYrpmGNhsu8_rl3uuZM-1786600905.5040457-1.0.1.1-cphkK7Mlub6QJN8Mh2BGK6xfCSaHwLOnTHdEI4fdRx8; sails.sid=s%3AfaRG88jjIeTyVVw2Q-jUB-9Cmo2_At9G.uuF8kmPkA7L7eT6pyvCJuhH8QglFvhnFDAS5Lwzx5Jk\"},\"url\":\"https://postman-echo.com/get?foo=bar\"}"
+  },
+  "vars" : { },
+  "checks" : [ {
+    "name" : "field check",
+    "type" : "assertion",
+    "passed" : false,
+    "message" : "JS evaluation failed: org.graalvm.polyglot.PolyglotException: Error: Assertion failed:\nCondition 1: actual=\"https://postman-echo.com/get?foo=bar\"  expected == \"nomatch\""
+  } ],
+  "postResponseLog" : [ ]
+}

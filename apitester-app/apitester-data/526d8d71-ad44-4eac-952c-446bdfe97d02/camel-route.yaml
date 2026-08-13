@@ -1,0 +1,44 @@
+# Camel YAML DSL — generated for request: 526d8d71-ad44-4eac-952c-446bdfe97d02
+
+  - route:
+      id: 526d8d71-ad44-4eac-952c-446bdfe97d02
+      from:
+        uri: direct:526d8d71-ad44-4eac-952c-446bdfe97d02
+      steps:
+        - log:
+            message: 'http: GET https://postman-echo.com/get?foo=bar&throwExceptionOnFailure=${exchangeProperty.__throwOff}'
+            logName: com.batchmate.workflow.execution
+            loggingLevel: INFO
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('Accept-Encoding','identity');
+        - script:
+            expression:
+              js: exchange.getMessage().getHeaders().put('CamelHttpMethod','GET');exchange.setProperty('_httpUrl',
+                String('https://postman-echo.com/get?foo=bar&throwExceptionOnFailure='
+                + exchange.getProperties().get('__throwOff')));
+        - toD:
+            uri: ${exchangeProperty._httpUrl}
+        - script:
+            expression:
+              js: var _b=exchange.getMessage().getBody();var _is=null;if(_b instanceof
+                java.io.InputStream){_is=_b;}else if(_b!=null && _b.getClass && _b.getClass().isArray()){_is=new
+                java.io.ByteArrayInputStream(_b);}if(_is!=null){  var _ce=String(exchange.getMessage().getHeader('Content-Encoding')||'');  var
+                _gz=_ce.toLowerCase().indexOf('gzip')>=0;  if(_gz)_is=new java.util.zip.GZIPInputStream(_is);  var
+                _isr=new java.io.InputStreamReader(_is,'UTF-8');  var _br=new java.io.BufferedReader(_isr);  var
+                _sb=new java.lang.StringBuilder();  var _ln;  while((_ln=_br.readLine())!==null){_sb.append(_ln).append('\n');}  _br.close();  exchange.getMessage().setBody(_sb.toString().trim());  if(_gz)exchange.getMessage().removeHeader('Content-Encoding');}
+        - script:
+            expression:
+              js: var _m=exchange.getMessage();var _ks=_m.getHeaders().keySet().toArray();for(var
+                _i=0;_i<_ks.length;_i++){  var _k=String(_ks[_i]);  if(_k.startsWith('CamelHttp')){    var
+                _nk=_k.substring(5,6).toLowerCase()+_k.substring(6);    _m.getHeaders().put(_nk,_m.getHeaders().get(_k));  }}
+        - script:
+            expression:
+              js: 'var _failures=[];var _l0=((function(){var _b=exchange.getMessage().getBody();if(_b==null)return
+                null;if(_b instanceof java.util.Map)return _b.get(''url'');try{var
+                _gn=''get''+''url''[0].toUpperCase()+''url''.slice(1);if(typeof _b[_gn]===''function'')return
+                _b[_gn]();}catch(_ge){}try{var _s=_b instanceof java.lang.String?_b:new
+                java.lang.String(_b);return JSON.parse(_s)[''url''];}catch(e){return
+                null;}})());var _r0=(''nomatch'');if(!(String(_l0)===String(_r0)))_failures.push(''Condition
+                1: ''+''actual="''+String(_l0)+''"  expected == "''+String(_r0)+''"'');if(_failures.length>0)throw
+                new Error(''Assertion failed:\n''+_failures.join(''\n''));'
