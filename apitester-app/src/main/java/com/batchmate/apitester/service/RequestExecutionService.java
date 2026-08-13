@@ -617,10 +617,10 @@ public class RequestExecutionService {
 
     /** Resolves an assertion condition's left/right expression against the current post-response
      *  chain payload — same conventions as the UI's ConditionsEditor placeholder text: a numeric
-     *  literal, a 'quoted'/"quoted" string literal, bare "body"/"body.field", "headers.field", or
-     *  "vars.name"/"vars.name.field" (field access parses the target as JSON first). Anything else
-     *  is treated as a literal string (rather than throwing a ReferenceError like the old Camel/JS
-     *  version would for an unrecognized bare identifier). */
+     *  literal, a 'quoted'/"quoted" string literal, bare "body"/"body.field", bare "headers" (the
+     *  whole header map)/"headers.field", or "vars.name"/"vars.name.field" (field access parses the
+     *  target as JSON first). Anything else is treated as a literal string (rather than throwing a
+     *  ReferenceError like the old Camel/JS version would for an unrecognized bare identifier). */
     private Object resolveAssertionValue(String expr, Payload payload, Map<String, Object> vars) {
         if (expr == null || expr.isEmpty()) return "";
         if (expr.matches("-?\\d+")) {
@@ -635,6 +635,7 @@ public class RequestExecutionService {
         }
         if (expr.equals("body")) return payload.body;
         if (expr.startsWith("body.")) return resolveFieldAccess(payload.body, expr.substring(5));
+        if (expr.equals("headers")) return payload.headers;
         if (expr.startsWith("headers.")) return payload.headers != null ? payload.headers.get(expr.substring(8)) : null;
         if (expr.startsWith("vars.")) {
             String rest = expr.substring(5);

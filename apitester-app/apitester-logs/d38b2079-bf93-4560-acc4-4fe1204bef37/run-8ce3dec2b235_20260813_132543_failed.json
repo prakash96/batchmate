@@ -1,0 +1,39 @@
+{
+  "runId" : "run-8ce3dec2b235",
+  "requestId" : "d38b2079-bf93-4560-acc4-4fe1204bef37",
+  "status" : "failed",
+  "error" : "Assertion failed:\nCondition 1: actual=\"{Accept-Encoding=identity, cf-cache-status=DYNAMIC, CF-RAY=a2a628b4ac858730-BOM, Content-Type=application/json; charset=utf-8, etag=W/\"1a7-QVHmKGAM8NbUQW1W25KEWAGDDp8\", Server=cloudflare, Set-Cookie=[sails.sid=s%3AKWj3RbFJ0ptvXfu05huoHJnmeQQNwa9m.tgtiFU3Q3oY%2BMYpVFDFHEBzfZHLH2zKXIhbOtD4lYrY; Path=/; HttpOnly, __cf_bm=p9BEpJtJ4MS0J6MCggJNfJ_UI9S8zX6Or0F6AwWODII-1786607742.1887286-1.0.1.1-X.4i8LGYla2mY0rskCUiPylnu8YjWgJEWm3EvnwMO.M1x.zi0wacpgqvniw18CCNb0MHOostOvkbIooVZp7.y55kUhxqIpeVn001gc7v5Ggs2GTfQtTZl9292umdq29P; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 08:25:42 GMT], vary=Accept-Encoding, x-envoy-upstream-service-time=5}\"  expected == \"nomatch\"",
+  "durationMs" : 448,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "cf-cache-status" : "DYNAMIC",
+      "CF-RAY" : "a2a628b4ac858730-BOM",
+      "Connection" : "keep-alive",
+      "Content-Length" : "423",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Date" : "Thu, 13 Aug 2026 07:55:42 GMT",
+      "etag" : "W/\"1a7-QVHmKGAM8NbUQW1W25KEWAGDDp8\"",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Server" : "cloudflare",
+      "Set-Cookie" : "[sails.sid=s%3AKWj3RbFJ0ptvXfu05huoHJnmeQQNwa9m.tgtiFU3Q3oY%2BMYpVFDFHEBzfZHLH2zKXIhbOtD4lYrY; Path=/; HttpOnly, __cf_bm=p9BEpJtJ4MS0J6MCggJNfJ_UI9S8zX6Or0F6AwWODII-1786607742.1887286-1.0.1.1-X.4i8LGYla2mY0rskCUiPylnu8YjWgJEWm3EvnwMO.M1x.zi0wacpgqvniw18CCNb0MHOostOvkbIooVZp7.y55kUhxqIpeVn001gc7v5Ggs2GTfQtTZl9292umdq29P; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 08:25:42 GMT]",
+      "vary" : "Accept-Encoding",
+      "x-envoy-upstream-service-time" : "5"
+    },
+    "body" : "{\"args\":{},\"headers\":{\"host\":\"postman-echo.com\",\"x-forwarded-proto\":\"https\",\"accept-encoding\":\"gzip, br\",\"user-agent\":\"Apache-HttpClient/4.5.14 (Java/11.0.25)\",\"cookie\":\"_cfuvid=DBUvgMMrUyV4BOgOrnS94_6EHrlXLD7mg.wKZ0vegYw-1786607730.437043-1.0.1.1-Q4NlXepczNNgcZw8adn6DzZs1qjpGSOtyTTxXE3oPmA; sails.sid=s%3ArSuUKZv_QnvVEz8BMFRBK0XhlFmub4W5.eM20mNy7eUcJS6iCDM4QdaRhCVKxdqssIRbfE21j0zA\"},\"url\":\"https://postman-echo.com/get\"}"
+  },
+  "vars" : { },
+  "checks" : [ {
+    "name" : "bare headers mismatch",
+    "type" : "assertion",
+    "passed" : false,
+    "message" : "Assertion failed:\nCondition 1: actual=\"{Accept-Encoding=identity, cf-cache-status=DYNAMIC, CF-RAY=a2a628b4ac858730-BOM, Content-Type=application/json; charset=utf-8, etag=W/\"1a7-QVHmKGAM8NbUQW1W25KEWAGDDp8\", Server=cloudflare, Set-Cookie=[sails.sid=s%3AKWj3RbFJ0ptvXfu05huoHJnmeQQNwa9m.tgtiFU3Q3oY%2BMYpVFDFHEBzfZHLH2zKXIhbOtD4lYrY; Path=/; HttpOnly, __cf_bm=p9BEpJtJ4MS0J6MCggJNfJ_UI9S8zX6Or0F6AwWODII-1786607742.1887286-1.0.1.1-X.4i8LGYla2mY0rskCUiPylnu8YjWgJEWm3EvnwMO.M1x.zi0wacpgqvniw18CCNb0MHOostOvkbIooVZp7.y55kUhxqIpeVn001gc7v5Ggs2GTfQtTZl9292umdq29P; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 08:25:42 GMT], vary=Accept-Encoding, x-envoy-upstream-service-time=5}\"  expected == \"nomatch\""
+  } ],
+  "postResponseLog" : [ ]
+}
