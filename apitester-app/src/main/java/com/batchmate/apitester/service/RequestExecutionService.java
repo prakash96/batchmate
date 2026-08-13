@@ -29,12 +29,16 @@ import java.util.regex.Pattern;
  *   each entry's body/headers seeding that iteration), and the results come back as one
  *   {@code {iterating:true, iterations:[...]}} wrapper — see the public run() overload.
  *
- * "Call Request" is the ONLY pre-request/post-response step type — it doesn't need to be a Camel
- * node type: it's resolved here by recursively invoking the single-run method for the referenced
- * request, plain Java control flow since it's inherently sequential. It always chains from
- * whatever the previous step returned (pre-request: the prior Call Request's response, or nothing
- * for the first one; post-response: the prior Call Request's response, or THIS request's own
- * response for the first one) — see {@link Payload}/{@link #executeCallRequestStep}.
+ * "Call Request" is the only pre-request step type, and one of several post-response step types
+ * (alongside Set Variable, Assertion, JSON/Text Compare, DB Check, Wait). It doesn't need to be a
+ * Camel node type: it's resolved here by recursively invoking the single-run method for the
+ * referenced request, plain Java control flow since it's inherently sequential. It always chains
+ * from whatever the previous step returned (pre-request: the prior Call Request's response, or
+ * nothing for the first one; post-response: the prior Call Request's response, or THIS request's
+ * own response for the first one) — see {@link Payload}/{@link #executeCallRequestStep}. Call
+ * Request, Set Variable, and Assertion all run in TRUE list order relative to each other (Java-
+ * orchestrated — see POST_RESPONSE_ORCHESTRATED_TYPES); JSON/Text Compare and DB Check remain
+ * Camel-embedded and still always run BEFORE all three, regardless of listed order.
  *
  * Order per run/iteration is always pre-request → request → post-response: the Pre-Request
  * chain's final payload is bound as the "body"/"headers" JS globals for the Request tab's own
@@ -100,6 +104,18 @@ public class RequestExecutionService {
             this.log = log;
             this.resultPayload = resultPayload;
             this.subVars = subVars;
+        }
+    }
+
+    /** Thrown by runAssertionStep when a "stop"-type assertion fails, carrying the check result so
+     *  the caller can still record it (as failed) before halting the post-response loop and marking
+     *  the whole run as failed — mirroring how a Camel-embedded stop-assertion failure surfaces as
+     *  the run's own status/error. */
+    private static final class PostResponseAssertionFailedException extends RuntimeException {
+        final Map<String, Object> checkResult;
+        PostResponseAssertionFailedException(String message, Map<String, Object> checkResult) {
+            super(message);
+            this.checkResult = checkResult;
         }
     }
 
@@ -280,12 +296,23 @@ public class RequestExecutionService {
         // throughout the callee's ENTIRE pipeline (its own pre-request → request Input tab →
         // post-response), the same way an actual global variable already is.
         List<Map<String, Object>> postResponseLog = new ArrayList<>();
+        List<Map<String, Object>> assertionChecks = new ArrayList<>();
         Payload postChain = payloadFromResponse(response);
         Map<String, Object> postVars = new LinkedHashMap<>(finalVars);
         for (JsonNode step : postResponseSteps) {
-            if ("setVariable".equals(step.path("type").asText(""))) {
+            String stepType = step.path("type").asText("");
+            if ("setVariable".equals(stepType)) {
                 postResponseLog.add(runSetVariableStep(step, postChain, postVars));
-            } else {
+            } else if ("assertion".equals(stepType)) {
+                try {
+                    assertionChecks.add(runAssertionStep(step, postChain, postVars));
+                } catch (PostResponseAssertionFailedException e) {
+                    assertionChecks.add(e.checkResult);
+                    status = "failed";
+                    if (error == null) error = e.getMessage();
+                    break; // "stop" semantics — halt remaining post-response steps
+                }
+            } else { // callRequest
                 Map<String, Object> effectiveFloor = new LinkedHashMap<>();
                 if (globalVars != null) effectiveFloor.putAll(globalVars);
                 effectiveFloor.putAll(postVars);
@@ -299,6 +326,36 @@ public class RequestExecutionService {
             }
         }
         finalVars.putAll(postVars);
+
+        // Re-interleave the (still Camel-embedded) dbcheck/jsoncompare/textcompare results with
+        // the Java-orchestrated assertion results back into the postResponse list's TRUE original
+        // order for the "checks" the UI shows — both sub-lists already preserve their own subset's
+        // relative order, so one simultaneous walk over the original list re-merges them correctly.
+        List<Map<String, Object>> finalChecks = new ArrayList<>();
+        Iterator<Map<String, Object>> camelCheckIter = checks.iterator();
+        Iterator<Map<String, Object>> assertionCheckIter = assertionChecks.iterator();
+        if (postResponse.isArray()) {
+            for (JsonNode step : postResponse) {
+                String stepType = step.path("type").asText("");
+                if ("assertion".equals(stepType)) {
+                    if (assertionCheckIter.hasNext()) {
+                        finalChecks.add(assertionCheckIter.next());
+                    } else {
+                        // A prior Java-orchestrated "stop" failure halted the loop before this one ran.
+                        String name = step.path("name").asText("").trim();
+                        Map<String, Object> skipped = new LinkedHashMap<>();
+                        skipped.put("name", name.isEmpty() ? "Assertion" : name);
+                        skipped.put("type", "assertion");
+                        skipped.put("passed", null);
+                        skipped.put("message", "not run — a prior check stopped execution");
+                        finalChecks.add(skipped);
+                    }
+                } else if ("jsoncompare".equals(stepType) || "textcompare".equals(stepType) || "dbcheck".equals(stepType)) {
+                    if (camelCheckIter.hasNext()) finalChecks.add(camelCheckIter.next());
+                }
+            }
+        }
+        checks = finalChecks;
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("runId", runId);
@@ -421,18 +478,27 @@ public class RequestExecutionService {
         return new Payload(body, headers);
     }
 
-    /** Post-response types resolved in Java (below), never handed to the Camel adapter. */
-    private static final Set<String> POST_RESPONSE_ORCHESTRATED_TYPES = Set.of("callRequest", "setVariable");
+    /** Post-response types resolved in Java (below), never handed to the Camel adapter — includes
+     *  "assertion" (moved out of the Camel-embedded checks; see runAssertionStep's javadoc) in
+     *  addition to callRequest/setVariable. jsoncompare/textcompare/dbcheck/wait remain Camel node
+     *  types and still always run BEFORE every step in this set — see postResponseChecksOnly. */
+    private static final Set<String> POST_RESPONSE_ORCHESTRATED_TYPES = Set.of("callRequest", "setVariable", "assertion");
 
     /**
-     * Post-response "callRequest"/"setVariable" steps aren't Camel node types (same reasoning as
-     * pre-request's callRequest) — RequestToCamelAdapter only knows assertion/jsoncompare/
-     * textcompare/dbcheck/wait, so these are filtered out before building the route and run here
-     * in Java, strictly AFTER the whole Camel route (http + every Response Validation check) has
-     * completed. That means these steps always run after every check, regardless of where they're
-     * positioned in the underlying postResponse list — there is no way to interleave them mid-route
-     * — but they DO run in order relative to EACH OTHER, which is what lets a "setVariable" step
-     * affect a "callRequest" step listed after it.
+     * Post-response "callRequest"/"setVariable"/"assertion" steps aren't Camel node types.
+     * callRequest/setVariable never were (inherently sequential Java control flow, not something
+     * Camel's route model expresses). "assertion" moved out too, specifically so it can evaluate
+     * against whatever Call Request chain link precedes it in the list — previously (when it was
+     * Camel-embedded like jsoncompare/textcompare/dbcheck still are) it always ran against the
+     * CURRENT request's own main response, regardless of where it was positioned relative to a
+     * Call Request step, which is wrong once a Call Request is meant to feed it. jsoncompare/
+     * textcompare/dbcheck are still genuine Camel node types (RequestToCamelAdapter/CoreNodesPlugin),
+     * so they're filtered out here and still run as part of the Camel route, strictly BEFORE every
+     * step in POST_RESPONSE_ORCHESTRATED_TYPES, regardless of listed order (a real remaining
+     * limitation for those three types — only callRequest/setVariable/assertion get true list-order
+     * interleaving). Steps within POST_RESPONSE_ORCHESTRATED_TYPES DO run in true list order
+     * relative to each other: a Set Variable before a Call Request is visible to it; an assertion
+     * after a Call Request evaluates that callee's response; and so on.
      */
     private JsonNode postResponseChecksOnly(JsonNode postResponse) {
         if (postResponse == null || !postResponse.isArray()) return postResponse;
@@ -476,6 +542,184 @@ public class RequestExecutionService {
             log.put("error", e.getMessage());
         }
         return log;
+    }
+
+    /**
+     * Java-orchestrated equivalent of CoreNodesPlugin's Camel-embedded assertion converter — moved
+     * out of the Camel route (unlike jsoncompare/textcompare/dbcheck, which stay Camel-embedded) so
+     * it runs at its TRUE position in the postResponse list, evaluating against whatever Call
+     * Request chain link precedes it (postChain/postVars) instead of always the main request's own
+     * response. This also sidesteps entirely the byte[]-vs-String body quirk that plagues the
+     * Camel/exchange-based path (see ConversionUtils.readHttpBody's javadoc), since it operates on
+     * the ALREADY-decoded Payload.body (a proper String, from payloadFromResponse/captureResponse).
+     */
+    private Map<String, Object> runAssertionStep(JsonNode step, Payload postChain, Map<String, Object> postVars) {
+        String name = step.path("name").asText("").trim();
+        if (name.isEmpty()) name = "Assertion";
+        boolean isOr = "OR".equalsIgnoreCase(step.path("logic").asText("AND"));
+        String onFail = step.path("onFail").asText("stop");
+        JsonNode conditions = step.path("conditions");
+
+        List<String> failures = new ArrayList<>();
+        int passCount = 0, total = 0;
+        if (conditions.isArray()) {
+            for (JsonNode c : conditions) {
+                total++;
+                String leftExpr = c.path("left").asText("").trim();
+                String op = c.path("operator").asText("==");
+                String rightExpr = c.path("right").asText("").trim();
+                Object leftVal = resolveAssertionValue(leftExpr, postChain, postVars);
+                boolean pass;
+                String failMsg;
+                switch (op) {
+                    case "notNull":
+                        pass = leftVal != null;
+                        failMsg = "actual=" + stringifyForCompare(leftVal) + "  expected: not null";
+                        break;
+                    case "contains": {
+                        Object rightVal = resolveAssertionValue(rightExpr, postChain, postVars);
+                        String l = stringifyForCompare(leftVal), r = stringifyForCompare(rightVal);
+                        pass = l.contains(r);
+                        failMsg = "actual=\"" + l + "\"  expected to contain: \"" + r + "\"";
+                        break;
+                    }
+                    case "typeof": {
+                        String actualType = typeOfValue(leftVal);
+                        pass = actualType.equals(rightExpr);
+                        failMsg = "actual typeof=" + actualType + "  expected type: " + rightExpr;
+                        break;
+                    }
+                    default: {
+                        Object rightVal = resolveAssertionValue(rightExpr, postChain, postVars);
+                        pass = compareValues(leftVal, rightVal, op);
+                        failMsg = "actual=\"" + stringifyForCompare(leftVal) + "\"  expected " + op
+                                + " \"" + stringifyForCompare(rightVal) + "\"";
+                        break;
+                    }
+                }
+                if (pass) passCount++; else failures.add("Condition " + total + ": " + failMsg);
+            }
+        }
+        boolean overallPass = total == 0 || (isOr ? passCount > 0 : failures.isEmpty());
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("name", name);
+        result.put("type", "assertion");
+        result.put("passed", overallPass);
+        if (!overallPass) {
+            String message = (isOr ? "Assertion failed (no condition passed):\n" : "Assertion failed:\n")
+                    + String.join("\n", failures);
+            result.put("message", message);
+            if ("stop".equals(onFail)) throw new PostResponseAssertionFailedException(message, result);
+        }
+        return result;
+    }
+
+    /** Resolves an assertion condition's left/right expression against the current post-response
+     *  chain payload — same conventions as the UI's ConditionsEditor placeholder text: a numeric
+     *  literal, a 'quoted'/"quoted" string literal, bare "body"/"body.field", "headers.field", or
+     *  "vars.name"/"vars.name.field" (field access parses the target as JSON first). Anything else
+     *  is treated as a literal string (rather than throwing a ReferenceError like the old Camel/JS
+     *  version would for an unrecognized bare identifier). */
+    private Object resolveAssertionValue(String expr, Payload payload, Map<String, Object> vars) {
+        if (expr == null || expr.isEmpty()) return "";
+        if (expr.matches("-?\\d+")) {
+            try { return Long.parseLong(expr); } catch (NumberFormatException ignored) {}
+        }
+        if (expr.matches("-?\\d+\\.\\d+")) {
+            try { return Double.parseDouble(expr); } catch (NumberFormatException ignored) {}
+        }
+        if (expr.length() >= 2 && ((expr.charAt(0) == '\'' && expr.charAt(expr.length() - 1) == '\'')
+                || (expr.charAt(0) == '"' && expr.charAt(expr.length() - 1) == '"'))) {
+            return expr.substring(1, expr.length() - 1);
+        }
+        if (expr.equals("body")) return payload.body;
+        if (expr.startsWith("body.")) return resolveFieldAccess(payload.body, expr.substring(5));
+        if (expr.startsWith("headers.")) return payload.headers != null ? payload.headers.get(expr.substring(8)) : null;
+        if (expr.startsWith("vars.")) {
+            String rest = expr.substring(5);
+            int dot = rest.indexOf('.');
+            if (dot < 0) return vars.get(rest);
+            return resolveFieldAccess(vars.get(rest.substring(0, dot)), rest.substring(dot + 1));
+        }
+        return expr;
+    }
+
+    /** Reads one field off a value that may be a JSON-string body, an already-parsed Map/JsonNode
+     *  variable, or anything else (→ null). Mirrors ConversionUtils.replaceVars's "body.field" /
+     *  "vars.name.field" resolution, but against plain Java values instead of Camel exchange state. */
+    private Object resolveFieldAccess(Object source, String field) {
+        if (source == null) return null;
+        if (source instanceof Map) return ((Map<?, ?>) source).get(field);
+        JsonNode node;
+        if (source instanceof JsonNode) {
+            node = (JsonNode) source;
+        } else if (source instanceof String) {
+            try { node = objectMapper.readTree((String) source); } catch (Exception e) { return null; }
+        } else {
+            return null;
+        }
+        if (!node.isObject()) return null;
+        return jsonNodeToValue(node.get(field));
+    }
+
+    private Object jsonNodeToValue(JsonNode node) {
+        if (node == null || node.isNull() || node.isMissingNode()) return null;
+        if (node.isTextual()) return node.asText();
+        if (node.isBoolean()) return node.asBoolean();
+        if (node.isIntegralNumber()) return node.longValue();
+        if (node.isNumber()) return node.doubleValue();
+        return node; // object/array — kept as JsonNode for stringify/typeof/contains handling
+    }
+
+    private String stringifyForCompare(Object v) {
+        if (v == null) return "null";
+        if (v instanceof Double) {
+            double d = (Double) v;
+            return d == Math.rint(d) && !Double.isInfinite(d) ? String.valueOf((long) d) : String.valueOf(d);
+        }
+        if (v instanceof JsonNode) return v.toString();
+        return String.valueOf(v);
+    }
+
+    private String typeOfValue(Object v) {
+        if (v == null) return "undefined";
+        if (v instanceof Boolean) return "boolean";
+        if (v instanceof Number) return "number";
+        if (v instanceof String) return "string";
+        return "object";
+    }
+
+    /** gt/gte/lt/lte compare numerically whenever both sides parse as numbers (regardless of
+     *  whether they arrived as an actual Number or a numeric-looking String/header value) —
+     *  otherwise, and always for ==/!=, falls back to string comparison. */
+    private boolean compareValues(Object left, Object right, String op) {
+        Double leftNum = asDouble(left), rightNum = asDouble(right);
+        if (leftNum != null && rightNum != null && !"==".equals(op) && !"!=".equals(op)) {
+            switch (op) {
+                case "gt": case ">":   return leftNum > rightNum;
+                case "gte": case ">=": return leftNum >= rightNum;
+                case "lt": case "<":   return leftNum < rightNum;
+                case "lte": case "<=": return leftNum <= rightNum;
+            }
+        }
+        String l = stringifyForCompare(left), r = stringifyForCompare(right);
+        switch (op) {
+            case "neq": case "!=": return !l.equals(r);
+            case "gt": case ">":   return l.compareTo(r) > 0;
+            case "gte": case ">=": return l.compareTo(r) >= 0;
+            case "lt": case "<":   return l.compareTo(r) < 0;
+            case "lte": case "<=": return l.compareTo(r) <= 0;
+            default:               return l.equals(r);
+        }
+    }
+
+    private Double asDouble(Object v) {
+        if (v instanceof Number) return ((Number) v).doubleValue();
+        if (v instanceof String) {
+            try { return Double.parseDouble((String) v); } catch (NumberFormatException e) { return null; }
+        }
+        return null;
     }
 
     /**
@@ -587,17 +831,21 @@ public class RequestExecutionService {
     // ── Post-response check ("Response Validations") result attribution ─────
 
     /**
+     * Handles the postResponse entries still Camel-embedded (dbcheck/jsoncompare/textcompare/wait
+     * — "assertion" moved to Java-orchestrated evaluation, see runAssertionStep, and never reaches
+     * here; the "postResponse" param is always the already-filtered postResponseChecks).
+     *
      * jsoncompare/textcompare always get an auto-assigned resultVar (see RequestToCamelAdapter)
      * so their pass/fail is read directly off the final exchange properties, regardless of
      * onMismatch and regardless of overall run outcome.
      *
-     * Bare "assertion" / "dbcheck" steps have no per-step result property in the reused
-     * CoreNodesPlugin converter — Camel steps run strictly in order, so when the run fails,
-     * the failing check is deterministically the FIRST list entry configured with a "stop"
-     * semantic (any stop-type check before it would have already thrown). Checks after it
-     * never ran. When the run succeeds, every stop-type check passed by definition; continue-type
-     * bare assertions fall back to the shared "_assertionFailed" flag (imprecise — inherited
-     * limitation of the reused converter, which only tracks one shared flag, not one per check).
+     * Bare "dbcheck" steps have no per-step result property in the reused CoreNodesPlugin
+     * converter — Camel steps run strictly in order, so when the run fails, the failing check is
+     * deterministically the FIRST list entry configured with a "stop" semantic (any stop-type
+     * check before it would have already thrown). Checks after it never ran. When the run
+     * succeeds, every stop-type check passed by definition; continue-type checks fall back to the
+     * shared "_assertionFailed" flag (imprecise — inherited limitation of the reused converter,
+     * which only tracks one shared flag, not one per check).
      */
     private List<Map<String, Object>> buildCheckResults(JsonNode postResponse, Exchange exchange, String runStatus, String runError) {
         List<Map<String, Object>> results = new ArrayList<>();
@@ -624,7 +872,7 @@ public class RequestExecutionService {
                     ? asBoolean(exchange.getProperty(resultVar))
                     : null;
                 r.put("passed", passed);
-            } else { // assertion / dbcheck — no per-step result var available
+            } else { // dbcheck — no per-step result var available
                 String onFail = check.path("onFail").asText("stop");
                 boolean stopType = "stop".equals(onFail);
                 if ("success".equals(runStatus)) {
