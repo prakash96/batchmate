@@ -1,0 +1,38 @@
+{
+  "runId" : "run-0cc34c6a4bf6",
+  "requestId" : "f0e9d301-3e94-4e1f-a03d-568e10701665",
+  "status" : "failed",
+  "error" : "Assertion failed:\nCondition 1: actual=\"200\"  expected == \"999\"",
+  "durationMs" : 503,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : { },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "cf-cache-status" : "DYNAMIC",
+      "CF-RAY" : "a2a7a93d1f1db5d1-BOM",
+      "Connection" : "keep-alive",
+      "Content-Length" : "424",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Date" : "Thu, 13 Aug 2026 12:18:12 GMT",
+      "etag" : "W/\"1a8-g4QJTtNWfboaWOpXDvV8iGM6zzg\"",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Server" : "cloudflare",
+      "Set-Cookie" : "[sails.sid=s%3A_ROmbNMxX0WAhZSQhE7Hu2UQLniNLp12.b9TckqG677b5qtfZgP7%2Fu9F2DEbSiAudCgU%2BvuqvRzo; Path=/; HttpOnly, __cf_bm=WHKHwf8BH8NZaHIfG7gGSg2L7R_gHo6JPDrP1i0C0So-1786623492.651811-1.0.1.1-Dtmoz4UaidVGbkjmbkWusc6AQJ6PDlfLPypBKuVz8lvgAxlaMrGEgOC7yTl76FaSZ0W24F_PuxcU5W_DU0fs63jRZNdFjPZxg5PDbpM1.JPzY1UvhIF43KrQoESltTrZ; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 12:48:12 GMT]",
+      "vary" : "Accept-Encoding",
+      "x-envoy-upstream-service-time" : "5"
+    },
+    "body" : "{\"args\":{},\"headers\":{\"host\":\"postman-echo.com\",\"x-forwarded-proto\":\"https\",\"accept-encoding\":\"gzip, br\",\"user-agent\":\"Apache-HttpClient/4.5.14 (Java/11.0.25)\",\"cookie\":\"_cfuvid=u7_tB3OhLqPCZvfrH3Jzc8uChhL8viK2wevyV2_0eAg-1786623490.7870846-1.0.1.1-N0DGjcKu53vbwFQwKJedy0mQGDvDhT95w4sf21h4JFI; sails.sid=s%3Auv5DsEnj45JqlFkUNkARA9KE8d-_zxln.VwBCdgeYavD0xvOXFPG8TQhLHSsr0Yyan1cOrkgoMrs\"},\"url\":\"https://postman-echo.com/get\"}"
+  },
+  "vars" : { },
+  "checks" : [ {
+    "name" : "deliberately wrong status",
+    "type" : "assertion",
+    "passed" : false,
+    "message" : "Assertion failed:\nCondition 1: actual=\"200\"  expected == \"999\""
+  } ],
+  "postResponseLog" : [ ]
+}

@@ -1,0 +1,131 @@
+INFO: SSL certificate verification disabled (trust-all)
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::               (v2.7.18)
+
+2026-08-13 17:11:46.769  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : Starting ApiTesterApplication v0.0.1-SNAPSHOT using Java 11.0.25 on DESKTOP-PR2JQHH with PID 18724 (C:\batchmate\batchmate\apitester-app\target\apitester-app-0.0.1-SNAPSHOT.jar started by Admin in C:\batchmate\batchmate\apitester-app)
+2026-08-13 17:11:46.769  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-08-13 17:11:48.735  INFO 18724 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8082 (http)
+2026-08-13 17:11:48.761  INFO 18724 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-13 17:11:48.761  INFO 18724 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-08-13 17:11:48.894  INFO 18724 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-13 17:11:48.894  INFO 18724 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2063 ms
+2026-08-13 17:11:49.546  INFO 18724 --- [           main] c.b.apitester.service.ConnectionService  : Connections file ? C:\batchmate\batchmate\apitester-metadata\connections.json
+2026-08-13 17:11:49.554  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Loading plugins from: C:\batchmate\batchmate\apitester-app\target\plugins
+2026-08-13 17:11:49.852  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Installed trust-all SSL configurer for 'http' component
+2026-08-13 17:11:50.032  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'http' from plugin: workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.068  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'file' from plugin: workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.076  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Installed trust-all SSL configurer for 'https' component
+2026-08-13 17:11:50.085  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'https' from plugin: workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.101  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered bean 'compareHelper' from plugin 'core-nodes'
+2026-08-13 17:11:50.101  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Plugin 'core-nodes' loaded 10 type(s) from workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.163  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'jdbc' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.186  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'bean' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.210  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'class' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.218  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'browse' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.226  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'controlbus' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.234  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'dataformat' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.234  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'dataset' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.250  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'dataset-test' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.265  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'direct' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.289  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'direct-vm' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.297  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'language' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.305  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'log' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.313  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'mock' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.327  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'ref' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.344  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'rest' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.351  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'rest-api' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.360  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'saga' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.368  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'scheduler' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.384  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'seda' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.393  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'stub' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.419  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'timer' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.427  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'validator' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.435  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'vm' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.451  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'xslt' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.498  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered JDBC driver 'org.postgresql.Driver' from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.498  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered JDBC driver 'com.mysql.cj.jdbc.Driver' from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.810  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered JDBC driver 'oracle.jdbc.OracleDriver' from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.850  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered JDBC driver 'com.microsoft.sqlserver.jdbc.SQLServerDriver' from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.860  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Plugin 'db' loaded 1 type(s) from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:50.860  INFO 18724 --- [           main] c.b.a.camel.RequestConverterRegistry     : Extended CamelContext ClassLoader with 2 plugin JAR(s)
+2026-08-13 17:11:50.876  INFO 18724 --- [           main] c.b.apitester.service.RequestService     : Requests dir ? C:\batchmate\batchmate\apitester-app\apitester-data
+2026-08-13 17:11:50.876  INFO 18724 --- [           main] c.b.apitester.service.RequestService     : Logs dir     ? C:\batchmate\batchmate\apitester-app\apitester-logs
+2026-08-13 17:11:50.949  INFO 18724 --- [           main] c.b.a.controller.ConfigController        : Metadata dir ? C:\batchmate\batchmate\apitester-metadata
+2026-08-13 17:11:51.012  INFO 18724 --- [           main] c.b.apitester.camel.JsLanguageConfig     : Registering GraalVM JS as Camel 'js' language
+2026-08-13 17:11:51.192  INFO 18724 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-08-13 17:11:51.549  INFO 18724 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8082 (http) with context path ''
+2026-08-13 17:11:51.676  INFO 18724 --- [           main] o.a.c.impl.engine.AbstractCamelContext   : Apache Camel 3.22.2 (camel-1) is starting
+2026-08-13 17:11:51.682  INFO 18724 --- [           main] o.a.c.impl.engine.AbstractCamelContext   : Using 2 instances of same component class: org.apache.camel.component.http.HttpComponent with names: http, https
+2026-08-13 17:11:51.682  INFO 18724 --- [           main] o.a.c.impl.engine.AbstractCamelContext   : Routes startup (started:0)
+2026-08-13 17:11:51.682  INFO 18724 --- [           main] o.a.c.impl.engine.AbstractCamelContext   : Apache Camel 3.22.2 (camel-1) started in 223ms (build:117ms init:101ms start:5ms)
+2026-08-13 17:11:51.693  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : Started ApiTesterApplication in 5.585 seconds (JVM running for 6.662)
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : ??? Plugin Registry ?????????????????????????????????
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Plugins directory: C:\batchmate\batchmate\apitester-app\target\plugins
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'http' registered from workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'file' registered from workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'https' registered from workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Plugin 'core-nodes' ? 10 type(s): http, setbody, setvariable, log, wait, assertion, jsoncompare, textcompare, throwerror, workflowref  [workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar]
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'jdbc' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'bean' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'class' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'browse' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'controlbus' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'dataformat' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'dataset' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'dataset-test' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'direct' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'direct-vm' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'language' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'log' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'mock' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'ref' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'rest' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'rest-api' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'saga' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'scheduler' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'seda' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'stub' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'timer' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'validator' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'vm' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Camel component 'xslt' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  JDBC driver 'org.postgresql.Driver' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  JDBC driver 'com.mysql.cj.jdbc.Driver' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  JDBC driver 'oracle.jdbc.OracleDriver' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  JDBC driver 'com.microsoft.sqlserver.jdbc.SQLServerDriver' registered from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Plugin 'db' ? 1 type(s): dbexecute  [workflow-plugin-db-0.0.1-SNAPSHOT.jar]
+2026-08-13 17:11:51.698  INFO 18724 --- [           main] c.b.apitester.ApiTesterApplication       : INFO  Total step types registered: 11 [http, setbody, setvariable, log, wait, assertion, jsoncompare, textcompare, throwerror, workflowref, dbexecute]
+2026-08-13 17:11:57.055  INFO 18724 --- [nio-8082-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-13 17:11:57.055  INFO 18724 --- [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-13 17:11:57.055  INFO 18724 --- [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-08-13 17:48:09.228  WARN 18724 --- [nio-8082-exec-3] o.a.c.dsl.yaml.YamlRoutesBuilderLoader   : Deprecated route/steps detected in file:C:\batchmate\batchmate\apitester-app\apitester-data\a9638d71-fe30-4053-90cc-33198afa612f\camel-route.yaml:7. To migrate move route/steps to route/from/steps
+2026-08-13 17:48:09.399  INFO 18724 --- [nio-8082-exec-3] c.b.a.service.CamelRouteDeployService    : Deployed Camel route for request: a9638d71-fe30-4053-90cc-33198afa612f
+2026-08-13 17:48:09.407  INFO 18724 --- [nio-8082-exec-3] com.batchmate.workflow.execution         : http: GET https://postman-echo.com/get?throwExceptionOnFailure=false
+[To redirect Truffle log output to a file use one of the following options:
+* '--log.file=<path>' if the option is passed using a guest language launcher.
+* '-Dpolyglot.log.file=<path>' if the option is passed using the host Java launcher.
+* Configure logging using the polyglot embedding API.]
+[engine] WARNING: The polyglot context is using an implementation that does not support runtime compilation.
+The guest application code will therefore be executed in interpreted mode only.
+Execution only in interpreted mode will strongly impact the guest application performance.
+For more information on using GraalVM see https://www.graalvm.org/java/quickstart/.
+To disable this warning the '--engine.WarnInterpreterOnly=false' option or use the '-Dpolyglot.engine.WarnInterpreterOnly=false' system property.
+2026-08-13 17:48:11.933  WARN 18724 --- [nio-8082-exec-3] o.a.h.c.protocol.ResponseProcessCookies  : Invalid cookie header: "set-cookie: __cf_bm=jH0D_9NIPF02RJJSsrpXwYVw1v9_fmDcm9ZM4PY3RKE-1786623490.7870846-1.0.1.1-HElmL41mtrKZEw27PHxzN5ScHe1PjTN3hIHEE0t_lV3RLO7NTjweGPVdobbV_3T0fmnOzevEnqpfhxErhlaoHMA5VLYbC6BFkLNfLy710hUN6jXOGPLCGFKG0H.LZ6Cu; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 12:48:11 GMT". Invalid 'expires' attribute: Thu, 13 Aug 2026 12:48:11 GMT
+2026-08-13 17:48:12.160  WARN 18724 --- [nio-8082-exec-3] o.a.c.dsl.yaml.YamlRoutesBuilderLoader   : Deprecated route/steps detected in file:C:\batchmate\batchmate\apitester-app\apitester-data\d87f46e8-c254-4269-bb63-f2d11651878b\camel-route.yaml:7. To migrate move route/steps to route/from/steps
+2026-08-13 17:48:12.198  INFO 18724 --- [nio-8082-exec-3] c.b.a.service.CamelRouteDeployService    : Deployed Camel route for request: d87f46e8-c254-4269-bb63-f2d11651878b
+2026-08-13 17:48:12.198  INFO 18724 --- [nio-8082-exec-3] com.batchmate.workflow.execution         : http: GET https://postman-echo.com/get?throwExceptionOnFailure=false
+2026-08-13 17:48:12.727  WARN 18724 --- [nio-8082-exec-3] o.a.h.c.protocol.ResponseProcessCookies  : Invalid cookie header: "set-cookie: __cf_bm=TSowHRNBcjfSYQrYBISbh39mN6Vx_TLba976Gb8o9BE-1786623491.5218625-1.0.1.1-ZAvVzn7HJKApVZ3gE9gjyBfd7mM1e_fP8hYMgVQp0XkAcC8MiJYxZlSlCmSk3v27SiGjJFZFmYZCpfclbZGGgccKQZJOKJep6pMeAdQg41TAtrtBjx2K.AlpswcEuBd5; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 12:48:11 GMT". Invalid 'expires' attribute: Thu, 13 Aug 2026 12:48:11 GMT
+2026-08-13 17:48:12.780  WARN 18724 --- [nio-8082-exec-3] o.a.c.dsl.yaml.YamlRoutesBuilderLoader   : Deprecated route/steps detected in file:C:\batchmate\batchmate\apitester-app\apitester-data\67673c91-1037-4ee6-9604-c028d70be574\camel-route.yaml:7. To migrate move route/steps to route/from/steps
+2026-08-13 17:48:12.780  INFO 18724 --- [nio-8082-exec-3] c.b.a.service.CamelRouteDeployService    : Deployed Camel route for request: 67673c91-1037-4ee6-9604-c028d70be574
+2026-08-13 17:48:12.780  INFO 18724 --- [nio-8082-exec-3] com.batchmate.workflow.execution         : http: GET https://postman-echo.com/get?throwExceptionOnFailure=false
+2026-08-13 17:48:13.230  WARN 18724 --- [nio-8082-exec-3] o.a.h.c.protocol.ResponseProcessCookies  : Invalid cookie header: "set-cookie: __cf_bm=59Q5yloboYfz_liRc86eZ9RuzbtUNwkPofstoVJBBb8-1786623492.1220098-1.0.1.1-KmIXsG.x9legEOnfbC.VKXQ1Nt9qCXfqm_PXjGavPr6bM2ny4Ia.ZZ7nbxWjuNzxbrsyPVNkg0S3jhezsBsQiakpdEDJGuOeuREFmlQgH5m3.SjIXbUGdj2Z8I1i5xOa; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 12:48:12 GMT". Invalid 'expires' attribute: Thu, 13 Aug 2026 12:48:12 GMT
+2026-08-13 17:48:13.305  WARN 18724 --- [nio-8082-exec-3] o.a.c.dsl.yaml.YamlRoutesBuilderLoader   : Deprecated route/steps detected in file:C:\batchmate\batchmate\apitester-app\apitester-data\f0e9d301-3e94-4e1f-a03d-568e10701665\camel-route.yaml:7. To migrate move route/steps to route/from/steps
+2026-08-13 17:48:13.313  INFO 18724 --- [nio-8082-exec-3] c.b.a.service.CamelRouteDeployService    : Deployed Camel route for request: f0e9d301-3e94-4e1f-a03d-568e10701665
+2026-08-13 17:48:13.313  INFO 18724 --- [nio-8082-exec-3] com.batchmate.workflow.execution         : http: GET https://postman-echo.com/get?throwExceptionOnFailure=false
+2026-08-13 17:48:13.745  WARN 18724 --- [nio-8082-exec-3] o.a.h.c.protocol.ResponseProcessCookies  : Invalid cookie header: "set-cookie: __cf_bm=WHKHwf8BH8NZaHIfG7gGSg2L7R_gHo6JPDrP1i0C0So-1786623492.651811-1.0.1.1-Dtmoz4UaidVGbkjmbkWusc6AQJ6PDlfLPypBKuVz8lvgAxlaMrGEgOC7yTl76FaSZ0W24F_PuxcU5W_DU0fs63jRZNdFjPZxg5PDbpM1.JPzY1UvhIF43KrQoESltTrZ; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 12:48:12 GMT". Invalid 'expires' attribute: Thu, 13 Aug 2026 12:48:12 GMT

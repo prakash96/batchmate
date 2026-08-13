@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useCollectionStore, flattenRequests } from '../../store/collectionStore';
-import { useGlobalVarsStore } from '../../store/globalVarsStore';
 import { C, inputStyle, btnStyle, primaryBtnStyle } from '../../theme';
 import RequestSection from './RequestSection';
 import ResponseViewer from '../ResponseViewer';
@@ -8,7 +7,6 @@ import InputDataSetModal from '../InputDataSetModal';
 
 export default function RequestPanel() {
     const { activeRequestId, folders, saveRequest, runRequest } = useCollectionStore();
-    const { globalVariables } = useGlobalVarsStore();
     const [draft, setDraft] = useState(null);
     const [dirty, setDirty] = useState(false);
     const [running, setRunning] = useState(false);
@@ -43,13 +41,12 @@ export default function RequestPanel() {
         try {
             await saveRequest(draft);
             setDirty(false);
-            // Backend precedence is collectionVars, then this "overrideVars" map, then the
-            // Pre-Request Call Request chain. Global variables are meant to be the *lowest* tier
-            // (collection vars should win over them) — since the backend only has two tiers, merge
-            // globals under the request's own collection variables here so the combined map still
-            // lands as one "overrideVars" call.
-            const collectionVars = findFolderById(folders, draft.collectionId)?.variables || {};
-            const res = await runRequest(draft.id, { ...globalVariables, ...collectionVars });
+            // Global variables (persisted server-side, see GlobalVarsService) and this request's
+            // own collection variables are both loaded independently by the backend itself as the
+            // run's floor — see RequestExecutionService.run's javadoc for the precedence order.
+            // Nothing needs merging or sending from here; an empty overrideVars is just "no
+            // per-run override".
+            const res = await runRequest(draft.id, {});
             setResult(res);
         } finally {
             setRunning(false);
@@ -122,11 +119,3 @@ function findRequestById(folders, id) {
     return null;
 }
 
-function findFolderById(folders, id) {
-    for (const f of folders) {
-        if (f.id === id) return f;
-        const nested = findFolderById(f.folders || [], id);
-        if (nested) return nested;
-    }
-    return null;
-}

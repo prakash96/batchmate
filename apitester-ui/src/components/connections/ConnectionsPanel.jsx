@@ -20,8 +20,11 @@ export default function ConnectionsPanel({ onClose }) {
     const setField = (key, value) => setEditing(e => ({ ...e, config: { ...e.config, [key]: value } }));
 
     const doSave = async () => {
+        // The id is assigned server-side on first save (see ConnectionController) — the browser's
+        // crypto.randomUUID() needs a "secure context" (HTTPS or localhost) and would throw when
+        // this app is opened via a LAN IP/hostname over plain HTTP, so we don't rely on it here.
         if (editing.id) await update(editing.id, editing);
-        else await save({ ...editing, id: crypto.randomUUID() });
+        else await save(editing);
         setEditing(null);
     };
 

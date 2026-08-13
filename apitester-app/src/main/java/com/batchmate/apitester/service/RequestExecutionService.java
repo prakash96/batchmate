@@ -56,6 +56,7 @@ public class RequestExecutionService {
 
     private final RequestService requestService;
     private final CollectionService collectionService;
+    private final GlobalVarsService globalVarsService;
     private final RequestToCamelAdapter camelAdapter;
     private final CamelRouteDeployService camelDeployService;
     private final ProducerTemplate producerTemplate;
@@ -63,12 +64,14 @@ public class RequestExecutionService {
 
     public RequestExecutionService(RequestService requestService,
                                     CollectionService collectionService,
+                                    GlobalVarsService globalVarsService,
                                     RequestToCamelAdapter camelAdapter,
                                     CamelRouteDeployService camelDeployService,
                                     ProducerTemplate producerTemplate,
                                     ObjectMapper objectMapper) {
         this.requestService = requestService;
         this.collectionService = collectionService;
+        this.globalVarsService = globalVarsService;
         this.camelAdapter = camelAdapter;
         this.camelDeployService = camelDeployService;
         this.producerTemplate = producerTemplate;
@@ -117,6 +120,14 @@ public class RequestExecutionService {
      * at this top level (a nested Call Request always just chains the previous response, regardless
      * of the callee's own Input setting — iterating mid-chain wouldn't have a single "previous"
      * response to hand the next link). Otherwise behaves as a single run, unchanged.
+     *
+     * Loads the persisted global variables (see GlobalVarsService) here, once, as the "floor" fed
+     * into every run/iteration/recursive Call Request — this used to be whatever the client sent
+     * as "overrideVars" (the frontend merged its own localStorage-persisted globals in before
+     * calling), which meant global variables only ever existed in one browser's local storage,
+     * never shared or backed up. "overrideVars" (the request body's own "variables" field) is now
+     * a genuinely separate, optional, per-run override — still the HIGHEST-precedence tier (see
+     * the private run() overload's merge order), just no longer doubling as globals' source.
      */
     public Map<String, Object> run(String requestId, Map<String, Object> overrideVars) {
         JsonNode reqNode;
@@ -127,21 +138,35 @@ public class RequestExecutionService {
         }
         if (reqNode == null) throw new RuntimeException("Request not found: " + requestId);
 
+        Map<String, Object> globalVars;
+        try {
+            globalVars = globalVarsService.readAsMap();
+        } catch (IOException e) {
+            log.warn("Failed to load global variables, proceeding with none: {}", e.getMessage());
+            globalVars = Collections.emptyMap();
+        }
+
         JsonNode inputDataSets = reqNode.path("inputDataSets");
         boolean iterating = "dataset".equals(reqNode.path("request").path("inputSource").asText("previous"))
             && inputDataSets.isArray() && inputDataSets.size() > 0;
 
         if (!iterating) {
-            return run(requestId, overrideVars, 0, new LinkedHashSet<>(), overrideVars, null, null);
+            return run(requestId, overrideVars, 0, new LinkedHashSet<>(), globalVars, null, null);
         }
+
+        // Data-set entries are evaluated as templates (see payloadFromEntry) before the pipeline
+        // even starts, so they need the same global+override vars visible to everything else.
+        Map<String, Object> seedVars = new LinkedHashMap<>();
+        if (globalVars != null) seedVars.putAll(globalVars);
+        if (overrideVars != null) seedVars.putAll(overrideVars);
 
         long startMs = System.currentTimeMillis();
         List<Map<String, Object>> iterations = new ArrayList<>();
         boolean anyFailed = false;
         int index = 0;
         for (JsonNode entry : inputDataSets) {
-            Payload seed = payloadFromEntry(entry, overrideVars);
-            Map<String, Object> iterResult = run(requestId, overrideVars, 0, new LinkedHashSet<>(), overrideVars, seed.body, seed.headers);
+            Payload seed = payloadFromEntry(entry, seedVars);
+            Map<String, Object> iterResult = run(requestId, overrideVars, 0, new LinkedHashSet<>(), globalVars, seed.body, seed.headers);
             Map<String, Object> withIndex = new LinkedHashMap<>(iterResult);
             withIndex.put("iterationIndex", index);
             iterations.add(withIndex);

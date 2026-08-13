@@ -3,6 +3,7 @@ import { useCollectionStore } from '../../store/collectionStore';
 import { C, btnStyle, inputStyle, methodBadgeStyle } from '../../theme';
 import { readFileAsText, buildFoldersFromSwagger } from '../../utils/swaggerImport';
 import { buildFoldersFromPostman } from '../../utils/postmanImport';
+import RunAllReportModal from '../RunAllReportModal';
 
 // Custom MIME type so drop targets can tell a request row is what's being dragged
 // (as opposed to, say, a browser-native file/text drag) before touching dataTransfer.
@@ -15,6 +16,7 @@ export default function CollectionTree() {
     const swaggerInputRef = useRef(null);
     const [importTarget, setImportTarget] = useState(null); // folderId requests import into
     const [clipboard, setClipboard] = useState(null); // full request object last "copied"
+    const [reportTarget, setReportTarget] = useState(null); // {id, name, autoRun} for RunAllReportModal
 
     useEffect(() => { fetchCollections(); }, []);
 
@@ -129,16 +131,25 @@ export default function CollectionTree() {
                     <FolderRow
                         key={f.id ?? 'uncategorized'} folder={f} depth={0} onImport={triggerImport} importing={importing}
                         onCopy={setClipboard} onPaste={pasteRequest} hasClipboard={!!clipboard}
+                        onReport={(folder, autoRun) => setReportTarget({ id: folder.id, name: folder.name, autoRun })}
                     />
                 ))}
             </div>
             <input ref={postmanInputRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handlePostmanFile} />
             <input ref={swaggerInputRef} type="file" accept=".json,.yaml,.yml" style={{ display: 'none' }} onChange={handleSwaggerFile} />
+            {reportTarget && (
+                <RunAllReportModal
+                    collectionId={reportTarget.id}
+                    collectionName={reportTarget.name}
+                    autoRun={reportTarget.autoRun}
+                    onClose={() => setReportTarget(null)}
+                />
+            )}
         </div>
     );
 }
 
-function FolderRow({ folder, depth, onImport, importing, onCopy, onPaste, hasClipboard }) {
+function FolderRow({ folder, depth, onImport, importing, onCopy, onPaste, hasClipboard, onReport }) {
     const [open, setOpen] = useState(true);
     const [menuOpen, setMenuOpen] = useState(false);
     const [dragOver, setDragOver] = useState(false);
@@ -162,6 +173,8 @@ function FolderRow({ folder, depth, onImport, importing, onCopy, onPaste, hasCli
         const name = window.prompt('Rename', folder.name);
         if (name) await renameCollection(folder.id, name);
     };
+    const runAll = (e) => { e.stopPropagation(); onReport(folder, true); };
+    const showReport = (e) => { e.stopPropagation(); onReport(folder, false); };
     const remove = async (e) => {
         e.stopPropagation();
         if (window.confirm(`Delete "${folder.name}" and everything inside it?`)) await deleteCollection(folder.id);
@@ -227,6 +240,8 @@ function FolderRow({ folder, depth, onImport, importing, onCopy, onPaste, hasCli
                         )}
                     </span>
                     {hasClipboard && <IconBtn title="Paste request here" onClick={paste}>📌</IconBtn>}
+                    {folder.id && <IconBtn title="Run All main requests" onClick={runAll}>▶</IconBtn>}
+                    {folder.id && <IconBtn title="Last Run All report" onClick={showReport}>📊</IconBtn>}
                     {folder.id && <IconBtn title="Rename" onClick={rename}>✎</IconBtn>}
                     {folder.id && <IconBtn title="Delete" onClick={remove}>🗑</IconBtn>}
                 </span>
@@ -239,7 +254,7 @@ function FolderRow({ folder, depth, onImport, importing, onCopy, onPaste, hasCli
                     {(folder.folders || []).map(f => (
                         <FolderRow
                             key={f.id} folder={f} depth={depth + 1} onImport={onImport} importing={importing}
-                            onCopy={onCopy} onPaste={onPaste} hasClipboard={hasClipboard}
+                            onCopy={onCopy} onPaste={onPaste} hasClipboard={hasClipboard} onReport={onReport}
                         />
                     ))}
                 </div>
