@@ -1,0 +1,61 @@
+INFO: SSL certificate verification disabled (trust-all)
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::               (v2.7.18)
+
+2026-08-13 14:33:08.056  INFO 20920 --- [           main] c.b.apitester.ApiTesterApplication       : Starting ApiTesterApplication v0.0.1-SNAPSHOT using Java 11.0.25 on DESKTOP-PR2JQHH with PID 20920 (C:\batchmate\batchmate\apitester-app\target\apitester-app-0.0.1-SNAPSHOT.jar started by Admin in C:\batchmate\batchmate\apitester-app)
+2026-08-13 14:33:08.072  INFO 20920 --- [           main] c.b.apitester.ApiTesterApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-08-13 14:33:09.686  INFO 20920 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8082 (http)
+2026-08-13 14:33:09.702  INFO 20920 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-13 14:33:09.702  INFO 20920 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-08-13 14:33:09.790  INFO 20920 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-13 14:33:09.790  INFO 20920 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1671 ms
+2026-08-13 14:33:10.219  INFO 20920 --- [           main] c.b.apitester.service.ConnectionService  : Connections file ? C:\batchmate\batchmate\apitester-metadata\connections.json
+2026-08-13 14:33:10.235  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Loading plugins from: C:\batchmate\batchmate\apitester-app\target\plugins
+2026-08-13 14:33:10.500  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Installed trust-all SSL configurer for 'http' component
+2026-08-13 14:33:10.625  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'http' from plugin: workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.672  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'file' from plugin: workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.672  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Installed trust-all SSL configurer for 'https' component
+2026-08-13 14:33:10.683  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'https' from plugin: workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.697  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered bean 'compareHelper' from plugin 'core-nodes'
+2026-08-13 14:33:10.704  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Plugin 'core-nodes' loaded 10 type(s) from workflow-plugin-core-nodes-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.766  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'jdbc' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.782  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'bean' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.798  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'class' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.798  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'browse' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.813  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'controlbus' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.813  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'dataformat' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.829  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'dataset' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.829  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'dataset-test' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.844  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'direct' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.844  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'direct-vm' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.864  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'language' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.864  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'log' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.876  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'mock' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.876  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'ref' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.892  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'rest' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.892  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'rest-api' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.892  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'saga' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.907  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'scheduler' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.907  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'seda' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.923  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'stub' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.923  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'timer' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.938  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'validator' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.938  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'vm' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.954  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered Camel component 'xslt' from plugin: workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:10.985  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered JDBC driver 'org.postgresql.Driver' from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:11.001  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered JDBC driver 'com.mysql.cj.jdbc.Driver' from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:11.174  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered JDBC driver 'oracle.jdbc.OracleDriver' from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:11.190  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Registered JDBC driver 'com.microsoft.sqlserver.jdbc.SQLServerDriver' from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:11.205  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Plugin 'db' loaded 1 type(s) from workflow-plugin-db-0.0.1-SNAPSHOT.jar
+2026-08-13 14:33:11.205  INFO 20920 --- [           main] c.b.a.camel.RequestConverterRegistry     : Extended CamelContext ClassLoader with 2 plugin JAR(s)
+2026-08-13 14:33:11.221  INFO 20920 --- [           main] c.b.apitester.service.RequestService     : Requests dir ? C:\batchmate\batchmate\apitester-app\apitester-data
+2026-08-13 14:33:11.221  INFO 20920 --- [           main] c.b.apitester.service.RequestService     : Logs dir     ? C:\batchmate\batchmate\apitester-app\apitester-logs
+2026-08-13 14:33:11.221  INFO 20920 --- [           main] c.b.a.controller.ConfigController        : Metadata dir ? C:\batchmate\batchmate\apitester-metadata
+2026-08-13 14:33:11.284  INFO 20920 --- [           main] c.b.apitester.camel.JsLanguageConfig     : Registering GraalVM JS as Camel 'js' language
+2026-08-13 14:33:11.487  INFO 20920 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]

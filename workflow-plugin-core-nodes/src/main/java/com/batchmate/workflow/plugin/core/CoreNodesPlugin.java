@@ -83,6 +83,11 @@ public class CoreNodesPlugin implements NodeConverterPlugin {
         }
 
         if (!url.isEmpty()) {
+            // Snapshot every header the request set (custom headers, Accept-Encoding, etc.) right
+            // before the call — Camel's http producer reuses this SAME Message for the response
+            // instead of starting clean, so without this a request header sticks around afterward
+            // and looks exactly like a real response header. See snapshotOutgoingHeaders' javadoc.
+            steps.add(ConversionUtils.snapshotOutgoingHeaders());
             if (dynamicUrl) {
                 // Evaluate the URL expression at runtime, store in a property, use toD.
                 // CamelHttpMethod header drives the HTTP method for dynamic endpoints.
@@ -99,6 +104,7 @@ public class CoreNodesPlugin implements NodeConverterPlugin {
             }
             steps.add(ConversionUtils.readHttpBody());
             steps.add(ConversionUtils.mapHttpResponseHeaders());
+            steps.add(ConversionUtils.stripStaleRequestHeaders());
         }
         return steps;
     }

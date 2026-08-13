@@ -1,0 +1,43 @@
+{
+  "runId" : "run-7ae31f35f6fd",
+  "requestId" : "8e954855-549b-4f23-be84-53e91beb9f70",
+  "status" : "success",
+  "durationMs" : 10282,
+  "preRequestLog" : [ ],
+  "sentBody" : "",
+  "sentHeaders" : {
+    "X-Scratch-Marker" : "abc123-should-not-be-in-response"
+  },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "cf-cache-status" : "DYNAMIC",
+      "CF-RAY" : "a2a685233c74f3f0-BOM",
+      "Connection" : "keep-alive",
+      "Content-Length" : "252",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Date" : "Thu, 13 Aug 2026 08:58:48 GMT",
+      "etag" : "W/\"fc-KSf7EJ0l104vunMD7wK16ALl9BI\"",
+      "httpMethod" : "GET",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Server" : "cloudflare",
+      "Set-Cookie" : "[sails.sid=s%3AKpjsNVfJ3YG_sOpLXiHwNVy2e7VJX7Fy.CDVQAfTMCQc5oq1wd7OVZGDVrJo7roK5p%2BjRA0M3BIc; Path=/; HttpOnly, __cf_bm=ub7KbtuMa.imPb7bwtwA2V9dAzC_6gqIbQrffAA3NMY-1786611528.1993163-1.0.1.1-rvkclPAHP5Dqn61BsdpnjCtiiIaC8sInQwmekQ9j74KbbHYOYVI9lllTuCnoS5iczMim3_aqbCSCIaWSOylXANU.lDKczdwrLuif8E21j7xVuf3dSRNy7r5CTjbibrhO; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 09:28:48 GMT, _cfuvid=SyhsQe3pOchvGGVXTBDs3NlEij8nkx3prMKpj0cK_V0-1786611528.1993163-1.0.1.1-08H4z225FjRI.2_43vH5C.oYnF46lpKSsPpZTjiIBcA; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com]",
+      "vary" : "Accept-Encoding",
+      "x-envoy-upstream-service-time" : "5",
+      "X-Scratch-Marker" : "abc123-should-not-be-in-response"
+    },
+    "body" : "{\"args\":{},\"headers\":{\"host\":\"postman-echo.com\",\"x-forwarded-proto\":\"https\",\"accept-encoding\":\"gzip, br\",\"user-agent\":\"Apache-HttpClient/4.5.14 (Java/11.0.25)\",\"x-scratch-marker\":\"abc123-should-not-be-in-response\"},\"url\":\"https://postman-echo.com/get\"}"
+  },
+  "vars" : {
+    "markerStillPresent" : "abc123-should-not-be-in-response"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ {
+    "type" : "setVariable",
+    "name" : "markerStillPresent",
+    "value" : "abc123-should-not-be-in-response",
+    "status" : "ok"
+  } ]
+}

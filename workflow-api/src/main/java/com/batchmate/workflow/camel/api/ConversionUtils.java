@@ -109,6 +109,55 @@ public final class ConversionUtils {
     }
 
     /**
+     * Snapshots every header currently on the message — call this right before the HTTP call,
+     * once all outgoing request headers have been set. Camel's http producer reuses the SAME
+     * Message object for the response rather than starting from a clean one, so any header the
+     * request set (a custom auth header, "Accept-Encoding", etc.) is still sitting there
+     * afterward unless the response happens to overwrite that exact key — meaning code reading
+     * "the response's headers" post-call actually sees request headers bleeding through mixed in
+     * with the genuine response ones. Pairs with stripStaleRequestHeaders(), which removes
+     * whatever this snapshot shows is unchanged after the call — i.e. never touched by the
+     * response — leaving only headers the response actually sent or overwrote.
+     */
+    public static Map<String, Object> snapshotOutgoingHeaders() {
+        String script =
+            "var _snap=new java.util.LinkedHashMap();" +
+            "var _ks=exchange.getMessage().getHeaders().keySet().toArray();" +
+            "for(var _i=0;_i<_ks.length;_i++){" +
+            "  var _k=String(_ks[_i]);" +
+            "  var _v=exchange.getMessage().getHeaders().get(_k);" +
+            "  _snap.put(_k,_v==null?null:String(_v));" +
+            "}" +
+            "exchange.setProperty('_outgoingHeaderSnapshot',_snap);";
+        return scriptStep("js", script);
+    }
+
+    /**
+     * After the HTTP call (+ readHttpBody/mapHttpResponseHeaders), removes any header whose value
+     * is IDENTICAL to what snapshotOutgoingHeaders() captured before the call — i.e. a request
+     * header the response never actually set or overwrote, so it's stale outgoing-request cruft,
+     * not a real response header. See snapshotOutgoingHeaders' javadoc for why this is needed.
+     */
+    public static Map<String, Object> stripStaleRequestHeaders() {
+        String script =
+            "var _snap=exchange.getProperty('_outgoingHeaderSnapshot');" +
+            "if(_snap!=null){" +
+            "  var _ks=exchange.getMessage().getHeaders().keySet().toArray();" +
+            "  for(var _i=0;_i<_ks.length;_i++){" +
+            "    var _k=String(_ks[_i]);" +
+            "    if(_snap.containsKey(_k)){" +
+            "      var _before=_snap.get(_k);" +
+            "      var _now=exchange.getMessage().getHeaders().get(_k);" +
+            "      var _nowStr=(_now==null?null:String(_now));" +
+            "      if(_before===_nowStr){exchange.getMessage().getHeaders().remove(_k);}" +
+            "    }" +
+            "  }" +
+            "  exchange.removeProperty('_outgoingHeaderSnapshot');" +
+            "}";
+        return scriptStep("js", script);
+    }
+
+    /**
      * After an HTTP call, copies all CamelHttp* headers to non-Camel equivalents.
      * e.g. CamelHttpResponseCode → httpResponseCode, CamelHttpResponseText → httpResponseText
      */
