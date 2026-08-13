@@ -54,14 +54,6 @@ public class RequestExecutionService {
     private static final int MAX_DEPTH = 5;
     private static final Pattern DOLLAR_EXPR = Pattern.compile("\\$\\{([^}]*)\\}");
 
-    // Response headers that must never be forwarded verbatim as the NEXT call's request headers:
-    // hop-by-hop / auto-computed HTTP headers (a stale Content-Length or Transfer-Encoding would
-    // corrupt the next request) and Camel's synthetic http-status bookkeeping headers.
-    private static final Set<String> SKIP_RESPONSE_HEADERS = Set.of(
-        "content-length", "transfer-encoding", "connection", "date", "host",
-        "httpresponsecode", "httpresponsetext", "httpmethod"
-    );
-
     private final RequestService requestService;
     private final CollectionService collectionService;
     private final RequestToCamelAdapter camelAdapter;
@@ -460,8 +452,14 @@ public class RequestExecutionService {
         return new Payload(body, headers);
     }
 
-    /** Turns a captured response (see captureResponse) into a Payload for the next chain link,
-     *  dropping headers that must never be forwarded as request headers — see SKIP_RESPONSE_HEADERS. */
+    /** Turns a captured response (see captureResponse) into a Payload for the next chain link.
+     *  Nothing here auto-forwards these headers wholesale as the NEXT request's actual outgoing
+     *  headers — only explicitly-configured "headers" rows are ever sent (see the Input tab
+     *  evaluation in run()) — so this is purely a READ source for "${headers.X}"/assertion
+     *  "headers.X" access, and previously filtered out httpResponseCode/httpResponseText/
+     *  httpMethod/etc. for no real benefit while actively breaking the single most common
+     *  assertion target ("headers.httpResponseCode"). Kept unfiltered, matching what the old
+     *  Camel-embedded assertion evaluation exposed (the raw exchange headers, no filtering). */
     private Payload payloadFromResponse(Map<String, Object> response) {
         if (response == null) return Payload.EMPTY;
         Object rawBody = response.get("body");
@@ -470,9 +468,7 @@ public class RequestExecutionService {
         Object rawHeaders = response.get("headers");
         if (rawHeaders instanceof Map) {
             for (Map.Entry<?, ?> e : ((Map<?, ?>) rawHeaders).entrySet()) {
-                String key = String.valueOf(e.getKey());
-                if (SKIP_RESPONSE_HEADERS.contains(key.toLowerCase())) continue;
-                headers.put(key, e.getValue() != null ? String.valueOf(e.getValue()) : "");
+                headers.put(String.valueOf(e.getKey()), e.getValue() != null ? String.valueOf(e.getValue()) : "");
             }
         }
         return new Payload(body, headers);
