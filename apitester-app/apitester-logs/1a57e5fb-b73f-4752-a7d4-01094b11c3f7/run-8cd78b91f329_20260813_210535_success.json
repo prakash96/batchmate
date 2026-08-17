@@ -1,0 +1,33 @@
+{
+  "runId" : "run-8cd78b91f329",
+  "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+  "status" : "success",
+  "durationMs" : 332,
+  "preRequestLog" : [ ],
+  "sentBody" : "{\n  \"CIF\": \"000001111112\",\n  \"ACCOUNT_NUMBER\": \"567\"\n}",
+  "sentHeaders" : {
+    "client_id" : "afdfsdfd",
+    "client_secret" : "afdgdsgsd"
+  },
+  "response" : {
+    "status" : 429,
+    "headers" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "62",
+      "Content-Type" : "text/plain; charset=utf-8",
+      "Date" : "Thu, 13 Aug 2026 15:35:34 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "429",
+      "httpResponseText" : "Too Many Requests"
+    },
+    "body" : "429 - Too Many Requests. Refer: https://beeceptor.com/pricing/"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

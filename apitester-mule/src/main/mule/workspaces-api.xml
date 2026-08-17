@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- The scope ABOVE collections — see schema.sql's file comment. A workspace's password (if
+         set) gates ALL its collections at once, replacing collections' own former per-collection
+         password entirely: collections-api.xml's get-collections omits any collection whose
+         workspace is locked from its response entirely (not merely hidden client-side), and
+         unlock-workspace below is the only way to get them back. -->
+
+    <flow name="get-workspaces">
+        <http:listener config-ref="HTTP_Listener_config" path="/workspaces" allowedMethods="GET" doc:name="GET /workspaces"/>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select all workspaces">
+            <db:sql><![CDATA[SELECT id, name, password_hash FROM syskm.workspaces ORDER BY name]]></db:sql>
+        </db:select>
+        <ee:transform doc:name="Rows to workspace objects (never echoes the password hash)">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.rows map ((r) -> { id: r.id, name: r.name, locked: r.password_hash != null })]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- Optional "password" in the request body password-protects the new workspace — see
+         get-workspaces/unlock-workspace for how that's enforced. Hashed (SHA-256, hex) before it
+         ever touches the database; the hash itself is never echoed back in the response. -->
+    <flow name="create-workspace">
+        <http:listener config-ref="HTTP_Listener_config" path="/workspaces" allowedMethods="POST" doc:name="POST /workspaces"/>
+        <ee:transform doc:name="New workspace object">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+import * from dw::Crypto
+import * from dw::core::Binaries
+import * from dw::core::Strings
+output application/json
+var rawPassword = trim(payload.password default '')
+---
+{
+    id: uuid(),
+    name: payload.name default "New Workspace",
+    locked: !isEmpty(rawPassword),
+    passwordHash: if (isEmpty(rawPassword)) null else toHex(hashWith(rawPassword as Binary {encoding: "UTF-8"}, "SHA256"))
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <!-- Snapshot before the insert — db:insert has no target=, so it overwrites payload with
+             its own StatementResult once it runs (see collections-api.xml's create-collection for
+             the full explanation of this exact failure mode — it's the same fix here). -->
+        <set-variable variableName="newWorkspace" value="#[payload]" doc:name="snapshot before insert clobbers payload"/>
+        <db:insert config-ref="Database_Config" doc:name="Insert workspace">
+            <db:sql><![CDATA[INSERT INTO syskm.workspaces (id, name, password_hash) VALUES (:id, :name, :passwordHash)]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: payload.id,
+                name: payload.name,
+                passwordHash: payload.passwordHash
+            }]]]></db:input-parameters>
+        </db:insert>
+        <ee:transform doc:name="Response (never echoes the password hash)">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{ id: vars.newWorkspace.id, name: vars.newWorkspace.name, locked: vars.newWorkspace.locked }]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="rename-workspace">
+        <http:listener config-ref="HTTP_Listener_config" path="/workspaces/{workspaceId}" allowedMethods="PUT" doc:name="PUT /workspaces/{workspaceId}"/>
+        <db:update config-ref="Database_Config" doc:name="Update workspace name">
+            <db:sql><![CDATA[UPDATE syskm.workspaces SET name = :name WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.workspaceId, name: payload.name default ''}]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Workspace renamed"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="delete-workspace">
+        <http:listener config-ref="HTTP_Listener_config" path="/workspaces/{workspaceId}" allowedMethods="DELETE" doc:name="DELETE /workspaces/{workspaceId}"/>
+        <!-- ON DELETE CASCADE (see schema.sql) does the rest — every collection in this workspace,
+             their sub-folders, requests, run_logs, run_all_reports, and this workspace's own
+             global_vars all cascade from this one statement. Not wrapped in
+             <try transactionalAction="ALWAYS_BEGIN"> — see collections-api.xml's delete-collection
+             for the full writeup on why: that wrapper actively breaks commits (live-confirmed via
+             curl + a direct sqlplus check against the table). A lone unwrapped db:delete was
+             confirmed live to persist correctly every time. -->
+        <db:delete config-ref="Database_Config" doc:name="Delete workspace">
+            <db:sql><![CDATA[DELETE FROM syskm.workspaces WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.workspaceId}]]]></db:input-parameters>
+        </db:delete>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Workspace deleted"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- The only way to get a locked workspace's collections back — verifies the posted password
+         against its stored hash, and if correct, returns the full nested collection/request tree
+         for every collection in this workspace (same recursive node-building shape
+         collections-api.xml's get-collections produces, scoped to just this workspace). -->
+    <flow name="unlock-workspace">
+        <http:listener config-ref="HTTP_Listener_config" path="/workspaces/{workspaceId}/unlock" allowedMethods="POST" doc:name="POST /workspaces/{workspaceId}/unlock">
+            <http:response statusCode="#[vars.httpStatus default 200]"/>
+        </http:listener>
+        <db:select config-ref="Database_Config" target="targetRow" doc:name="Select target workspace">
+            <db:sql><![CDATA[SELECT id, password_hash FROM syskm.workspaces WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.workspaceId}]]]></db:input-parameters>
+        </db:select>
+        <set-variable variableName="uwProvidedHash" value="#[%dw 2.0 import * from dw::Crypto import * from dw::core::Binaries output application/java --- toHex(hashWith((payload.password default '') as Binary {encoding: 'UTF-8'}, 'SHA256'))]" doc:name="hash provided password"/>
+        <choice doc:name="Found and password matches?">
+            <when expression="#[sizeOf(vars.targetRow) == 0]">
+                <set-variable variableName="httpStatus" value="#[404]"/>
+                <set-payload value="#[%dw 2.0 output application/json --- {error: 'Workspace not found'}]"/>
+            </when>
+            <when expression="#[(vars.targetRow[0]).password_hash == null or (vars.targetRow[0]).password_hash != vars.uwProvidedHash]">
+                <set-variable variableName="httpStatus" value="#[401]"/>
+                <set-payload value="#[%dw 2.0 output application/json --- {error: 'Incorrect password'}]"/>
+            </when>
+            <otherwise>
+                <db:select config-ref="Database_Config" target="wsCollections" doc:name="Select this workspace's collections">
+                    <db:sql><![CDATA[SELECT id, name, parent_id, variables_json FROM syskm.collections WHERE workspace_id = :id ORDER BY name]]></db:sql>
+                    <db:input-parameters><![CDATA[#[{id: attributes.uriParams.workspaceId}]]]></db:input-parameters>
+                </db:select>
+                <db:select config-ref="Database_Config" target="wsRequests" doc:name="Select requests in those collections">
+                    <db:sql><![CDATA[SELECT id, collection_id, name, description, pre_request_json, request_json, post_response_json, input_data_sets_json FROM syskm.requests WHERE collection_id IN (SELECT id FROM syskm.collections WHERE workspace_id = :id) ORDER BY name]]></db:sql>
+                    <db:input-parameters><![CDATA[#[{id: attributes.uriParams.workspaceId}]]]></db:input-parameters>
+                </db:select>
+                <ee:transform doc:name="Build this workspace's collection tree">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+import * from dw::rowToRequest
+var wsId = attributes.uriParams.workspaceId
+var cols = vars.wsCollections default []
+var reqs = (vars.wsRequests default []) map (r) -> rowToRequest(r)
+fun childrenOf(pid) = cols filter ((c) -> (if (pid == null) (c.parent_id == null) else (c.parent_id == pid)))
+fun node(c) = {
+    id: c.id,
+    name: c.name,
+    workspaceId: wsId,
+    variables: read(c.variables_json default "{}", "application/json"),
+    requests: reqs filter ((r) -> r.collectionId == c.id),
+    folders: childrenOf(c.id) map ((child) -> node(child))
+}
+---
+{ workspaceId: wsId, collections: childrenOf(null) map ((c) -> node(c)) }]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </otherwise>
+        </choice>
+    </flow>
+
+</mule>

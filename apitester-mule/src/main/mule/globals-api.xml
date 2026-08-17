@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- Mirrors GlobalVarsController.java's /globals endpoints, now scoped per-workspace (see
+         schema.sql's global_vars table) instead of one flat name->value map shared by everyone —
+         each workspace has its own set, merged into a run by execution-engine.xml's run-request
+         after it resolves the running request's own workspace via its collection. -->
+
+    <flow name="get-globals">
+        <http:listener config-ref="HTTP_Listener_config" path="/workspaces/{workspaceId}/globals" allowedMethods="GET" doc:name="GET /workspaces/{workspaceId}/globals"/>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select this workspace's global vars">
+            <db:sql><![CDATA[SELECT name, value FROM syskm.global_vars WHERE workspace_id = :wsId]]></db:sql>
+            <db:input-parameters><![CDATA[#[{wsId: attributes.uriParams.workspaceId}]]]></db:input-parameters>
+        </db:select>
+        <ee:transform doc:name="Rows to flat map">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.rows reduce ((row, acc = {}) -> acc ++ {(row.name): row.value})]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="set-globals">
+        <http:listener config-ref="HTTP_Listener_config" path="/workspaces/{workspaceId}/globals" allowedMethods="PUT" doc:name="PUT /workspaces/{workspaceId}/globals"/>
+        <set-variable variableName="incomingGlobals" value="#[payload]" doc:name="save incoming payload before it's overwritten"/>
+        <!-- Replace-all semantics (matches GlobalVarsService.write(), which overwrites the whole
+             file every time), scoped to just this workspace's rows — delete-then-bulk-insert.
+             NOT wrapped in <try transactionalAction="ALWAYS_BEGIN"> — see collections-api.xml's
+             delete-collection for the full writeup on why: that wrapper was live-confirmed (curl
+             + a direct sqlplus check against the table) to let an earlier statement's effect
+             persist while a later one in the same ambient transaction silently didn't commit, no
+             exception thrown either way. Independent, unwrapped, auto-committing statements is
+             what was confirmed to actually work — each db:delete/db:insert here commits on its
+             own as it runs. -->
+        <db:delete config-ref="Database_Config" doc:name="Clear this workspace's global vars">
+            <db:sql><![CDATA[DELETE FROM syskm.global_vars WHERE workspace_id = :wsId]]></db:sql>
+            <db:input-parameters><![CDATA[#[{wsId: attributes.uriParams.workspaceId}]]]></db:input-parameters>
+        </db:delete>
+        <foreach collection="#[keysOf(vars.incomingGlobals)]" doc:name="Insert each entry">
+            <db:insert config-ref="Database_Config" doc:name="Insert global var">
+                <db:sql><![CDATA[INSERT INTO syskm.global_vars (workspace_id, name, value) VALUES (:wsId, :name, :value)]]></db:sql>
+                <db:input-parameters><![CDATA[#[{wsId: attributes.uriParams.workspaceId, name: payload, value: vars.incomingGlobals[payload]}]]]></db:input-parameters>
+            </db:insert>
+        </foreach>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Global variables saved"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+</mule>

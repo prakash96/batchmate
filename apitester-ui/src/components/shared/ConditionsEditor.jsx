@@ -5,7 +5,7 @@ const OPERATORS = ['==', '!=', '>', '>=', '<', '<=', 'contains', 'notNull', 'typ
 /**
  * Editable left/operator/right condition list — same shape as the main platform's
  * "assertion" node: conditions:[{left,operator,right}], plus a top-level AND/OR logic.
- * Used by AssertionCard and (nested) DbCheckCard.
+ * Used by AssertionFields.
  */
 export default function ConditionsEditor({ logic, onLogicChange, conditions, onChange }) {
     const update = (i, patch) => onChange(conditions.map((c, idx) => idx === i ? { ...c, ...patch } : c));

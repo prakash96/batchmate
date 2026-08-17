@@ -1,0 +1,69 @@
+{
+  "runId" : "run-93644791acee",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "success",
+  "durationMs" : 1132,
+  "preRequestLog" : [ {
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputBody" : "{\n  \"CIF\": \"000001111112\",\n  \"ACCOUNT_NUMBER\": \"2345\"\n}",
+    "inputHeaders" : { },
+    "subRunId" : "run-fbbfbbdde034",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"apeTYmtDD2UTXjRumX5VazsQYSwy4LY2\",\n  \"REQUEST_REFERENCE_NUMBER\": \"f8a9f4b5-bbcf-4d66-b151-2f15c08ff259\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjcwOTksImV4cCI6MTc4NjY1MDU1NCwibmJmIjoxNzkzNjYwMzk4LCJpc3MiOiJXaWVnYW5kIC0gSGFydG1hbm4iLCJzdWIiOiJmOWNiYWE1OS1jNDBjLTRiYjktYTc2My0wOGQ3ODM4MTMzNzAiLCJhdWQiOiI2MjY3NTdjMC01OWM5LTRlNzQtOGY4OS05MzRhNTFkZDJjN2MiLCJqdGkiOiI3NjY4ZDhmMS0zZTdhLTQzMDMtOTY5Yy02YTgwYzg4YmVjNmMifQ.rEYJ9Wwks6mZpcNri43qsZrYMIOwCSu8czULMjbBYoV8pheOAuba3HOofenYiiVY\"\n}",
+    "status" : "ok"
+  } ],
+  "sentBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"apeTYmtDD2UTXjRumX5VazsQYSwy4LY2\",\n  \"REQUEST_REFERENCE_NUMBER\": \"f8a9f4b5-bbcf-4d66-b151-2f15c08ff259\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjcwOTksImV4cCI6MTc4NjY1MDU1NCwibmJmIjoxNzkzNjYwMzk4LCJpc3MiOiJXaWVnYW5kIC0gSGFydG1hbm4iLCJzdWIiOiJmOWNiYWE1OS1jNDBjLTRiYjktYTc2My0wOGQ3ODM4MTMzNzAiLCJhdWQiOiI2MjY3NTdjMC01OWM5LTRlNzQtOGY4OS05MzRhNTFkZDJjN2MiLCJqdGkiOiI3NjY4ZDhmMS0zZTdhLTQzMDMtOTY5Yy02YTgwYzg4YmVjNmMifQ.rEYJ9Wwks6mZpcNri43qsZrYMIOwCSu8czULMjbBYoV8pheOAuba3HOofenYiiVY\"\n}",
+  "sentHeaders" : {
+    "client_id" : "",
+    "client_secret" : "",
+    "AccessToken" : ""
+  },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "830",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:31:56 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "body" : "{\n  \"RESPONSE\": \"goJrwzkD84NB4IR64yBj\",\n  \"DIGI_SIGN\": \"Wae3oP39WqKG49z4rVRzVH5pWNy7gMNM\",\n  \"RESPONSE_DATE\": \"2026-08-13T15:31:56.015+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;apeTYmtDD2UTXjRumX5VazsQYSwy4LY2&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;f8a9f4b5-bbcf-4d66-b151-2f15c08ff259&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjcwOTksImV4cCI6MTc4NjY1MDU1NCwibmJmIjoxNzkzNjYwMzk4LCJpc3MiOiJXaWVnYW5kIC0gSGFydG1hbm4iLCJzdWIiOiJmOWNiYWE1OS1jNDBjLTRiYjktYTc2My0wOGQ3ODM4MTMzNzAiLCJhdWQiOiI2MjY3NTdjMC01OWM5LTRlNzQtOGY4OS05MzRhNTFkZDJjN2MiLCJqdGkiOiI3NjY4ZDhmMS0zZTdhLTQzMDMtOTY5Yy02YTgwYzg4YmVjNmMifQ.rEYJ9Wwks6mZpcNri43qsZrYMIOwCSu8czULMjbBYoV8pheOAuba3HOofenYiiVY&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ {
+    "name" : "Assertion",
+    "type" : "assertion",
+    "passed" : true
+  } ],
+  "postResponseLog" : [ {
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+    "inputBody" : "{\n  \"RESPONSE\": \"goJrwzkD84NB4IR64yBj\",\n  \"DIGI_SIGN\": \"Wae3oP39WqKG49z4rVRzVH5pWNy7gMNM\",\n  \"RESPONSE_DATE\": \"2026-08-13T15:31:56.015+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;apeTYmtDD2UTXjRumX5VazsQYSwy4LY2&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;f8a9f4b5-bbcf-4d66-b151-2f15c08ff259&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjcwOTksImV4cCI6MTc4NjY1MDU1NCwibmJmIjoxNzkzNjYwMzk4LCJpc3MiOiJXaWVnYW5kIC0gSGFydG1hbm4iLCJzdWIiOiJmOWNiYWE1OS1jNDBjLTRiYjktYTc2My0wOGQ3ODM4MTMzNzAiLCJhdWQiOiI2MjY3NTdjMC01OWM5LTRlNzQtOGY4OS05MzRhNTFkZDJjN2MiLCJqdGkiOiI3NjY4ZDhmMS0zZTdhLTQzMDMtOTY5Yy02YTgwYzg4YmVjNmMifQ.rEYJ9Wwks6mZpcNri43qsZrYMIOwCSu8czULMjbBYoV8pheOAuba3HOofenYiiVY&quot;\n}\"\n}",
+    "inputHeaders" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "830",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:31:56 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "subRunId" : "run-3f52bc1c52a5",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"ERROR_CODE\": \"\",\n  \"ERROR_DESCRIPTION\": \"\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n  \"RESPONSE_STATUS\": \"0\",\n  \"TRANSACTION_STATUS\": \"success\",\n  \"bdy\": {\n  &quot;RESPONSE&quot;: &quot;goJrwzkD84NB4IR64yBj&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;Wae3oP39WqKG49z4rVRzVH5pWNy7gMNM&quot;,\n  &quot;RESPONSE_DATE&quot;: &quot;2026-08-13T15:31:56.015+00:00&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;&quot;,\n&quot;bdy&quot;: &quot;{\n  &amp;quot;REQUEST&amp;quot;: &amp;quot;default_data&amp;quot;,\n  &amp;quot;DIGI_SIGN&amp;quot;: &amp;quot;apeTYmtDD2UTXjRumX5VazsQYSwy4LY2&amp;quot;,\n  &amp;quot;REQUEST_REFERENCE_NUMBER&amp;quot;: &amp;quot;f8a9f4b5-bbcf-4d66-b151-2f15c08ff259&amp;quot;,\n  &amp;quot;ACCESS_TOKEN&amp;quot;: &amp;quot;eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjcwOTksImV4cCI6MTc4NjY1MDU1NCwibmJmIjoxNzkzNjYwMzk4LCJpc3MiOiJXaWVnYW5kIC0gSGFydG1hbm4iLCJzdWIiOiJmOWNiYWE1OS1jNDBjLTRiYjktYTc2My0wOGQ3ODM4MTMzNzAiLCJhdWQiOiI2MjY3NTdjMC01OWM5LTRlNzQtOGY4OS05MzRhNTFkZDJjN2MiLCJqdGkiOiI3NjY4ZDhmMS0zZTdhLTQzMDMtOTY5Yy02YTgwYzg4YmVjNmMifQ.rEYJ9Wwks6mZpcNri43qsZrYMIOwCSu8czULMjbBYoV8pheOAuba3HOofenYiiVY&amp;quot;\n}&quot;\n}\n}",
+    "status" : "ok"
+  } ]
+}

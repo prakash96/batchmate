@@ -6,9 +6,6 @@
   "inputDataSets" : [ {
     "body" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
     "headers" : [ ]
-  }, {
-    "body" : "{\"CIF\": \"000002222222\", \"REQUEST_REFERENCE_NUMBER\": \"EDGE_CASE_001\"}",
-    "headers" : [ ]
   } ],
   "preRequest" : [ {
     "type" : "callRequest",
@@ -42,12 +39,16 @@
     "conditions" : [ {
       "left" : "headers.httpResponseCode",
       "operator" : "==",
-      "right" : "429"
+      "right" : "200"
     } ],
     "onFail" : "stop"
   }, {
     "type" : "callRequest",
     "name" : "",
     "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380"
+  }, {
+    "type" : "wait",
+    "name" : "",
+    "waitTime" : 2000
   } ]
 }

@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- Mirrors CollectionController.java's /collections endpoints exactly (paths + JSON shapes),
+         so apitester-ui works unchanged. Unlike apitester-app's nested-JSON-tree file, collections
+         are flat rows here (parent_id) — get-collections rebuilds the nested {folders,requests}
+         shape the UI expects via a recursive DataWeave function over two flat SELECTs. -->
+
+    <flow name="get-collections">
+		<http:listener config-ref="HTTP_Listener_config" path="/collections" allowedMethods="GET" doc:name="GET /collections"/>
+        <db:select config-ref="Database_Config" target="allWorkspaces" doc:name="Select all workspaces (to filter out any collection whose workspace is locked)">
+            <db:sql><![CDATA[SELECT id, password_hash FROM syskm.workspaces]]></db:sql>
+        </db:select>
+        <db:select config-ref="Database_Config" target="allCollections" doc:name="Select all collections">
+            <db:sql><![CDATA[SELECT id, name, parent_id, workspace_id, variables_json FROM syskm.collections ORDER BY name]]></db:sql>
+        </db:select>
+        <db:select config-ref="Database_Config" target="allRequests" doc:name="Select all requests (full — RequestPanel builds its draft straight from this tree, never a separate GET /requests/{id}, so a narrower projection here silently drops preRequest/postResponse/inputDataSets/description on every edit-save cycle)">
+            <db:sql><![CDATA[SELECT id, collection_id, name, description, pre_request_json, request_json, post_response_json, input_data_sets_json FROM syskm.requests ORDER BY name]]></db:sql>
+        </db:select>
+        <!-- A collection whose WORKSPACE is password-protected is withheld from THIS tree
+             entirely (not merely hidden in the UI) — collections no longer carry their own
+             password (see workspaces-api.xml's file comment for why); the only way to actually
+             get one back is workspaces-api.xml's unlock-workspace with the right password. -->
+        <ee:transform doc:name="Build nested folder tree">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+import * from dw::rowToRequest
+var lockedWorkspaceIds = (vars.allWorkspaces default []) filter ((w) -> w.password_hash != null) map ((w) -> w.id)
+var cols = (vars.allCollections default []) filter ((c) -> !(lockedWorkspaceIds contains c.workspace_id))
+var reqs = (vars.allRequests default []) map (r) -> rowToRequest(r)
+fun childrenOf(pid) = cols filter ((c) -> (if (pid == null) (c.parent_id == null) else (c.parent_id == pid)))
+fun node(c) = {
+    id: c.id,
+    name: c.name,
+    workspaceId: c.workspace_id,
+    variables: read(c.variables_json default "{}", "application/json"),
+    requests: reqs filter ((r) -> r.collectionId == c.id),
+    folders: childrenOf(c.id) map ((child) -> node(child))
+}
+---
+childrenOf(null) map ((c) -> node(c))]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- workspaceId (required in practice — the UI always creates a collection inside a specific,
+         already-unlocked workspace) replaces the old per-collection "password" field entirely;
+         see workspaces-api.xml's file comment. -->
+    <flow name="create-collection">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections" allowedMethods="POST" doc:name="POST /collections"/>
+        <ee:transform doc:name="New collection object">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    id: uuid(),
+    name: payload.name default "New Collection",
+    parentId: payload.parentId default null,
+    workspaceId: payload.workspaceId default null,
+    variables: {}
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <!-- Snapshot before the insert — db:insert has no target=, so it overwrites payload with
+             its own StatementResult once it runs; without this, the response transform below
+             would read id/name/etc. off THAT instead and send back all-null fields (the insert
+             itself still succeeds either way, since it reads payload.id/name/etc. during its OWN
+             execution, before this clobbering happens). -->
+        <set-variable variableName="newCollection" value="#[payload]" doc:name="snapshot before insert clobbers payload"/>
+        <db:insert config-ref="Database_Config" doc:name="Insert collection">
+            <db:sql><![CDATA[INSERT INTO syskm.collections (id, name, parent_id, workspace_id, variables_json) VALUES (:id, :name, :parentId, :workspaceId, :variables)]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: payload.id,
+                name: payload.name,
+                parentId: payload.parentId,
+                workspaceId: payload.workspaceId,
+                variables: write(payload.variables, "application/json")
+            }]]]></db:input-parameters>
+        </db:insert>
+        <ee:transform doc:name="Response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.newCollection]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="rename-collection">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}" allowedMethods="PUT" doc:name="PUT /collections/{collectionId}"/>
+        <db:update config-ref="Database_Config" doc:name="Update collection name">
+            <db:sql><![CDATA[UPDATE syskm.collections SET name = :name WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: attributes.uriParams.collectionId,
+                name: payload.name default ''
+            }]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Collection renamed"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="set-collection-variables">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/variables" allowedMethods="PUT" doc:name="PUT /collections/{collectionId}/variables"/>
+        <db:update config-ref="Database_Config" doc:name="Update collection variables">
+            <db:sql><![CDATA[UPDATE syskm.collections SET variables_json = :variables WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: attributes.uriParams.collectionId,
+                variables: write(payload, "application/json")
+            }]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Variables saved"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="move-collection">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/move" allowedMethods="PATCH" doc:name="PATCH /collections/{collectionId}/move"/>
+        <db:update config-ref="Database_Config" doc:name="Reparent collection">
+            <db:sql><![CDATA[UPDATE syskm.collections SET parent_id = :parentId WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: attributes.uriParams.collectionId,
+                parentId: payload.parentId default null
+            }]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Collection moved"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="delete-collection">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}" allowedMethods="DELETE" doc:name="DELETE /collections/{collectionId}"/>
+        <!-- ON DELETE CASCADE (see schema.sql) does everything else — sub-folders (parent_id),
+             requests directly under this collection, those requests' run_logs, and this
+             collection's own run_all_reports row all cascade from this one statement. Not
+             wrapped in <try transactionalAction="ALWAYS_BEGIN"> — live-confirmed (curl + a direct
+             sqlplus SELECT against the table, bypassing the app entirely) that wrapper actively
+             breaks commits: an earlier statement's effect would persist while a later one in the
+             same ambient transaction silently didn't, no exception thrown either way. A lone
+             unwrapped db:delete (its own connection, autocommit) was confirmed live to persist
+             correctly every time. -->
+        <db:delete config-ref="Database_Config" doc:name="Delete collection">
+            <db:sql><![CDATA[DELETE FROM syskm.collections WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.collectionId}]]]></db:input-parameters>
+        </db:delete>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Collection deleted"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="create-request-in-collection">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/requests" allowedMethods="POST" doc:name="POST /collections/{collectionId}/requests"/>
+        <ee:transform doc:name="New request object (default Input template = a passthrough body binding, see apitester-app's own default)">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    id: uuid(),
+    collectionId: attributes.uriParams.collectionId,
+    name: payload.name default "New Request",
+    description: "",
+    preRequest: [],
+    request: {
+        method: "GET",
+        url: "",
+        params: [],
+        headers: [],
+        bodyMode: "raw-json",
+        // Built via a Unicode escape rather than writing the dollar-sign character itself
+        // anywhere in this source file — Mule's own config-property resolver flags a literal
+        // dollar sign even alone (not just paired with a brace) and tries to resolve it as a
+        // config property, which fails for anything that isn't one. The escape below produces
+        // the same character at runtime without the glyph itself ever appearing in the deployed
+        // source for that scanner to find.
+        body: "\u0024{body}"
+    },
+    postResponse: [],
+    inputDataSets: []
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <!-- Snapshot before the insert — db:insert has no target=, so it overwrites payload with
+             its own StatementResult once it runs. Without both this AND the response transform
+             below, the HTTP response body is that raw (non-JSON) StatementResult object
+             directly — addRequestToCollection's res.json() on the frontend then throws
+             "Unexpected token 'o', "org.mule.e"... is not valid JSON" (the start of
+             org.mule.extension.db.api.StatementResult's own toString()). -->
+        <set-variable variableName="newRequest" value="#[payload]" doc:name="snapshot before insert clobbers payload"/>
+        <db:insert config-ref="Database_Config" doc:name="Insert request">
+            <db:sql><![CDATA[INSERT INTO syskm.requests (id, collection_id, name, description, pre_request_json, request_json, post_response_json, input_data_sets_json)
+                VALUES (:id, :collectionId, :name, :description, :preRequest, :request, :postResponse, :inputDataSets)]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: payload.id,
+                collectionId: payload.collectionId,
+                name: payload.name,
+                description: payload.description,
+                preRequest: write(payload.preRequest, "application/json"),
+                request: write(payload.request, "application/json"),
+                postResponse: write(payload.postResponse, "application/json"),
+                inputDataSets: write(payload.inputDataSets, "application/json")
+            }]]]></db:input-parameters>
+        </db:insert>
+        <ee:transform doc:name="Response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.newRequest]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="move-request">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/requests/{requestId}/move" allowedMethods="PATCH" doc:name="PATCH .../requests/{requestId}/move"/>
+        <db:update config-ref="Database_Config" doc:name="Reparent request">
+            <db:sql><![CDATA[UPDATE syskm.requests SET collection_id = :collectionId WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: attributes.uriParams.requestId,
+                collectionId: payload.collectionId default null
+            }]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Request moved"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- Bulk import — replaces apitester-ui's old per-request round trips (one POST /collections,
+         then one POST .../requests + one POST /requests/{id}/save PER request, recursively per
+         sub-folder) with a SINGLE call: the whole Postman/Swagger/Apitester-format tree already
+         parsed client-side (swaggerImport.js/postmanImport.js already do that parsing — this
+         only takes over the "create everything in the DB" half) comes in as one nested JSON tree
+         and every collection/request row is inserted here in one flow.
+
+         Request body:
+           { workspaceId, parentId, mergeIntoParent, roots: [ node, node, ... ] }
+         where a node is { name, variables?, requests?: [{name, description, preRequest, request,
+         postResponse, inputDataSets}], folders?: [ node, ... ] } — the exact shape
+         get-collections/get-workspaces already returns and importFolderTree in CollectionTree.jsx
+         already builds client-side, so no new client-side data model is needed, just one HTTP
+         call instead of many.
+
+         mergeIntoParent=true (only valid with exactly one entry in roots and a real parentId) is
+         the "flatten a lone import group straight into the target folder, no redundant wrapper
+         collection" case CollectionTree.jsx already special-cased before — here that means
+         roots[0] contributes its OWN requests/folders directly under parentId instead of getting
+         its own new collection row. -->
+    <flow name="import-collections">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/import" allowedMethods="POST" doc:name="POST /collections/import"/>
+        <ee:transform doc:name="Flatten the whole import tree into insertable collection/request rows">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Arrays
+output application/json
+var workspaceId = payload.workspaceId default null
+var parentId = payload.parentId default null
+var mergeIntoParent = payload.mergeIntoParent default false
+var roots = payload.roots default []
+
+fun reqRow(r, colId) = {
+    id: uuid(),
+    collectionId: colId,
+    name: r.name default "Request",
+    description: r.description default "",
+    preRequestJson: write(r.preRequest default [], "application/json"),
+    requestJson: write(r.request default {}, "application/json"),
+    postResponseJson: write(r.postResponse default [], "application/json"),
+    inputDataSetsJson: write(r.inputDataSets default [], "application/json")
+}
+
+// Creates a new collection row for `node` itself (under `pId`), plus everything nested in it.
+fun flattenNew(node, pId) = do {
+    var colId = uuid()
+    var col = {
+        id: colId, name: node.name default "Imported", parentId: pId, workspaceId: workspaceId,
+        variablesJson: write(node.variables default {}, "application/json")
+    }
+    var reqs = (node.requests default []) map ((r) -> reqRow(r, colId))
+    var children = (node.folders default []) map ((f) -> flattenNew(f, colId))
+    ---
+    {
+        collections: [col] ++ flatten(children map ((c) -> c.collections)),
+        requests: reqs ++ flatten(children map ((c) -> c.requests))
+    }
+}
+
+// mergeIntoParent case — `node`'s own requests/folders attach directly under the EXISTING
+// `pId`, no new collection row for `node` itself (its sub-folders still get real new rows).
+fun flattenMerged(node, pId) = do {
+    var reqs = (node.requests default []) map ((r) -> reqRow(r, pId))
+    var children = (node.folders default []) map ((f) -> flattenNew(f, pId))
+    ---
+    {
+        collections: flatten(children map ((c) -> c.collections)),
+        requests: reqs ++ flatten(children map ((c) -> c.requests))
+    }
+}
+
+var results = if (mergeIntoParent and parentId != null and sizeOf(roots) == 1)
+    [flattenMerged(roots[0], parentId)]
+else
+    roots map ((r) -> flattenNew(r, parentId))
+---
+{
+    collections: flatten(results map ((r) -> r.collections)),
+    requests: flatten(results map ((r) -> r.requests))
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <set-variable variableName="importPlan" value="#[payload]" doc:name="snapshot before the insert loops below clobber payload"/>
+        <foreach collection="#[vars.importPlan.collections]" doc:name="Insert each collection (parents always precede their children — flattenNew emits a node before recursing into its folders)">
+            <db:insert config-ref="Database_Config" doc:name="Insert collection">
+                <db:sql><![CDATA[INSERT INTO syskm.collections (id, name, parent_id, workspace_id, variables_json) VALUES (:id, :name, :parentId, :workspaceId, :variablesJson)]]></db:sql>
+                <db:input-parameters>#[payload]</db:input-parameters>
+            </db:insert>
+        </foreach>
+        <foreach collection="#[vars.importPlan.requests]" doc:name="Insert each request">
+            <db:insert config-ref="Database_Config" doc:name="Insert request">
+                <db:sql><![CDATA[INSERT INTO syskm.requests (id, collection_id, name, description, pre_request_json, request_json, post_response_json, input_data_sets_json) VALUES (:id, :collectionId, :name, :description, :preRequestJson, :requestJson, :postResponseJson, :inputDataSetsJson)]]></db:sql>
+                <db:input-parameters>#[payload]</db:input-parameters>
+            </db:insert>
+        </foreach>
+        <ee:transform doc:name="Response (counts only — the frontend re-fetches the tree)">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    collectionsCreated: sizeOf(vars.importPlan.collections),
+    requestsCreated: sizeOf(vars.importPlan.requests)
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="delete-request-in-collection">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/requests/{requestId}" allowedMethods="DELETE" doc:name="DELETE .../requests/{requestId}"/>
+        <db:delete config-ref="Database_Config" doc:name="Delete request">
+            <db:sql><![CDATA[DELETE FROM syskm.requests WHERE id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.requestId}]]]></db:input-parameters>
+        </db:delete>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Request deleted"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+	<!-- UI served under /ui/* rather than at the root — apitester-ui/vite.config.js's base:'/ui/'
+	     is what makes the built index.html's own asset references match this prefix. The API
+	     endpoints above are unaffected — they stay at their own root-level paths (/collections,
+	     /requests/..., etc.), only the static UI moved. Visiting bare "/" no longer serves
+	     anything; go to /ui/ directly. -->
+	<flow name="api-router-bindingsFlow" doc:id="6cd4883e-b868-44cd-b9ea-e7378dac046b">
+		<http:listener doc:name="Listener" doc:id="91002d09-1cbd-40e3-aa56-14241c1bc22e" config-ref="HTTP_Listener_config" path="/ui/*" />
+		<http:load-static-resource doc:name="Load static resource" doc:id="978edf6b-6d3e-4272-b0ee-2388e7594e28" resourceBasePath="${mule.home}/apps/${app.name}/web/" />
+	</flow>
+
+
+</mule>

@@ -1,21 +1,38 @@
 import { useEffect, useState } from 'react';
 import { useGlobalVarsStore } from '../store/globalVarsStore';
+import { useCollectionStore } from '../store/collectionStore';
 import { C, inputStyle, btnStyle, primaryBtnStyle } from '../theme';
 
 export default function GlobalVarsPanel({ onClose }) {
-    const { globalVariables, setGlobalVariables, fetchGlobalVariables, loaded } = useGlobalVarsStore();
-    const [rows, setRows] = useState(null); // null while the initial backend fetch is in flight
+    const { globalVariables, setGlobalVariables, fetchGlobalVariables, loaded, loadedWorkspaceId } = useGlobalVarsStore();
+    const { workspaces, fetchWorkspaces } = useCollectionStore();
+    // Global vars are now per-workspace (see globals-api.xml) — this picker decides which
+    // workspace's set the panel is viewing/editing. Locked workspaces are still listed (their
+    // globals aren't gated by the workspace password, same as collection variables aren't
+    // separately gated either) so switching to one doesn't require unlocking it first.
+    const [workspaceId, setWorkspaceId] = useState(null);
+    const [rows, setRows] = useState(null); // null while a backend fetch is in flight
     const [saving, setSaving] = useState(false);
 
+    useEffect(() => { if (workspaces.length === 0) fetchWorkspaces(); }, []);
+
+    // Default to the first workspace once the list arrives.
     useEffect(() => {
-        if (!loaded) fetchGlobalVariables();
-    }, [loaded, fetchGlobalVariables]);
+        if (workspaceId === null && workspaces.length > 0) setWorkspaceId(workspaces[0].id);
+    }, [workspaceId, workspaces]);
 
     useEffect(() => {
-        if (loaded && rows === null) {
+        if (workspaceId != null) {
+            setRows(null);
+            fetchGlobalVariables(workspaceId);
+        }
+    }, [workspaceId]);
+
+    useEffect(() => {
+        if (loaded && loadedWorkspaceId === workspaceId && rows === null) {
             setRows(Object.entries(globalVariables).map(([name, value]) => ({ name, value })));
         }
-    }, [loaded, globalVariables, rows]);
+    }, [loaded, loadedWorkspaceId, workspaceId, globalVariables, rows]);
 
     const update = (i, patch) => setRows(r => r.map((row, idx) => idx === i ? { ...row, ...patch } : row));
     const add = () => setRows(r => [...(r || []), { name: '', value: '' }]);
@@ -25,7 +42,7 @@ export default function GlobalVarsPanel({ onClose }) {
         setSaving(true);
         const vars = {};
         (rows || []).forEach(r => { if (r.name.trim()) vars[r.name.trim()] = r.value; });
-        await setGlobalVariables(vars);
+        await setGlobalVariables(workspaceId, vars);
         setSaving(false);
         onClose();
     };
@@ -37,9 +54,18 @@ export default function GlobalVarsPanel({ onClose }) {
                     <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Global Variables</span>
                     <button onClick={onClose} style={btnStyle}>Close</button>
                 </div>
-                <div style={{ fontSize: 11, color: C.textFaint, marginBottom: 12 }}>
-                    Stored on the backend (shared across everyone using this app, not just this browser) — injected as <code style={{ color: C.textDim }}>vars.x</code> on every request run, before collection variables and pre-request steps override them.
+                <div style={{ fontSize: 11, color: C.textFaint, marginBottom: 10 }}>
+                    Stored on the backend, scoped to one workspace — injected as <code style={{ color: C.textDim }}>vars.x</code> into every run of a request whose collection belongs to that workspace, before collection variables and pre-request steps override them.
                 </div>
+                <label style={{ fontSize: 10, color: C.textFaint, display: 'block', marginBottom: 4 }}>WORKSPACE</label>
+                <select
+                    style={{ ...inputStyle, width: '100%', marginBottom: 12 }}
+                    value={workspaceId ?? ''}
+                    onChange={e => setWorkspaceId(e.target.value)}
+                >
+                    {workspaces.length === 0 && <option value="">No workspaces yet</option>}
+                    {workspaces.map(ws => <option key={ws.id} value={ws.id}>{ws.name}</option>)}
+                </select>
                 {rows === null ? (
                     <div style={{ fontSize: 11, color: C.textFaint, fontStyle: 'italic', padding: '12px 0' }}>Loading…</div>
                 ) : (
@@ -53,7 +79,7 @@ export default function GlobalVarsPanel({ onClose }) {
                         ))}
                         <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                             <button onClick={add} style={btnStyle}>+ Add</button>
-                            <button onClick={save} style={primaryBtnStyle} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
+                            <button onClick={save} style={primaryBtnStyle} disabled={saving || !workspaceId}>{saving ? 'Saving…' : 'Save'}</button>
                         </div>
                     </>
                 )}

@@ -1,0 +1,69 @@
+{
+  "runId" : "run-cec75d6c4602",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "success",
+  "durationMs" : 2966,
+  "preRequestLog" : [ {
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputBody" : "{\n  \"CIF\": \"000001111113\",\n  \"ACCOUNT_NUMBER\": \"1234\"\n}",
+    "inputHeaders" : { },
+    "subRunId" : "run-0655f425ab8c",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"I8LDHnAuSg97FCkYXnA8AGkTEJ9xpkup\",\n  \"REQUEST_REFERENCE_NUMBER\": \"e39c77c4-bebf-409d-bcad-478769ba8fbd\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MDc5NDcsImV4cCI6MTc4NjYyNzk3MSwibmJmIjoxNzkyODE3NzI2LCJpc3MiOiJUaG9tcHNvbiwgTHluY2ggYW5kIE1jR2x5bm4iLCJzdWIiOiJiZjhjMWZkMS0wZmFmLTQ3ZGUtOTQ3Zi0wOTQwN2JhMzIyOWMiLCJhdWQiOiJkYzk3MjRjNy0wOWUxLTRkN2EtOTY2Ny1hYmI3MDg1NmQwYmUiLCJqdGkiOiI3MjkyMzRmNi0yMjBiLTQ1ZDQtOGU5Yy0wY2M0NjY3N2JkZDcifQ.eo4lfyZQGFo7uFBo0u6l4k5LFsMW8aDkI7q5paxL0aJDgw7JZJKlH6ymSIiymDul\"\n}",
+    "status" : "ok"
+  } ],
+  "sentBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"I8LDHnAuSg97FCkYXnA8AGkTEJ9xpkup\",\n  \"REQUEST_REFERENCE_NUMBER\": \"e39c77c4-bebf-409d-bcad-478769ba8fbd\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MDc5NDcsImV4cCI6MTc4NjYyNzk3MSwibmJmIjoxNzkyODE3NzI2LCJpc3MiOiJUaG9tcHNvbiwgTHluY2ggYW5kIE1jR2x5bm4iLCJzdWIiOiJiZjhjMWZkMS0wZmFmLTQ3ZGUtOTQ3Zi0wOTQwN2JhMzIyOWMiLCJhdWQiOiJkYzk3MjRjNy0wOWUxLTRkN2EtOTY2Ny1hYmI3MDg1NmQwYmUiLCJqdGkiOiI3MjkyMzRmNi0yMjBiLTQ1ZDQtOGU5Yy0wY2M0NjY3N2JkZDcifQ.eo4lfyZQGFo7uFBo0u6l4k5LFsMW8aDkI7q5paxL0aJDgw7JZJKlH6ymSIiymDul\"\n}",
+  "sentHeaders" : {
+    "client_id" : "",
+    "client_secret" : "",
+    "AccessToken" : ""
+  },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "842",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:34:27 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "body" : "{\n  \"RESPONSE\": \"mdznBtXapqkUMCyAGcEb\",\n  \"DIGI_SIGN\": \"FonzJhBw64jKMr9ncfuKqzSQ4gvEyvec\",\n  \"RESPONSE_DATE\": \"2026-08-13T15:34:27.531+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;I8LDHnAuSg97FCkYXnA8AGkTEJ9xpkup&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;e39c77c4-bebf-409d-bcad-478769ba8fbd&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MDc5NDcsImV4cCI6MTc4NjYyNzk3MSwibmJmIjoxNzkyODE3NzI2LCJpc3MiOiJUaG9tcHNvbiwgTHluY2ggYW5kIE1jR2x5bm4iLCJzdWIiOiJiZjhjMWZkMS0wZmFmLTQ3ZGUtOTQ3Zi0wOTQwN2JhMzIyOWMiLCJhdWQiOiJkYzk3MjRjNy0wOWUxLTRkN2EtOTY2Ny1hYmI3MDg1NmQwYmUiLCJqdGkiOiI3MjkyMzRmNi0yMjBiLTQ1ZDQtOGU5Yy0wY2M0NjY3N2JkZDcifQ.eo4lfyZQGFo7uFBo0u6l4k5LFsMW8aDkI7q5paxL0aJDgw7JZJKlH6ymSIiymDul&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ {
+    "name" : "Assertion",
+    "type" : "assertion",
+    "passed" : true
+  } ],
+  "postResponseLog" : [ {
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+    "inputBody" : "{\n  \"RESPONSE\": \"mdznBtXapqkUMCyAGcEb\",\n  \"DIGI_SIGN\": \"FonzJhBw64jKMr9ncfuKqzSQ4gvEyvec\",\n  \"RESPONSE_DATE\": \"2026-08-13T15:34:27.531+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;I8LDHnAuSg97FCkYXnA8AGkTEJ9xpkup&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;e39c77c4-bebf-409d-bcad-478769ba8fbd&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MDc5NDcsImV4cCI6MTc4NjYyNzk3MSwibmJmIjoxNzkyODE3NzI2LCJpc3MiOiJUaG9tcHNvbiwgTHluY2ggYW5kIE1jR2x5bm4iLCJzdWIiOiJiZjhjMWZkMS0wZmFmLTQ3ZGUtOTQ3Zi0wOTQwN2JhMzIyOWMiLCJhdWQiOiJkYzk3MjRjNy0wOWUxLTRkN2EtOTY2Ny1hYmI3MDg1NmQwYmUiLCJqdGkiOiI3MjkyMzRmNi0yMjBiLTQ1ZDQtOGU5Yy0wY2M0NjY3N2JkZDcifQ.eo4lfyZQGFo7uFBo0u6l4k5LFsMW8aDkI7q5paxL0aJDgw7JZJKlH6ymSIiymDul&quot;\n}\"\n}",
+    "inputHeaders" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "842",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:34:27 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "subRunId" : "run-59b098f6936e",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"ERROR_CODE\": \"\",\n  \"ERROR_DESCRIPTION\": \"\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n  \"RESPONSE_STATUS\": \"0\",\n  \"TRANSACTION_STATUS\": \"success\",\n  \"bdy\": {\n  &quot;RESPONSE&quot;: &quot;mdznBtXapqkUMCyAGcEb&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;FonzJhBw64jKMr9ncfuKqzSQ4gvEyvec&quot;,\n  &quot;RESPONSE_DATE&quot;: &quot;2026-08-13T15:34:27.531+00:00&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;&quot;,\n&quot;bdy&quot;: &quot;{\n  &amp;quot;REQUEST&amp;quot;: &amp;quot;default_data&amp;quot;,\n  &amp;quot;DIGI_SIGN&amp;quot;: &amp;quot;I8LDHnAuSg97FCkYXnA8AGkTEJ9xpkup&amp;quot;,\n  &amp;quot;REQUEST_REFERENCE_NUMBER&amp;quot;: &amp;quot;e39c77c4-bebf-409d-bcad-478769ba8fbd&amp;quot;,\n  &amp;quot;ACCESS_TOKEN&amp;quot;: &amp;quot;eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MDc5NDcsImV4cCI6MTc4NjYyNzk3MSwibmJmIjoxNzkyODE3NzI2LCJpc3MiOiJUaG9tcHNvbiwgTHluY2ggYW5kIE1jR2x5bm4iLCJzdWIiOiJiZjhjMWZkMS0wZmFmLTQ3ZGUtOTQ3Zi0wOTQwN2JhMzIyOWMiLCJhdWQiOiJkYzk3MjRjNy0wOWUxLTRkN2EtOTY2Ny1hYmI3MDg1NmQwYmUiLCJqdGkiOiI3MjkyMzRmNi0yMjBiLTQ1ZDQtOGU5Yy0wY2M0NjY3N2JkZDcifQ.eo4lfyZQGFo7uFBo0u6l4k5LFsMW8aDkI7q5paxL0aJDgw7JZJKlH6ymSIiymDul&amp;quot;\n}&quot;\n}\n}",
+    "status" : "ok"
+  } ]
+}

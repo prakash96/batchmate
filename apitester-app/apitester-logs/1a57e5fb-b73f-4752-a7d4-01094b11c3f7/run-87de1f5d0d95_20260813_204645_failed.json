@@ -1,0 +1,25 @@
+{
+  "runId" : "run-87de1f5d0d95",
+  "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+  "status" : "failed",
+  "error" : "null",
+  "durationMs" : 809,
+  "preRequestLog" : [ ],
+  "sentBody" : "{\"CIF\": \"000002222222\", \"REQUEST_REFERENCE_NUMBER\": \"EDGE_CASE_001\"}",
+  "sentHeaders" : {
+    "client_id" : "",
+    "client_secret" : ""
+  },
+  "response" : {
+    "status" : null,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "client_id" : "",
+      "client_secret" : ""
+    },
+    "body" : "{\"CIF\": \"000002222222\", \"REQUEST_REFERENCE_NUMBER\": \"EDGE_CASE_001\"}"
+  },
+  "vars" : { },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

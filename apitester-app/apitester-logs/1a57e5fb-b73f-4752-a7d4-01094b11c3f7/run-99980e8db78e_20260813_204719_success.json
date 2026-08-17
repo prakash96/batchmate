@@ -1,0 +1,35 @@
+{
+  "runId" : "run-99980e8db78e",
+  "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+  "status" : "success",
+  "durationMs" : 408,
+  "preRequestLog" : [ ],
+  "sentBody" : "{\"CIF\": \"000002222222\", \"REQUEST_REFERENCE_NUMBER\": \"EDGE_CASE_001\"}",
+  "sentHeaders" : {
+    "client_id" : "afdfsdfd",
+    "client_secret" : "afdgdsgsd"
+  },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "555",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:17:18 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "ihdddzq33lk"
+    },
+    "body" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"wO54ngc1CljNgLOB12y8oGxRvGyjxuR6\",\n  \"REQUEST_REFERENCE_NUMBER\": \"6a17a5e9-57f5-47e8-b0fb-1413d97f8539\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY1NTk4NjQsImV4cCI6MTc4NjU3ODEzNywibmJmIjoxNzg0MDI2OTcxLCJpc3MiOiJHbGVpY2huZXIgSW5jIiwic3ViIjoiNTExMjZiYmUtODVlYy00ZDgyLWI3OTctMWFlZTdmYjhmYzVjIiwiYXVkIjoiNTVkMGU5YTUtNzlmNC00MTYzLWI2M2EtMDhjMTI5YWUzYTU5IiwianRpIjoiMjgyNzNlODMtNmFiNC00MTg2LWEzODItNDk3YjAzN2IyYzhjIn0.IbaTmYrgbOewwjn9aCaj85IR6VSNq1RVbOm0m3aTpyUtTHPlj4Q9Q08cLyxfp9qQ\"\n}"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

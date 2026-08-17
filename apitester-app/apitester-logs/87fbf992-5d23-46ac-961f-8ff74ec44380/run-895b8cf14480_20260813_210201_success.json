@@ -1,0 +1,35 @@
+{
+  "runId" : "run-895b8cf14480",
+  "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+  "status" : "success",
+  "durationMs" : 409,
+  "preRequestLog" : [ ],
+  "sentBody" : "{\n  \"RESPONSE\": \"ug46axCJyqV6bQwclWKd\",\n  \"DIGI_SIGN\": \"XOmQDMKMuDm6t2rKqa2gS8kn9CKOcvfO\",\n  \"RESPONSE_DATE\": \"2026-08-13T15:32:00.301+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;OnebICHZB0G32YzGTpjV3nCgGFgU5wm3&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;b0b15b56-3bd6-4ef0-8e82-0df345dc0d0f&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjA5OTgsImV4cCI6MTc4NjY1NjgxMCwibmJmIjoxNzk0ODU4MDExLCJpc3MiOiJEZW5lc2lrLCBTdGFudG9uIGFuZCBEJ0Ftb3JlIiwic3ViIjoiODczYmJkMjYtODZiYS00ZWJkLWFkNzEtMTJkNmViZmYyODcwIiwiYXVkIjoiNmJkY2QzYjQtM2FmYy00ZGNlLWJkZmEtNjUyMWY5M2M5MmRkIiwianRpIjoiNzZjYjFiNWEtNjFmNi00ZTdkLThlOGQtMmI0YmJiMzE1MWFlIn0.ovBuiRFfp00w55COfLei7jaifieSLXWdMzAt8FHN8aPs9kqTlPgyYbdnGpjeetX3&quot;\n}\"\n}",
+  "sentHeaders" : {
+    "client_id" : "afdfsdfd",
+    "client_secret" : "afdgdsgsd"
+  },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "1162",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:32:00 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "oll91bescvi"
+    },
+    "body" : "{\n  \"ERROR_CODE\": \"\",\n  \"ERROR_DESCRIPTION\": \"\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n  \"RESPONSE_STATUS\": \"0\",\n  \"TRANSACTION_STATUS\": \"success\",\n  \"bdy\": {\n  &quot;RESPONSE&quot;: &quot;ug46axCJyqV6bQwclWKd&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;XOmQDMKMuDm6t2rKqa2gS8kn9CKOcvfO&quot;,\n  &quot;RESPONSE_DATE&quot;: &quot;2026-08-13T15:32:00.301+00:00&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;&quot;,\n&quot;bdy&quot;: &quot;{\n  &amp;quot;REQUEST&amp;quot;: &amp;quot;default_data&amp;quot;,\n  &amp;quot;DIGI_SIGN&amp;quot;: &amp;quot;OnebICHZB0G32YzGTpjV3nCgGFgU5wm3&amp;quot;,\n  &amp;quot;REQUEST_REFERENCE_NUMBER&amp;quot;: &amp;quot;b0b15b56-3bd6-4ef0-8e82-0df345dc0d0f&amp;quot;,\n  &amp;quot;ACCESS_TOKEN&amp;quot;: &amp;quot;eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjA5OTgsImV4cCI6MTc4NjY1NjgxMCwibmJmIjoxNzk0ODU4MDExLCJpc3MiOiJEZW5lc2lrLCBTdGFudG9uIGFuZCBEJ0Ftb3JlIiwic3ViIjoiODczYmJkMjYtODZiYS00ZWJkLWFkNzEtMTJkNmViZmYyODcwIiwiYXVkIjoiNmJkY2QzYjQtM2FmYy00ZGNlLWJkZmEtNjUyMWY5M2M5MmRkIiwianRpIjoiNzZjYjFiNWEtNjFmNi00ZTdkLThlOGQtMmI0YmJiMzE1MWFlIn0.ovBuiRFfp00w55COfLei7jaifieSLXWdMzAt8FHN8aPs9kqTlPgyYbdnGpjeetX3&amp;quot;\n}&quot;\n}\n}"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

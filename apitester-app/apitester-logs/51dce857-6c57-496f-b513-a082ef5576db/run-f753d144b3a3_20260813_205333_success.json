@@ -1,0 +1,38 @@
+{
+  "runId" : "run-f753d144b3a3",
+  "requestId" : "51dce857-6c57-496f-b513-a082ef5576db",
+  "status" : "success",
+  "durationMs" : 1570,
+  "preRequestLog" : [ ],
+  "sentBody" : "{\n  \"appName\": \"myapp\",\n  \"CIF\": \"1001\"\n}",
+  "sentHeaders" : {
+    "X-Env" : "dev"
+  },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "cf-cache-status" : "DYNAMIC",
+      "CF-RAY" : "a2a8b8b3fad1d20d-BOM",
+      "Connection" : "keep-alive",
+      "Content-Length" : "370",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Date" : "Thu, 13 Aug 2026 15:23:32 GMT",
+      "etag" : "W/\"172-F3OeqzreZnaO+XzPhRTYa+c7o7M\"",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Server" : "cloudflare",
+      "Set-Cookie" : "[sails.sid=s%3Aq3oBWDg9S99jcBEyQakHb-f2lDmWGTEh.fSlxzK2A48IJF24%2B7OfwkDhOMlpYm0agfdmzxR04L1E; Path=/; HttpOnly, __cf_bm=da6Eb54RqcWn5IHI6.tHJHlTQiK.lnJ_eGFKQjCtM.E-1786634611.832959-1.0.1.1-cCIaev1azxnzLFM9A59c6cvG_YdR1xYeq1qlPC2bQIP.2TU0EwkiPRZ7jz2wgsgrGhugfZPQTlOZ0Nx13bZP19hNXOkT4EFNxqtNYGPAW3fqPdXlfmcw_ku1K1Rveyh9; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com; Expires=Thu, 13 Aug 2026 15:53:32 GMT, _cfuvid=c0JqrKOTvOBxEh7I1zN5dTs0V21VVSgkD.FEUEFc5A0-1786634611.832959-1.0.1.1-0wuktBJBT4SJbVDEErWBGRBmmvfWoClHx1d.ePnBJ0U; HttpOnly; SameSite=None; Secure; Path=/; Domain=postman-echo.com]",
+      "vary" : "Accept-Encoding",
+      "x-envoy-upstream-service-time" : "4"
+    },
+    "body" : "{\"args\":{},\"data\":{\"appName\":\"myapp\",\"CIF\":\"1001\"},\"files\":{},\"form\":{},\"headers\":{\"host\":\"postman-echo.com\",\"accept-encoding\":\"gzip, br\",\"content-length\":\"41\",\"user-agent\":\"Apache-HttpClient/4.5.14 (Java/11.0.25)\",\"x-env\":\"dev\",\"x-forwarded-proto\":\"https\",\"content-type\":\"application/json\"},\"json\":{\"appName\":\"myapp\",\"CIF\":\"1001\"},\"url\":\"https://postman-echo.com/post\"}"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

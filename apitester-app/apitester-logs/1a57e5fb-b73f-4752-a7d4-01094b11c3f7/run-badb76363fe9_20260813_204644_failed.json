@@ -1,0 +1,25 @@
+{
+  "runId" : "run-badb76363fe9",
+  "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+  "status" : "failed",
+  "error" : "No such host is known (null)",
+  "durationMs" : 10000,
+  "preRequestLog" : [ ],
+  "sentBody" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}",
+  "sentHeaders" : {
+    "client_id" : "",
+    "client_secret" : ""
+  },
+  "response" : {
+    "status" : null,
+    "headers" : {
+      "Accept-Encoding" : "identity",
+      "client_id" : "",
+      "client_secret" : ""
+    },
+    "body" : "{\"CIF\": \"000001111111\", \"REQUEST_REFERENCE_NUMBER\": \"SBISI4352363263\"}"
+  },
+  "vars" : { },
+  "checks" : [ ],
+  "postResponseLog" : [ ]
+}

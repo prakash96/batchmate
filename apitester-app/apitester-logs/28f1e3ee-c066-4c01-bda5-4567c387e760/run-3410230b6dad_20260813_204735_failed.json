@@ -1,0 +1,51 @@
+{
+  "runId" : "run-3410230b6dad",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "failed",
+  "error" : "Assertion failed:\nCondition 1: actual=\"200\"  expected == \"429\"",
+  "durationMs" : 833,
+  "preRequestLog" : [ {
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputBody" : "{\"CIF\": \"000002222222\", \"REQUEST_REFERENCE_NUMBER\": \"EDGE_CASE_001\"}",
+    "inputHeaders" : { },
+    "subRunId" : "run-837270236bcf",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"f59zvDKgph5PFD5cshTG8Nzk0AaGLDsp\",\n  \"REQUEST_REFERENCE_NUMBER\": \"32c721fe-e619-4b85-a411-485df1093128\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjE1MjIsImV4cCI6MTc4NjY5Mzk2MiwibmJmIjoxNzkyMTI2NDI0LCJpc3MiOiJIb2VnZXIsIFlvc3QgYW5kIE11cmF6aWsiLCJzdWIiOiJmMmE4NDg2My00ZDZkLTRhMmUtYmE2ZC00NmI2MTNlZTE0YWMiLCJhdWQiOiIzYWY1YTU1Yy1jOTIzLTQ4ZWMtODE3MS00MWE5MWZhZmE5ZWQiLCJqdGkiOiIxZmI1YTFiNS02M2JhLTRmOGMtOWZjZi05ZmUwMmNjM2QyM2QifQ.aLagG94XywD9R9P1pVxvYC0vHhOWxH2xrKY2QOWuvkiXUcQxPOOr41O3H9zVgnmR\"\n}",
+    "status" : "ok"
+  } ],
+  "sentBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"f59zvDKgph5PFD5cshTG8Nzk0AaGLDsp\",\n  \"REQUEST_REFERENCE_NUMBER\": \"32c721fe-e619-4b85-a411-485df1093128\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjE1MjIsImV4cCI6MTc4NjY5Mzk2MiwibmJmIjoxNzkyMTI2NDI0LCJpc3MiOiJIb2VnZXIsIFlvc3QgYW5kIE11cmF6aWsiLCJzdWIiOiJmMmE4NDg2My00ZDZkLTRhMmUtYmE2ZC00NmI2MTNlZTE0YWMiLCJhdWQiOiIzYWY1YTU1Yy1jOTIzLTQ4ZWMtODE3MS00MWE5MWZhZmE5ZWQiLCJqdGkiOiIxZmI1YTFiNS02M2JhLTRmOGMtOWZjZi05ZmUwMmNjM2QyM2QifQ.aLagG94XywD9R9P1pVxvYC0vHhOWxH2xrKY2QOWuvkiXUcQxPOOr41O3H9zVgnmR\"\n}",
+  "sentHeaders" : {
+    "client_id" : "",
+    "client_secret" : "",
+    "AccessToken" : ""
+  },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "838",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:17:34 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "body" : "{\n  \"RESPONSE\": \"KSVGgAUMYEofPL07Q1sn\",\n  \"DIGI_SIGN\": \"MdbM4ddEp9Y06ccTcqrgUw2hqvzjaJsE\",\n  \"RESPONSE_DATE\": \"2026-08-13T15:17:34.298+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;f59zvDKgph5PFD5cshTG8Nzk0AaGLDsp&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;32c721fe-e619-4b85-a411-485df1093128&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjE1MjIsImV4cCI6MTc4NjY5Mzk2MiwibmJmIjoxNzkyMTI2NDI0LCJpc3MiOiJIb2VnZXIsIFlvc3QgYW5kIE11cmF6aWsiLCJzdWIiOiJmMmE4NDg2My00ZDZkLTRhMmUtYmE2ZC00NmI2MTNlZTE0YWMiLCJhdWQiOiIzYWY1YTU1Yy1jOTIzLTQ4ZWMtODE3MS00MWE5MWZhZmE5ZWQiLCJqdGkiOiIxZmI1YTFiNS02M2JhLTRmOGMtOWZjZi05ZmUwMmNjM2QyM2QifQ.aLagG94XywD9R9P1pVxvYC0vHhOWxH2xrKY2QOWuvkiXUcQxPOOr41O3H9zVgnmR&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ {
+    "name" : "Assertion",
+    "type" : "assertion",
+    "passed" : false,
+    "message" : "Assertion failed:\nCondition 1: actual=\"200\"  expected == \"429\""
+  } ],
+  "postResponseLog" : [ ]
+}

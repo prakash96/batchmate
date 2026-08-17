@@ -1,10 +1,9 @@
 import { C, inputStyle, btnStyle } from '../../theme';
 import ConditionsEditor from '../shared/ConditionsEditor';
-import { useConnectionStore } from '../../store/connectionStore';
 
 const SOURCE_OPTIONS = ['body', 'variable', 'expression', 'literal'];
 
-const TYPE_LABEL = { callRequest: 'Call Request', setVariable: 'Set Variable', wait: 'Wait', assertion: 'Assertion', jsoncompare: 'JSON Compare', textcompare: 'Text Compare', dbcheck: 'DB Check' };
+const TYPE_LABEL = { callRequest: 'Call Request', setVariable: 'Set Variable', wait: 'Wait', assertion: 'Assertion', jsoncompare: 'JSON Compare', textcompare: 'Text Compare' };
 
 /**
  * One unified, freely-reorderable Post-Response list — Call Request / Set Variable / Wait steps
@@ -36,12 +35,11 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
         else if (type === 'assertion') onChange([...checks, { ...base, logic: 'AND', conditions: [{ left: 'headers.httpResponseCode', operator: '==', right: '200' }], onFail: 'stop' }]);
         else if (type === 'jsoncompare') onChange([...checks, { ...base, leftSource: 'body', leftExpr: '', leftLiteral: '', rightSource: 'literal', rightExpr: '', rightLiteral: '', mode: 'partial', ignoreArrayOrder: true, resultVar: '', onMismatch: 'stop' }]);
         else if (type === 'textcompare') onChange([...checks, { ...base, leftSource: 'body', leftExpr: '', leftLiteral: '', rightSource: 'literal', rightExpr: '', rightLiteral: '', mode: 'exact', caseSensitive: true, resultVar: '', onMismatch: 'stop' }]);
-        else if (type === 'dbcheck') onChange([...checks, { ...base, connectionId: '', query: '', resultVar: 'rows', maxRows: 50, logic: 'AND', conditions: [{ left: 'vars.rows.length', operator: '>', right: '0' }], onFail: 'stop' }]);
     };
 
     return (
         <div>
-            {checks.length === 0 && <div style={{ fontSize: 11, color: C.textFaint, marginBottom: 8, fontStyle: 'italic' }}>No post-response steps yet — add a Call Request, Set Variable, wait, assertion, comparison, or DB check.</div>}
+            {checks.length === 0 && <div style={{ fontSize: 11, color: C.textFaint, marginBottom: 8, fontStyle: 'italic' }}>No post-response steps yet — add a Call Request, Set Variable, wait, assertion, or comparison.</div>}
             {checks.map((check, i) => (
                 <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: 5, padding: 10, marginBottom: 8, background: C.surface }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -79,9 +77,6 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
                     {(check.type === 'jsoncompare' || check.type === 'textcompare') && (
                         <CompareFields check={check} onChange={p => update(i, p)} isText={check.type === 'textcompare'} />
                     )}
-                    {check.type === 'dbcheck' && (
-                        <DbCheckFields check={check} onChange={p => update(i, p)} />
-                    )}
                 </div>
             ))}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -91,7 +86,6 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
                 <button onClick={() => add('assertion')} style={btnStyle}>+ Assertion</button>
                 <button onClick={() => add('jsoncompare')} style={btnStyle}>+ JSON Compare</button>
                 <button onClick={() => add('textcompare')} style={btnStyle}>+ Text Compare</button>
-                <button onClick={() => add('dbcheck')} style={btnStyle}>+ DB Check</button>
             </div>
         </div>
     );
@@ -179,38 +173,6 @@ function SideFields({ label, source, expr, literal, onChange }) {
             ) : (
                 <input style={{ ...inputStyle, flex: 1, fontFamily: C.mono }} placeholder={source === 'variable' ? 'myVar' : 'vars.myVar'} value={expr} onChange={e => onChange({ expr: e.target.value })} />
             )}
-        </div>
-    );
-}
-
-function DbCheckFields({ check, onChange }) {
-    const { connections } = useConnectionStore();
-    const dbConnections = connections.filter(c => ['postgresql', 'mysql', 'oracle', 'sqlserver', 'db'].includes(c.type));
-    return (
-        <div>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-                <select style={{ ...inputStyle, flex: 1 }} value={check.connectionId} onChange={e => onChange({ connectionId: e.target.value })}>
-                    <option value="">Select a saved DB connection…</option>
-                    {dbConnections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-                <input style={{ ...inputStyle, flex: '0 0 90px' }} type="number" placeholder="max rows" value={check.maxRows} onChange={e => onChange({ maxRows: Number(e.target.value) })} />
-            </div>
-            <textarea
-                style={{ ...inputStyle, width: '100%', minHeight: 70, fontFamily: C.mono, marginBottom: 6, resize: 'vertical' }}
-                placeholder="SELECT * FROM orders WHERE id = '${vars.orderId}'"
-                value={check.query}
-                onChange={e => onChange({ query: e.target.value })}
-            />
-            <input style={{ ...inputStyle, width: '100%', marginBottom: 8 }} placeholder="result variable, e.g. rows" value={check.resultVar} onChange={e => onChange({ resultVar: e.target.value })} />
-            <div style={{ fontSize: 10, color: C.textFaint, marginBottom: 6 }}>
-                Assert against the query result — reference it as <code style={{ color: C.textDim }}>vars.{check.resultVar || 'rows'}.length</code>,{' '}
-                <code style={{ color: C.textDim }}>vars.{check.resultVar || 'rows'}[0].column_name</code>, etc.
-            </div>
-            <ConditionsEditor
-                logic={check.logic} onLogicChange={v => onChange({ logic: v })}
-                conditions={check.conditions} onChange={v => onChange({ conditions: v })}
-            />
-            <OnFailSelect value={check.onFail} onChange={v => onChange({ onFail: v })} />
         </div>
     );
 }

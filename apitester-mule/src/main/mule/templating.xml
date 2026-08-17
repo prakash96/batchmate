@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!--
+        Reusable templated-string evaluation — a dollar sign followed by a PAREN-wrapped expression,
+        parens closed (dollar-paren-opened form), NOT the dollar-BRACE form apitester-app's own
+        RequestExecutionService evalTemplate()/evalExpressionValue() uses. Pure DataWeave — no
+        JavaScript scripting engine anywhere in this app anymore (see execution-engine.xml's
+        file-level comment for why: the JS scripting module's parameter binding was silently handing
+        scripts an empty object for every binding). Expressions inside the dollar-paren wrapper are
+        DataWeave, not JS — e.g. now() instead of new Date(), vars.x stays the same, payload.field
+        instead of JSON.parse(body).field, attributes.headers['X'] for a header. payload/
+        attributes.headers/vars are Mule/DataWeave's own native names (attributes.headers being a
+        real MultiMap-shaped object, same access pattern DataWeave supports everywhere else in this
+        app) — the ONLY names recognized, no body/headers legacy aliases. Same semantics as the JS
+        version/the Java original:
+          - blank template            -> "" (or null if raw)
+          - no template-opener at all -> returned as-is
+          - a SINGLE wrapped template -> evaluated; raw=true keeps the real type (number/object/
+                                         ... — Set Variable's own semantics), raw=false stringifies
+                                         (the Input tab's/header rows' always-stringify semantics)
+          - a MIXED template          -> every wrapped chunk evaluated + stringified + concatenated
+                                         with the surrounding literal text, regardless of raw
+        Parens inside an expression (very common in DataWeave — sizeOf(x), now(), etc.) are handled
+        correctly via matching-paren scanning, not a naive "first close paren" search.
+
+        Call via <flow-ref name="eval-template"/> after setting these flow vars:
+          vars.etTemplate — the string to evaluate
+          vars.etRaw      — boolean, default false (see above)
+          vars.etVars/etBody/etHeaders — the vars/body/headers bindings the template expressions see
+        Result lands in vars.etResult — payload itself is snapshotted before and restored after,
+        since <ee:transform> writes its result into payload (unlike the old JS scripting:execute's
+        target= attribute, which wrote straight into a variable without ever touching payload) —
+        without the restore, calling this via <flow-ref> would clobber whatever the CALLER's own
+        payload meant (a dataset entry, a header row, a post-response step object, ...).
+    -->
+    <flow name="eval-template">
+        <set-variable variableName="etCallerPayload" value="#[payload]" doc:name="snapshot caller's payload"/>
+        <ee:transform doc:name="Evaluate templated string (pure DataWeave)">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+import decodeURIComponent from dw::core::URL
+import * from dw::core::Strings
+output application/java
+
+// Built via URL-decoding rather than writing the dollar-sign character itself anywhere in this
+// source file — Mule's own config-property resolver flags a literal dollar sign even alone (not
+// just paired with a brace/paren) and tries to resolve it as a config property, which fails for
+// anything that isn't one. This produces the same character at runtime without the glyph itself
+// ever appearing in the deployed source for that scanner to find — see collections-api.xml's
+// create-request-in-collection flow for the analogous Unicode-escape technique.
+var DOLLAR = decodeURIComponent("%24")
+var OPEN = DOLLAR ++ "("
+
+fun charAt(s: String, i: Number): String = substring(s, i, i + 1)
+
+// Matching-paren scan (not a naive "first )" search) — idx is the position right after the
+// dollar-paren opener, depth starts at 0; returns the absolute index of the matching close
+// paren, or -1 if unclosed.
+fun findClose(s: String, idx: Number, depth: Number): Number =
+    if (idx >= sizeOf(s)) -1
+    else if (charAt(s, idx) == "(") findClose(s, idx + 1, depth + 1)
+    else if (charAt(s, idx) == ")") (if (depth == 0) idx else findClose(s, idx + 1, depth - 1))
+    else findClose(s, idx + 1, depth)
+
+// Splits a string into {kind:"lit"|"expr", text} chunks around each dollar-paren-wrapped chunk.
+fun tokenize(s: String): Array =
+    do {
+        fun go(i: Number, litStart: Number, acc: Array): Array =
+            if (i >= sizeOf(s))
+                (if (litStart < sizeOf(s)) acc ++ [{kind: "lit", text: substring(s, litStart, sizeOf(s))}] else acc)
+            else if (charAt(s, i) == DOLLAR and (i + 1) < sizeOf(s) and charAt(s, i + 1) == "(")
+                do {
+                    var withLit = if (litStart < i) (acc ++ [{kind: "lit", text: substring(s, litStart, i)}]) else acc
+                    var closeIdx = findClose(s, i + 2, 0)
+                    ---
+                    if (closeIdx == -1)
+                        // Unclosed opener — treat the rest as literal text rather than erroring.
+                        withLit ++ [{kind: "lit", text: substring(s, i, sizeOf(s))}]
+                    else
+                        go(closeIdx + 1, closeIdx + 1, withLit ++ [{kind: "expr", text: substring(s, i + 2, closeIdx)}])
+                }
+            else go(i + 1, litStart, acc)
+        ---
+        go(0, 0, [])
+    }
+
+// Wraps a user-authored DataWeave expression in a tiny standalone script, exposed under
+// Mule/DataWeave's own native names only — payload for the body, attributes.headers for headers
+// (a real MultiMap-shaped object, same access pattern DataWeave natively supports for
+// attributes.headers elsewhere in this app, e.g. execution-engine.xml's rsResponse capture), vars
+// unchanged. No body/headers aliases.
+//
+// bodyJson/headersJson/varsJson are already-serialized JSON text (from THIS script's own ambient
+// vars.etBody/etHeaders/etVars, resolved by evalExpr below, where `vars` is still genuinely
+// ambient/unshadowed) spliced in as literal values — NOT built by having the inner script
+// reference vars.etBody/etHeaders/etVars itself. A local `var vars = vars.etVars default {}`
+// inside the inner script would shadow the name `vars` for the WHOLE script, including its own
+// right-hand side, so `vars.etVars` there would resolve to the not-yet-initialized local `vars`
+// (a self-reference) rather than the ambient one — DataWeave throws "Variable: `vars` is not yet
+// initialized." JSON literals (valid DataWeave literal syntax too) sidestep that entirely: the
+// inner script's var declarations never need to name-reference vars/payload/attributes at all.
+fun buildScript(expr: String, bodyJson: String, headersJson: String, varsJson: String): String =
+    "%dw 2.0\noutput application/java\nvar payload = " ++ bodyJson ++ "\nvar attributes = {headers: (" ++ headersJson ++ ")}\nvar vars = " ++ varsJson ++ "\n---\n" ++ expr
+
+fun evalExpr(expr: String) =
+    read(buildScript(expr, write(vars.etBody, "application/json"), write(vars.etHeaders default {}, "application/json"), write(vars.etVars default {}, "application/json")), "application/dw")
+
+fun stringifyResult(v): String =
+    if (v == null) ""
+    else if (v is Object or v is Array) write(v, "application/json")
+    else (v as String)
+
+var template = vars.etTemplate
+var raw = vars.etRaw default false
+---
+if (template == null or trim(template as String) == "")
+    (if (raw) null else "")
+else if (!((template as String) contains OPEN))
+    template
+else
+    do {
+        // Tokenize the TRIMMED template just to detect "is this a single, fully-wrapped
+        // expression with nothing else around it" (surrounding whitespace tolerated, matching
+        // the old behavior) — the actual output below re-tokenizes the ORIGINAL (untrimmed)
+        // template so literal text outside any wrapped expression keeps its real formatting.
+        var trimmedTokens = tokenize(trim(template as String))
+        ---
+        if (raw and sizeOf(trimmedTokens) == 1 and trimmedTokens[0].kind == "expr")
+            evalExpr(trimmedTokens[0].text)
+        else
+            (tokenize(template as String) map ((t) -> if (t.kind == "lit") t.text else stringifyResult(evalExpr(t.text)))) joinBy ""
+    }]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <set-variable variableName="etResult" value="#[payload]" doc:name="etResult"/>
+        <set-payload value="#[vars.etCallerPayload]" doc:name="restore caller's payload"/>
+    </flow>
+
+</mule>

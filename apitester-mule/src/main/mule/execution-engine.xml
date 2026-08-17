@@ -1,0 +1,689 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!--
+        Mirrors RequestExecutionService.run()'s two-shape entry point (public: checks Input Data
+        Set iteration; private: the actual recursive per-run logic) — see run-request-http below.
+
+        RECURSION STRATEGY: Mule flows have no native call-stack scoping (a <flow-ref> shares the
+        SAME event/variables as its caller, so nested calls would collide on variable names with no
+        clean way to save/restore a "stack frame"). Rather than hand-roll fragile stack-indexed
+        variable juggling that can't be verified without a live Mule runtime, a Call Request step
+        (pre-request or post-response) invokes the callee via a LOOPBACK http:request back to this
+        same app's own /requests/{id}/run endpoint — depth, the visited-id chain (cycle guard), and
+        the global-vars floor travel as request headers (X-At-Depth/X-At-Chain/X-At-Global-Vars),
+        the caller's outgoing body/headers as X-At-Caller-Body/X-At-Caller-Headers. Each nested call
+        is then a genuinely fresh, isolated Mule event — the SAME isolation an inbound HTTP request
+        always gets — which eliminates the whole class of variable-collision bugs a shared-stack
+        approach would risk, at the cost of a (cheap, same-process) loopback HTTP hop per nested call.
+
+        NOT YET IMPLEMENTED here (see chat for the full status writeup): jsoncompare/textcompare/
+        dbcheck postResponse step types, and the "wait" step. Call Request, Set Variable, and
+        Assertion — the three steps that actually determine pass/fail and inter-request chaining —
+        are implemented and schema-validated.
+
+        No JavaScript scripting engine anywhere in this file — Assertion evaluation and (see
+        templating.xml) template/expression evaluation are both pure DataWeave. The JS engine's
+        scripting:parameters binding was, for reasons never fully root-caused, handing the script an
+        EMPTY object for `payload`/`step` (every field silently fell back to its JS default) — a
+        <set-variable>/<ee:transform> DataWeave expression reads payload/vars directly, the same
+        way dozens of other expressions already do in this file, sidestepping that whole class of
+        bug rather than chasing it further.
+    -->
+
+    <!-- Public entry — matches requests-api.xml's run-request-http, which sets vars.requestId/
+         vars.overrideVars from the inbound HTTP request before calling this. Branches on whether
+         attributes.headers['x-at-chain'] is present: absent = a genuine top-level call (checks
+         Input Data Set iteration, exactly like RequestExecutionService.run()'s public overload);
+         present = a nested loopback call from a Call Request step (skips iteration entirely — "a
+         nested Call Request always just chains the previous response, regardless of the callee's
+         own Input setting", per the original design). -->
+    <flow name="run-request">
+        <choice doc:name="Nested loopback call?">
+            <when expression="#[attributes.headers['x-at-chain'] != null]">
+                <set-variable variableName="rsDepth" value="#[output application/json --- attributes.headers['x-at-depth'] as Number]" doc:name="depth from header"/>
+                <set-variable variableName="rsChain" value="#[output application/json --- attributes.headers['x-at-chain'] splitBy ',']" doc:name="chain from header"/>
+                <set-variable variableName="rsGlobalVars" value="#[output application/json --- read(attributes.headers['x-at-global-vars'] default '{}', 'application/json')]" doc:name="globalVars from header"/>
+                <set-variable variableName="rsCallerBody" value="#[output application/json --- attributes.headers['x-at-caller-body']]" doc:name="callerBody from header"/>
+                <set-variable variableName="rsCallerHeaders" value="#[output application/json --- read(attributes.headers['x-at-caller-headers'] default '{}', 'application/json')]" doc:name="callerHeaders from header"/>
+                <flow-ref name="run-single" doc:name="Run once (nested)"/>
+                <set-payload value="#[vars.rsResult]" doc:name="Result as payload (run-single's own last processor is a db:insert with no target, which otherwise leaves payload as its StatementResult)"/>
+            </when>
+            <otherwise>
+                <!-- Genuine top-level call: resolve this request's own workspace (via its
+                     collection) so global vars come from the RIGHT workspace's set, not a flat
+                     shared table (see schema.sql's global_vars) — then load them once, seed
+                     depth 0 / empty chain. A request whose collection has no workspace
+                     (unassigned) resolves rsWorkspaceId to null; "workspace_id = :wsId" then
+                     never matches (global_vars.workspace_id is NOT NULL), so it correctly gets
+                     no global vars rather than erroring. -->
+                <db:select config-ref="Database_Config" target="reqWsRows" doc:name="Select this request's workspace">
+                    <db:sql><![CDATA[SELECT c.workspace_id FROM syskm.requests r JOIN syskm.collections c ON r.collection_id = c.id WHERE r.id = :id]]></db:sql>
+                    <db:input-parameters><![CDATA[#[{id: vars.requestId}]]]></db:input-parameters>
+                </db:select>
+                <set-variable variableName="rsWorkspaceId" value="#[(vars.reqWsRows[0]).workspace_id default null]" doc:name="this request's workspace"/>
+                <db:select config-ref="Database_Config" target="globalRows" doc:name="Select this workspace's global vars">
+                    <db:sql><![CDATA[SELECT name, value FROM syskm.global_vars WHERE workspace_id = :wsId]]></db:sql>
+                    <db:input-parameters><![CDATA[#[{wsId: vars.rsWorkspaceId}]]]></db:input-parameters>
+                </db:select>
+                <set-variable variableName="rsDepth" value="#[0]" doc:name="depth 0"/>
+                <set-variable variableName="rsChain" value="#[[]]" doc:name="empty chain"/>
+                <set-variable variableName="rsGlobalVars" value="#[output application/json --- vars.globalRows reduce ((row, acc = {}) -> acc ++ {(row.name): row.value})]" doc:name="globalVars map"/>
+                <set-variable variableName="rsCallerBody" value="#[null]" doc:name="no caller body"/>
+                <set-variable variableName="rsCallerHeaders" value="#[{}]" doc:name="no caller headers"/>
+
+                <db:select config-ref="Database_Config" target="reqRows" doc:name="Select request (for inputDataSets/inputSource check)">
+                    <db:sql>SELECT input_data_sets_json, request_json FROM syskm.requests WHERE id = :id</db:sql>
+                    <db:input-parameters><![CDATA[#[{id: vars.requestId}]]]></db:input-parameters>
+                </db:select>
+                <set-variable variableName="dataSets" value="#[read((vars.reqRows[0]).input_data_sets_json default '[]', 'application/json')]" doc:name="dataSets"/>
+                <set-variable variableName="reqDef" value="#[read((vars.reqRows[0]).request_json default '{}', 'application/json')]" doc:name="reqDef"/>
+
+                <choice doc:name="Iterating?">
+                    <when expression="#[vars.reqDef.inputSource == 'dataset' and sizeOf(vars.dataSets) > 0]">
+                        <foreach collection="#[vars.dataSets]" doc:name="For each Input Data Set entry">
+                            <set-variable variableName="etTemplate" value="#[payload.body default '']" doc:name="entry body template"/>
+                            <set-variable variableName="etRaw" value="#[false]" doc:name="stringify"/>
+                            <set-variable variableName="etVars" value="#[vars.overrideVars default {}]" doc:name="entry vars"/>
+                            <set-variable variableName="etBody" value="#[null]" doc:name="entry has no previous body"/>
+                            <set-variable variableName="etHeaders" value="#[{}]" doc:name="entry has no previous headers"/>
+                            <flow-ref name="eval-template" doc:name="Evaluate entry body"/>
+                            <set-variable variableName="rsCallerBody" value="#[vars.etResult]" doc:name="seed body"/>
+                            <set-variable variableName="rsCallerHeaders" value="#[output application/json --- (payload.headers default []) filter (h) -> (h.enabled default true) reduce ((h, acc = {}) -> acc ++ {(h.key): h.value})]" doc:name="seed headers (MultiMap-style, like attributes.headers — ++ on DataWeave objects appends rather than overwrites, so two rows with the same key survive as repeated entries; kept application/json, never coerced through application/java, which would collapse duplicate keys to last-value-wins)"/>
+                            <set-variable variableName="rsChain" value="#[[]]" doc:name="fresh cycle-guard chain per iteration (mirrors Java's new LinkedHashSet&lt;&gt;() per entry) — run-single appends to this var in place, so without resetting it here iteration 2+ always trips the cycle guard"/>
+                            <set-variable variableName="rsDepth" value="#[0]" doc:name="fresh depth per iteration"/>
+                            <flow-ref name="run-single" doc:name="Run one iteration"/>
+                            <set-variable variableName="iterations" value="#[(vars.iterations default []) ++ [(vars.rsResult ++ {iterationIndex: sizeOf(vars.iterations default [])})]]" doc:name="accumulate iteration"/>
+                        </foreach>
+                        <ee:transform doc:name="Wrap as iterating batch">
+                            <ee:message>
+                                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    runId: "run-" ++ uuid(),
+    requestId: vars.requestId,
+    iterating: true,
+    status: if (isEmpty(vars.iterations filter (i) -> i.status != "success")) "success" else "failed",
+    durationMs: sum(vars.iterations map (i) -> (i.durationMs default 0)),
+    iterations: vars.iterations
+}]]></ee:set-payload>
+                            </ee:message>
+                        </ee:transform>
+                    </when>
+                    <otherwise>
+                        <flow-ref name="run-single" doc:name="Run once"/>
+                        <set-payload value="#[vars.rsResult]" doc:name="Result as payload"/>
+                    </otherwise>
+                </choice>
+            </otherwise>
+        </choice>
+    </flow>
+
+    <!-- The actual per-run pipeline: pre-request chain -> Input tab eval -> HTTP call ->
+         post-response chain. Reads its params from vars.rs* (set by run-request above, either
+         branch); writes its result to vars.rsResult (a map matching RequestExecutionService's own
+         result shape: runId/requestId/status/error/durationMs/sentBody/sentHeaders/response/vars/
+         checks/preRequestLog/postResponseLog). -->
+    <flow name="run-single">
+        <set-variable variableName="rsStartMs" value="#[now() as Number {unit: 'milliseconds'}]" doc:name="start time"/>
+
+        <choice doc:name="Depth/cycle guard">
+            <when expression="#[vars.rsDepth > 5]">
+                <raise-error type="APP:TOO_DEEP" description="callRequest chain too deep (>5)"/>
+            </when>
+            <when expression="#[vars.rsChain contains vars.requestId]">
+                <raise-error type="APP:CYCLE" description="callRequest cycle detected"/>
+            </when>
+        </choice>
+        <set-variable variableName="rsChain" value="#[vars.rsChain ++ [vars.requestId]]" doc:name="extend chain with self"/>
+
+        <db:select config-ref="Database_Config" target="rsRows" doc:name="Load request">
+            <db:sql>SELECT collection_id, name, pre_request_json, request_json, post_response_json FROM syskm.requests WHERE id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: vars.requestId}]]]></db:input-parameters>
+        </db:select>
+        <set-variable variableName="rsRequestName" value="#[(vars.rsRows[0]).name default vars.requestId]" doc:name="requestName"/>
+        <set-variable variableName="rsPreRequest" value="#[read((vars.rsRows[0]).pre_request_json default '[]', 'application/json')]" doc:name="preRequest steps"/>
+        <set-variable variableName="rsRequestConfig" value="#[read((vars.rsRows[0]).request_json default '{}', 'application/json')]" doc:name="request config"/>
+        <set-variable variableName="rsPostResponse" value="#[read((vars.rsRows[0]).post_response_json default '[]', 'application/json')]" doc:name="postResponse steps"/>
+
+        <db:select config-ref="Database_Config" target="rsColRows" doc:name="Load collection variables">
+            <db:sql>SELECT variables_json FROM syskm.collections WHERE id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: (vars.rsRows[0]).collection_id default ''}]]]></db:input-parameters>
+        </db:select>
+        <set-variable variableName="rsVars" value="#[output application/json --- (vars.rsGlobalVars default {}) ++ (read((vars.rsColRows[0]).variables_json default '{}', 'application/json')) ++ (vars.overrideVars default {}) ++ {throwOff: 'false'}]" doc:name="seed vars (global -> collection -> override)"/>
+
+        <set-variable variableName="preChainBody" value="#[vars.rsCallerBody]" doc:name="preChain body"/>
+        <set-variable variableName="preChainHeaders" value="#[vars.rsCallerHeaders default {}]" doc:name="preChain headers"/>
+        <set-variable variableName="preRequestLog" value="#[[]]" doc:name="preRequestLog"/>
+
+        <foreach collection="#[vars.rsPreRequest filter (s) -> s.'type' == 'callRequest']" doc:name="Pre-Request Call Request chain">
+            <flow-ref name="call-request-step" doc:name="Execute one Call Request"/>
+            <set-variable variableName="preRequestLog" value="#[output application/java --- vars.preRequestLog ++ [vars.crLastLog]]" doc:name="record this step"/>
+        </foreach>
+
+        <!-- Input tab: pre-request chain's final payload bound as body/headers for template access;
+             body ALWAYS replaces the outgoing body outright (a bare passthrough-body-binding
+             template = byte-for-byte passthrough). Headers are NOT auto-inherited — only
+             explicit "headers" rows are sent. -->
+        <set-variable variableName="etTemplate" value="#[vars.rsRequestConfig.body default '']"/>
+        <set-variable variableName="etRaw" value="#[false]"/>
+        <set-variable variableName="etVars" value="#[vars.rsVars]"/>
+        <set-variable variableName="etBody" value="#[vars.preChainBody]"/>
+        <set-variable variableName="etHeaders" value="#[vars.preChainHeaders]"/>
+        <flow-ref name="eval-template" doc:name="Evaluate outgoing body"/>
+        <set-variable variableName="finalBody" value="#[vars.etResult]" doc:name="finalBody"/>
+
+        <set-variable variableName="finalHeaders" value="#[output application/json --- {}]" doc:name="finalHeaders (empty seed, MultiMap-style — see seed headers' comment above)"/>
+        <foreach collection="#[(vars.rsRequestConfig.headers default []) filter (h) -> (h.enabled default true) and !isEmpty(h.key default '')]" doc:name="Evaluate each header row">
+            <set-variable variableName="etTemplate" value="#[payload.value default '']"/>
+            <set-variable variableName="etRaw" value="#[false]"/>
+            <set-variable variableName="etVars" value="#[vars.rsVars]"/>
+            <set-variable variableName="etBody" value="#[vars.preChainBody]"/>
+            <set-variable variableName="etHeaders" value="#[vars.preChainHeaders]"/>
+            <flow-ref name="eval-template" doc:name="Evaluate header value"/>
+            <set-variable variableName="finalHeaders" value="#[output application/json --- vars.finalHeaders ++ {(payload.key): vars.etResult}]" doc:name="accumulate header (append via ++, not overwrite — two rows with the same key both survive, sent as repeated header lines, same as a real MultiMap)"/>
+        </foreach>
+        <set-variable variableName="etTemplate" value="#[vars.rsRequestConfig.url default '']"/>
+        <set-variable variableName="etRaw" value="#[false]"/>
+        <set-variable variableName="etVars" value="#[vars.rsVars]"/>
+        <set-variable variableName="etBody" value="#[vars.preChainBody]"/>
+        <set-variable variableName="etHeaders" value="#[vars.preChainHeaders]"/>
+        <flow-ref name="eval-template" doc:name="Evaluate URL"/>
+        <set-variable variableName="finalUrl" value="#[vars.etResult]" doc:name="finalUrl"/>
+
+        <try doc:name="HTTP call (never throw on connectivity/timeout — reported as a failed run instead)">
+            <http:request method="#[vars.rsRequestConfig.method default 'GET']" url="#[vars.finalUrl]" config-ref="HTTP_Request_config" doc:name="Send (TLS insecure)">
+                <http:body><![CDATA[#[vars.finalBody]]]></http:body>
+                <http:headers><![CDATA[#[vars.finalHeaders]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="0..599"/>
+                </http:response-validator>
+            </http:request>
+            <set-variable variableName="rsResponse" value="#[%dw 2.0 import * from dw::Runtime output application/java var safeBody = (try(() -> payload as String) orElseTry write(payload, 'application/json')) orElse '&lt;non-text response body&gt;' --- {status: attributes.statusCode, headers: attributes.headers, body: safeBody}]" doc:name="Capture response"/>
+            <set-variable variableName="rsStatus" value="#['success']"/>
+            <set-variable variableName="rsError" value="#[null]"/>
+            <error-handler>
+                <on-error-continue type="ANY" doc:name="Connectivity/timeout -> failed run">
+                    <set-variable variableName="rsResponse" value="#[{}]"/>
+                    <set-variable variableName="rsStatus" value="#['failed']"/>
+                    <set-variable variableName="rsError" value="#[error.description]"/>
+                </on-error-continue>
+            </error-handler>
+        </try>
+
+        <set-variable variableName="postChainBody" value="#[vars.rsResponse.body default null]" doc:name="postChain body"/>
+        <set-variable variableName="postChainHeaders" value="#[vars.rsResponse.headers default {}]" doc:name="postChain headers"/>
+        <set-variable variableName="postResponseLog" value="#[[]]" doc:name="postResponseLog"/>
+        <set-variable variableName="checks" value="#[[]]" doc:name="checks"/>
+
+        <try doc:name="Post-Response chain (stop-type Assertion/Compare failures are recorded normally via rsStatus/rsError/checks, not thrown out of the whole run)">
+            <foreach collection="#[vars.rsPostResponse]" doc:name="Post-Response chain (setVariable/assertion/callRequest/jsoncompare/textcompare, in true list order)">
+                <choice doc:name="Step type">
+                    <when expression="#[payload.'type' == 'setVariable']">
+                        <set-variable variableName="etTemplate" value="#[payload.expression default '']"/>
+                        <set-variable variableName="etRaw" value="#[true]"/>
+                        <set-variable variableName="etVars" value="#[vars.rsVars]"/>
+                        <set-variable variableName="etBody" value="#[vars.postChainBody]"/>
+                        <set-variable variableName="etHeaders" value="#[vars.postChainHeaders]"/>
+                        <flow-ref name="eval-template" doc:name="Evaluate Set Variable expression"/>
+                        <set-variable variableName="rsVars" value="#[vars.rsVars ++ {(payload.name): vars.etResult}]" doc:name="apply set variable"/>
+                        <set-variable variableName="postResponseLog" value="#[vars.postResponseLog ++ [{'type': 'setVariable', name: payload.name, value: vars.etResult, status: 'ok'}]]"/>
+                    </when>
+                    <when expression="#[payload.'type' == 'assertion']">
+                        <flow-ref name="run-assertion-step" doc:name="Run assertion"/>
+                    </when>
+                    <when expression="#[payload.'type' == 'callRequest']">
+                        <set-variable variableName="preChainBody" value="#[vars.postChainBody]" doc:name="reuse call-request-step's preChain vars"/>
+                        <set-variable variableName="preChainHeaders" value="#[vars.postChainHeaders]"/>
+                        <flow-ref name="call-request-step" doc:name="Execute one Call Request"/>
+                        <set-variable variableName="postChainBody" value="#[vars.preChainBody]" doc:name="carry result back into postChain"/>
+                        <set-variable variableName="postChainHeaders" value="#[vars.preChainHeaders]"/>
+                        <set-variable variableName="postResponseLog" value="#[output application/java --- vars.postResponseLog ++ [vars.crLastLog]]" doc:name="record this step"/>
+                    </when>
+                    <when expression="#[payload.'type' == 'jsoncompare' or payload.'type' == 'textcompare']">
+                        <flow-ref name="run-compare-step" doc:name="Run JSON/Text Compare"/>
+                    </when>
+                    <!-- dbcheck/wait: not yet implemented in this build — see execution-engine.xml's
+                         file-level comment. Unrecognized/unimplemented step types are silently
+                         skipped rather than failing the whole run. -->
+                </choice>
+            </foreach>
+            <error-handler>
+                <on-error-continue type="APP:ASSERTION_STOPPED" doc:name="Stop-type assertion failure — rsStatus/rsError/checks already set before this was raised, just stop iterating and fall through to Build rsResult below"/>
+                <on-error-continue type="APP:COMPARE_MISMATCH" doc:name="Stop-type compare mismatch — same as above"/>
+            </error-handler>
+        </try>
+
+        <ee:transform doc:name="Build rsResult">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    runId: "run-" ++ uuid(),
+    requestId: vars.requestId,
+    status: vars.rsStatus,
+    error: vars.rsError,
+    durationMs: (now() as Number {unit: "milliseconds"}) - vars.rsStartMs,
+    preRequestLog: vars.preRequestLog,
+    sentBody: vars.finalBody,
+    sentHeaders: vars.finalHeaders,
+    response: vars.rsResponse,
+    vars: vars.rsVars,
+    checks: vars.checks,
+    postResponseLog: vars.postResponseLog,
+    subVars: vars.rsVars
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <set-variable variableName="rsResult" value="#[payload]" doc:name="rsResult"/>
+
+        <db:insert config-ref="Database_Config" doc:name="Save run log">
+            <db:sql>INSERT INTO syskm.run_logs (id, request_id, run_id, status, result_json) VALUES (:id, :requestId, :runId, :status, :result)</db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: uuid(),
+                requestId: vars.requestId,
+                runId: vars.rsResult.runId,
+                status: vars.rsResult.status,
+                result: write(vars.rsResult, "application/json")
+            }]]]></db:input-parameters>
+        </db:insert>
+    </flow>
+
+    <!-- One Call Request step: chains from vars.preChainBody/preChainHeaders (the previous step's
+         payload, or the caller's own seed for the first one), invokes the target via loopback HTTP
+         (see the file-level comment), updates preChainBody/preChainHeaders from the callee's
+         response, and merges the callee's own final vars into vars.rsVars — this is what lets a
+         variable a CALLED request's post-response sets flow back up into the caller. -->
+    <flow name="call-request-step">
+        <set-variable variableName="crTargetId" value="#[payload.requestId default '']" doc:name="target id"/>
+        <set-variable variableName="crInputBody" value="#[vars.preChainBody]" doc:name="snapshot input body for the log before the call can overwrite preChainBody"/>
+        <set-variable variableName="crInputHeaders" value="#[vars.preChainHeaders]" doc:name="snapshot input headers for the log"/>
+        <choice doc:name="Has a target?">
+            <when expression="#[!isEmpty(vars.crTargetId)]">
+                <try doc:name="Call target (never throw — reported as a failed step instead)">
+                    <http:request method="POST" url="#['http://localhost:' ++ (p('listener.port') as String) ++ '/requests/' ++ vars.crTargetId ++ '/run']" config-ref="Loopback_Request_config" doc:name="Loopback call">
+                        <http:body><![CDATA[#[output application/json --- {}]]]></http:body>
+                        <http:headers><![CDATA[#[{
+                            "Content-Type": "application/json",
+                            "x-at-depth": (vars.rsDepth + 1) as String,
+                            "x-at-chain": vars.rsChain joinBy ",",
+                            "x-at-global-vars": write(vars.rsGlobalVars default {}, "application/json"),
+                            "x-at-caller-body": vars.preChainBody default "",
+                            "x-at-caller-headers": write(vars.preChainHeaders default {}, "application/json")
+                        }]]]></http:headers>
+                        <http:response-validator>
+                            <http:success-status-code-validator values="0..599"/>
+                        </http:response-validator>
+                    </http:request>
+                    <ee:transform doc:name="Parse callee result">
+                        <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+// http:request already parses a Content-Type: application/json response body into a
+// structured value — read() (String/Binary -> Object) would reject that Object outright.
+// Only fall back to read() for the unlikely case payload still arrives unparsed.
+if (payload is String or payload is Binary) read(payload, "application/json") else payload]]></ee:set-payload></ee:message>
+                    </ee:transform>
+                    <choice doc:name="Callee succeeded?">
+                        <when expression="#[payload.status == 'success']">
+                            <set-variable variableName="preChainBody" value="#[output application/java --- payload.response.body default vars.preChainBody]"/>
+                            <set-variable variableName="preChainHeaders" value="#[output application/java --- payload.response.headers default vars.preChainHeaders]"/>
+                            <set-variable variableName="rsVars" value="#[output application/java --- vars.rsVars ++ (payload.subVars default {})]" doc:name="merge callee vars back into caller"/>
+                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, subRunId: payload.runId, subStatus: payload.status, subResponseStatus: payload.response.status, subResponseBody: payload.response.body, status: 'ok'}]" doc:name="log: callee succeeded"/>
+                        </when>
+                        <otherwise>
+                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, subRunId: payload.runId, subStatus: payload.status, subError: payload.error, status: 'ok'}]" doc:name="log: call ran, callee itself reported a failed run"/>
+                        </otherwise>
+                    </choice>
+                    <error-handler>
+                        <on-error-continue type="ANY" doc:name="Call failed — keep previous payload, don't fail the whole run">
+                            <logger level="ERROR" category="apitester.callRequest" message="#['Call Request to ' ++ vars.crTargetId ++ ' failed: ' ++ (error.description default error.detailedDescription default 'unknown error')]" doc:name="Surface the swallowed error"/>
+                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, error: (error.description default error.detailedDescription default 'unknown error'), status: 'error'}]" doc:name="log: the loopback call itself failed"/>
+                        </on-error-continue>
+                    </error-handler>
+                </try>
+            </when>
+            <otherwise>
+                <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId}]" doc:name="log: no target selected"/>
+            </otherwise>
+        </choice>
+    </flow>
+
+    <!-- One Assertion step — conditions[{left,operator,right}], AND/OR logic, onFail stop/continue.
+         Pure DataWeave (mirrors RequestExecutionService.runAssertionStep/resolveAssertionValue/
+         compareValues: numeric literals, 'quoted'/"quoted" string literals, bare payload/
+         payload.field, bare attributes.headers/attributes.headers.field (Mule/DataWeave's own
+         native names — the only names recognized, no body/headers aliases), vars.name/
+         vars.name.field, ==/!=/>/>=/</<=/contains/notNull/typeof — same left/right heuristic as
+         before, no dollar-paren/dollar-brace wrapper needed here, that convention is for
+         eval-template's free-form templates, not this fixed condition grammar).
+         Appends one {name,type,passed,logic,conditions,message?} to vars.checks; a "stop" failure
+         marks the whole run failed and skips remaining postResponse steps (the foreach's own
+         remaining iterations are inherently skipped by raising an error the parent try/catch below
+         turns into a normal, recorded failure). -->
+    <flow name="run-assertion-step">
+        <ee:transform doc:name="Evaluate assertion (pure DataWeave)">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Strings
+import * from dw::Runtime
+output application/java
+
+fun asObject(source) =
+    if (source == null) null
+    else if (source is Object or source is Array) source
+    else if (source is String) (try(() -> read(source, "application/json")) orElse null)
+    else null
+
+fun resolveField(source, field: String) =
+    do {
+        var obj = asObject(source)
+        ---
+        if (obj == null) null
+        else if (obj is Object) obj[field]
+        else null
+    }
+
+fun firstChar(s: String): String = substring(s, 0, 1)
+fun lastChar(s: String): String = substring(s, sizeOf(s) - 1, sizeOf(s))
+fun isNumericLiteral(s: String): Boolean = s matches /-?\d+(\.\d+)?/
+fun stripQuotes(s: String): String =
+    if (sizeOf(s) >= 2 and (
+            (firstChar(s) == "'" and lastChar(s) == "'") or
+            (firstChar(s) == "\"" and lastChar(s) == "\"")
+        ))
+        substring(s, 1, sizeOf(s) - 1)
+    else s
+
+fun resolveValue(exprRaw, b, h, uv) =
+    do {
+        var expr = trim(exprRaw default "")
+        ---
+        if (expr == "") ""
+        else if (isNumericLiteral(expr)) (expr as Number)
+        else if (sizeOf(expr) >= 2 and (
+                    (firstChar(expr) == "'" and lastChar(expr) == "'") or
+                    (firstChar(expr) == "\"" and lastChar(expr) == "\"")
+                ))
+            stripQuotes(expr)
+        // payload/attributes.headers are Mule/DataWeave's own native names for these (attributes.headers
+        // being a real MultiMap-shaped object) — the only names recognized, no body/headers aliases.
+        else if (expr == "payload") b
+        else if (startsWith(expr, "payload.")) resolveField(b, substring(expr, 8, sizeOf(expr)))
+        else if (expr == "attributes.headers") h
+        else if (startsWith(expr, "attributes.headers.")) (if (h != null) h[(substring(expr, 19, sizeOf(expr)))] else null)
+        else if (startsWith(expr, "vars.")) do {
+            var rest = substring(expr, 5, sizeOf(expr))
+            var parts = rest splitBy "."
+            ---
+            if (sizeOf(parts) <= 1) uv[rest] else resolveField(uv[(parts[0])], (parts[1 to -1]) joinBy ".")
+        }
+        else expr
+    }
+
+fun stringifyVal(v) =
+    if (v == null) "null"
+    else if (v is Object or v is Array) write(v, "application/json")
+    else (v as String)
+
+fun typeOfVal(v) =
+    if (v == null) "undefined"
+    else if (v is Boolean) "boolean"
+    else if (v is Number) "number"
+    else if (v is String) "string"
+    else "object"
+
+fun asNumVal(v) =
+    if (v is Number) v
+    else if (v is String) (try(() -> (trim(v) as Number)) orElse null)
+    else null
+
+fun compareStr(l, r, op: String): Boolean =
+    do {
+        var ls = stringifyVal(l)
+        var rs = stringifyVal(r)
+        ---
+        if (op == "neq" or op == "!=") ls != rs
+        else if (op == "gt" or op == ">") ls > rs
+        else if (op == "gte" or op == ">=") ls >= rs
+        else if (op == "lt" or op == "<") ls < rs
+        else if (op == "lte" or op == "<=") ls <= rs
+        else ls == rs
+    }
+
+fun compareVal(l, r, op: String): Boolean =
+    do {
+        var ln = asNumVal(l)
+        var rn = asNumVal(r)
+        ---
+        if (ln != null and rn != null and op != "==" and op != "!=")
+            (if (op == "gt" or op == ">") ln > rn
+             else if (op == "gte" or op == ">=") ln >= rn
+             else if (op == "lt" or op == "<") ln < rn
+             else if (op == "lte" or op == "<=") ln <= rn
+             else compareStr(l, r, op))
+        else compareStr(l, r, op)
+    }
+
+var b = vars.postChainBody
+var h = vars.postChainHeaders default {}
+var uv = vars.rsVars default {}
+var step = payload
+var stepName = if (step.name != null and trim(step.name) != "") step.name else "Assertion"
+var isOr = upper(step.logic default "AND") == "OR"
+var stepOnFail = step.onFail default "stop"
+var stepConditions = step.conditions default []
+
+var conditionResults = stepConditions map ((c, idx) -> do {
+    var left = resolveValue(c.left default "", b, h, uv)
+    var op = c.operator default "=="
+    var right = trim(c.right default "")
+    ---
+    if (op == "notNull")
+        { left: (c.left default ""), operator: op, right: (c.right default ""), passed: (left != null), message: ("actual=" ++ stringifyVal(left) ++ "  expected: not null"), idx: idx }
+    else if (op == "contains")
+        do {
+            var rv = resolveValue(right, b, h, uv)
+            var passed = stringifyVal(left) contains stringifyVal(rv)
+            ---
+            { left: (c.left default ""), operator: op, right: (c.right default ""), passed: passed, message: ("actual=\"" ++ stringifyVal(left) ++ "\"  expected to contain: \"" ++ stringifyVal(rv) ++ "\""), idx: idx }
+        }
+    else if (op == "typeof")
+        do {
+            var actualType = typeOfVal(left)
+            var passed = actualType == right
+            ---
+            { left: (c.left default ""), operator: op, right: (c.right default ""), passed: passed, message: ("actual typeof=" ++ actualType ++ "  expected type: " ++ right), idx: idx }
+        }
+    else
+        do {
+            var rv2 = resolveValue(right, b, h, uv)
+            var passed = compareVal(left, rv2, op)
+            ---
+            { left: (c.left default ""), operator: op, right: (c.right default ""), passed: passed, message: ("actual=\"" ++ stringifyVal(left) ++ "\"  expected " ++ op ++ " \"" ++ stringifyVal(rv2) ++ "\""), idx: idx }
+        }
+})
+
+var passCount = sizeOf(conditionResults filter ((r) -> r.passed))
+var failures = (conditionResults filter ((r) -> !r.passed)) map ((r) -> ("Condition " ++ ((r.idx + 1) as String) ++ ": " ++ r.message))
+var overallPass = sizeOf(stepConditions) == 0 or (if (isOr) passCount > 0 else sizeOf(failures) == 0)
+var failMsgHeader = if (isOr) "Assertion failed (no condition passed):\n" else "Assertion failed:\n"
+var baseResult = {
+    name: stepName,
+    "type": "assertion",
+    passed: overallPass,
+    logic: (if (isOr) "OR" else "AND"),
+    conditions: (conditionResults map ((r) -> { left: r.left, operator: r.operator, right: r.right, passed: r.passed, message: r.message }))
+}
+var finalResult = if (overallPass) baseResult else (baseResult ++ { message: (failMsgHeader ++ (failures joinBy "\n")) })
+---
+{ result: finalResult, onFail: stepOnFail, overallPass: overallPass }]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <set-variable variableName="assertionResult" value="#[payload]" doc:name="assertionResult"/>
+        <set-variable variableName="checks" value="#[output application/java --- vars.checks ++ [vars.assertionResult.result]]" doc:name="record check"/>
+        <choice doc:name="Stop-type failure?">
+            <when expression="#[!vars.assertionResult.overallPass and vars.assertionResult.onFail == 'stop']">
+                <set-variable variableName="rsStatus" value="#['failed']"/>
+                <set-variable variableName="rsError" value="#[vars.assertionResult.result.message]"/>
+                <raise-error type="APP:ASSERTION_STOPPED" description="#[vars.assertionResult.result.message]"/>
+            </when>
+        </choice>
+    </flow>
+
+    <!-- jsoncompare/textcompare — ported from workflow-plugin-core-nodes' CoreNodesPlugin/
+         CompareHelper (the Camel node converters apitester-app itself delegates to for these two
+         step types). Same field shape: leftSource/leftExpr/leftLiteral, rightSource/rightExpr/
+         rightLiteral (source one of body|variable|literal|expression — "expression" isn't
+         actually implemented in the reference either, it silently falls back to "body", a real
+         gap in the original app; "variable" is a bare vars.rsVars floor lookup, matching the
+         reference's bare exchange-property lookup), mode (jsoncompare: deep-equal/partial/
+         keys-only; textcompare: exact/contains/starts-with/ends-with/regex), ignoreArrayOrder
+         (jsoncompare only), caseSensitive (textcompare only, default true), resultVar (optional —
+         stores the boolean pass/fail into vars.rsVars, unlike the reference this doesn't need an
+         internal fallback name since nothing else here reads it back), onMismatch (stop/continue).
+         Unlike the reference's bare {name,type,passed}, also carries a message with actual/
+         expected on failure, matching the assertion check's own level of detail. -->
+    <flow name="run-compare-step">
+        <ee:transform doc:name="Evaluate compare step (pure DataWeave)">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Strings
+import * from dw::core::Arrays
+import * from dw::Runtime
+output application/java
+
+fun asJson(v) =
+    if (v == null) null
+    else if (v is String) (try(() -> read(v, "application/json")) orElse v)
+    else v
+
+fun stringifyVal(v) =
+    if (v == null) ""
+    else if (v is Object or v is Array) write(v, "application/json")
+    else (v as String)
+
+// Deep, type-sensitive structural equality (DataWeave's own == already does this correctly for
+// the order-sensitive case) — the recursive part below only exists to apply ignoreArrayOrder at
+// every nesting level, sorting arrays by their canonical JSON text before comparing element-wise.
+fun jsonEquals(a, b, ignoreArr: Boolean): Boolean =
+    if (!ignoreArr) (a == b)
+    else if (a is Array and b is Array)
+        (sizeOf(a) == sizeOf(b) and do {
+            var sa = a orderBy ((x) -> write(x, "application/json"))
+            var sb = b orderBy ((x) -> write(x, "application/json"))
+            ---
+            sizeOf(sa) == 0 or (0 to (sizeOf(sa) - 1)) every ((i) -> jsonEquals(sa[i], sb[i], ignoreArr))
+        })
+    else if (a is Object and b is Object)
+        (sizeOf(a) == sizeOf(b) and (namesOf(a) every ((k) -> jsonEquals(a[k], b[k], ignoreArr))))
+    else (a == b)
+
+// "partial": every key in EXPECTED (right) must exist and deep-match in ACTUAL (left); extra
+// keys in left are ignored. If right isn't an object, there's no such thing as "subset of a
+// scalar/array" — degrades to full jsonEquals, matching the reference.
+fun isSubset(left, right, ignoreArr: Boolean): Boolean =
+    if (!(right is Object)) jsonEquals(left, right, ignoreArr)
+    else if (!(left is Object)) false
+    else (namesOf(right) every ((k) -> jsonEquals(left[k], right[k], ignoreArr)))
+
+// "keys-only": compares field-NAME sets only (values never inspected) — recurses through
+// arrays index-by-index (since arrays have no names of their own), but not into an object
+// field's value even if that value is itself an object.
+fun sameTopLevelKeys(left, right): Boolean =
+    if (left is Array and right is Array)
+        (sizeOf(left) == sizeOf(right) and
+            (sizeOf(left) == 0 or (0 to (sizeOf(left) - 1)) every ((i) -> sameTopLevelKeys(left[i], right[i]))))
+    else if (!(left is Object) or !(right is Object)) (left == right)
+    else ((namesOf(left) orderBy ((k) -> k)) == (namesOf(right) orderBy ((k) -> k)))
+
+var step = payload
+var stepType = step.'type' default "jsoncompare"
+var bodyVal = vars.postChainBody
+var varsFloor = vars.rsVars default {}
+
+// "expression" isn't wired up in the reference implementation either — it falls through to the
+// same default (body) branch there, so it does here too.
+fun resolveJsonSide(source, exprName, literal) =
+    if (source == "variable") asJson(varsFloor[(trim(exprName default ""))])
+    else if (source == "literal") (try(() -> read(literal default "", "application/json")) orElse null)
+    else asJson(bodyVal)
+
+fun resolveTextSide(source, exprName, literal) =
+    if (source == "variable") stringifyVal(varsFloor[(trim(exprName default ""))])
+    else if (source == "literal") (literal default "")
+    else stringifyVal(bodyVal)
+
+var stepName = if (step.name != null and trim(step.name) != "") step.name else (stepType ++ " compare")
+var stepOnMismatch = step.onMismatch default "stop"
+var stepResultVar = trim(step.resultVar default "")
+
+var evalResult =
+    if (stepType == "textcompare")
+        do {
+            var left = resolveTextSide(step.leftSource default "body", step.leftExpr, step.leftLiteral)
+            var right = resolveTextSide(step.rightSource default "literal", step.rightExpr, step.rightLiteral)
+            var cs = step.caseSensitive default true
+            var mode = step.mode default "exact"
+            var l = if (cs) left else lower(left)
+            var r = if (cs) right else lower(right)
+            var passed =
+                if (mode == "contains") (l contains r)
+                else if (mode == "starts-with") startsWith(l, r)
+                else if (mode == "ends-with") endsWith(l, r)
+                else if (mode == "regex") (sizeOf(scan(left, (if (cs) right else ("(?i)" ++ right)))) > 0)
+                else (l == r)
+            ---
+            { passed: passed, mode: mode, actualText: ("\"" ++ left ++ "\""), expectedText: ("\"" ++ right ++ "\"") }
+        }
+    else
+        do {
+            var left = resolveJsonSide(step.leftSource default "body", step.leftExpr, step.leftLiteral)
+            var right = resolveJsonSide(step.rightSource default "literal", step.rightExpr, step.rightLiteral)
+            var ignoreArr = step.ignoreArrayOrder default false
+            var mode = step.mode default "deep-equal"
+            var passed =
+                if (mode == "partial") isSubset(left, right, ignoreArr)
+                else if (mode == "keys-only") sameTopLevelKeys(left, right)
+                else jsonEquals(left, right, ignoreArr)
+            ---
+            { passed: passed, mode: mode, actualText: write(left default null, "application/json"), expectedText: write(right default null, "application/json") }
+        }
+
+var checkResult = { name: stepName, "type": stepType, passed: evalResult.passed }
+    ++ (if (evalResult.passed) {} else {
+        message: (stepType ++ " mismatch (mode=" ++ evalResult.mode ++ ")\n  actual:   " ++ evalResult.actualText ++ "\n  expected: " ++ evalResult.expectedText)
+    })
+---
+{ check: checkResult, passed: evalResult.passed, onMismatch: stepOnMismatch, resultVar: stepResultVar }]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <set-variable variableName="compareResult" value="#[payload]" doc:name="compareResult"/>
+        <choice doc:name="Has resultVar?">
+            <when expression="#[!isEmpty(vars.compareResult.resultVar)]">
+                <set-variable variableName="rsVars" value="#[output application/java --- vars.rsVars ++ {(vars.compareResult.resultVar): vars.compareResult.passed}]" doc:name="store resultVar"/>
+            </when>
+        </choice>
+        <set-variable variableName="checks" value="#[output application/java --- vars.checks ++ [vars.compareResult.check]]" doc:name="record check"/>
+        <choice doc:name="Stop-type mismatch?">
+            <when expression="#[!vars.compareResult.passed and vars.compareResult.onMismatch == 'stop']">
+                <set-variable variableName="rsStatus" value="#['failed']"/>
+                <set-variable variableName="rsError" value="#[vars.compareResult.check.message default (vars.compareResult.check.name ++ ' mismatch')]"/>
+                <raise-error type="APP:COMPARE_MISMATCH" description="#[vars.compareResult.check.message default (vars.compareResult.check.name ++ ' mismatch')]"/>
+            </when>
+        </choice>
+    </flow>
+
+</mule>

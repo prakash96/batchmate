@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CollectionTree from './components/sidebar/CollectionTree';
 import RequestPanel from './components/panels/RequestPanel';
-import ConnectionsPanel from './components/connections/ConnectionsPanel';
 import GlobalVarsPanel from './components/GlobalVarsPanel';
-import { C, btnStyle } from './theme';
+import JsonCompareModal from './components/JsonCompareModal';
+import SwaggerPayloadModal from './components/SwaggerPayloadModal';
+import { useThemeStore, THEMES } from './store/themeStore';
+import { C, btnStyle, inputStyle } from './theme';
 
 export default function App() {
-    const [showConnections, setShowConnections] = useState(false);
     const [showGlobalVars, setShowGlobalVars] = useState(false);
+    const [showJsonCompare, setShowJsonCompare] = useState(false);
+    const [showSwaggerPayload, setShowSwaggerPayload] = useState(false);
+    const { theme, setTheme } = useThemeStore();
+
+    // Reflects the selected theme onto <html> so every inline style built from theme.js's
+    // var()-based tokens (accent/accent2/accentDim, method colors) updates instantly — see
+    // index.css's :root/[data-theme="classic"] blocks. main.jsx does the same on first load
+    // (before React renders) to avoid a flash of the wrong theme.
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: C.bg, color: C.text, fontFamily: C.sans }}>
@@ -22,9 +34,13 @@ export default function App() {
                     }}>🧪</span>
                     <span style={{ fontSize: 14, fontWeight: 800, letterSpacing: '0.01em' }}>API Tester</span>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <select value={theme} onChange={e => setTheme(e.target.value)} style={{ ...inputStyle, padding: '5px 8px' }} title="Color theme">
+                        {THEMES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                    </select>
                     <button onClick={() => setShowGlobalVars(true)} style={btnStyle}>🌐 Global Variables</button>
-                    <button onClick={() => setShowConnections(true)} style={btnStyle}>🔌 DB Connections</button>
+                    <button onClick={() => setShowJsonCompare(true)} style={btnStyle}>🔍 JSON Compare</button>
+                    <button onClick={() => setShowSwaggerPayload(true)} style={btnStyle}>🧬 Swagger Payloads</button>
                 </div>
             </div>
             <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
@@ -35,8 +51,9 @@ export default function App() {
                     <RequestPanel />
                 </div>
             </div>
-            {showConnections && <ConnectionsPanel onClose={() => setShowConnections(false)} />}
             {showGlobalVars && <GlobalVarsPanel onClose={() => setShowGlobalVars(false)} />}
+            {showJsonCompare && <JsonCompareModal onClose={() => setShowJsonCompare(false)} />}
+            {showSwaggerPayload && <SwaggerPayloadModal onClose={() => setShowSwaggerPayload(false)} />}
         </div>
     );
 }

@@ -1,0 +1,69 @@
+{
+  "runId" : "run-b6ddc41716ae",
+  "requestId" : "28f1e3ee-c066-4c01-bda5-4567c387e760",
+  "status" : "success",
+  "durationMs" : 923,
+  "preRequestLog" : [ {
+    "requestId" : "1a57e5fb-b73f-4752-a7d4-01094b11c3f7",
+    "inputBody" : "{\"CIF\": \"000002222222\", \"REQUEST_REFERENCE_NUMBER\": \"EDGE_CASE_001\"}",
+    "inputHeaders" : { },
+    "subRunId" : "run-0b6d3bf22dd0",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"cYsfa9bTQW5tJhFQpY6vqj85y8vgU9JM\",\n  \"REQUEST_REFERENCE_NUMBER\": \"e06247d3-5367-4de0-95c9-56f17253b3c9\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjAzMTIsImV4cCI6MTc4NjY5MjMwNywibmJmIjoxODE2OTEyNjM5LCJpc3MiOiJSb2dhaG4sIEphY29ic29uIGFuZCBUZXJyeSIsInN1YiI6ImY5MWI3ZmQxLTU0NmEtNDUxNS1hM2MyLTc1MTkwNTljMzdlOSIsImF1ZCI6ImQ5MWM4Y2YwLTJmMjgtNDZhYS1iNjkzLTkwMjIxYjQyYzc0NSIsImp0aSI6IjdhOTY5NjM3LWU2N2EtNDBlOS05MjM3LWUyMDA1ZDc3YmFmZSJ9.JAs1i1e89ucJTWExICFrIDoWvwm1TXrIoaWpR50GCpfq0sRkZrGlXiY40AGFGBv7\"\n}",
+    "status" : "ok"
+  } ],
+  "sentBody" : "{\n  \"REQUEST\": \"default_data\",\n  \"DIGI_SIGN\": \"cYsfa9bTQW5tJhFQpY6vqj85y8vgU9JM\",\n  \"REQUEST_REFERENCE_NUMBER\": \"e06247d3-5367-4de0-95c9-56f17253b3c9\",\n  \"ACCESS_TOKEN\": \"eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjAzMTIsImV4cCI6MTc4NjY5MjMwNywibmJmIjoxODE2OTEyNjM5LCJpc3MiOiJSb2dhaG4sIEphY29ic29uIGFuZCBUZXJyeSIsInN1YiI6ImY5MWI3ZmQxLTU0NmEtNDUxNS1hM2MyLTc1MTkwNTljMzdlOSIsImF1ZCI6ImQ5MWM4Y2YwLTJmMjgtNDZhYS1iNjkzLTkwMjIxYjQyYzc0NSIsImp0aSI6IjdhOTY5NjM3LWU2N2EtNDBlOS05MjM3LWUyMDA1ZDc3YmFmZSJ9.JAs1i1e89ucJTWExICFrIDoWvwm1TXrIoaWpR50GCpfq0sRkZrGlXiY40AGFGBv7\"\n}",
+  "sentHeaders" : {
+    "client_id" : "",
+    "client_secret" : "",
+    "AccessToken" : ""
+  },
+  "response" : {
+    "status" : 200,
+    "headers" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "840",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:18:13 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "body" : "{\n  \"RESPONSE\": \"mMFJtKkKjUkhMzb0uhDy\",\n  \"DIGI_SIGN\": \"RR41SJ8R9ZLKBtAEkejjoH1TWVznnqcF\",\n  \"RESPONSE_DATE\": \"2026-08-13T15:18:13.682+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;cYsfa9bTQW5tJhFQpY6vqj85y8vgU9JM&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;e06247d3-5367-4de0-95c9-56f17253b3c9&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjAzMTIsImV4cCI6MTc4NjY5MjMwNywibmJmIjoxODE2OTEyNjM5LCJpc3MiOiJSb2dhaG4sIEphY29ic29uIGFuZCBUZXJyeSIsInN1YiI6ImY5MWI3ZmQxLTU0NmEtNDUxNS1hM2MyLTc1MTkwNTljMzdlOSIsImF1ZCI6ImQ5MWM4Y2YwLTJmMjgtNDZhYS1iNjkzLTkwMjIxYjQyYzc0NSIsImp0aSI6IjdhOTY5NjM3LWU2N2EtNDBlOS05MjM3LWUyMDA1ZDc3YmFmZSJ9.JAs1i1e89ucJTWExICFrIDoWvwm1TXrIoaWpR50GCpfq0sRkZrGlXiY40AGFGBv7&quot;\n}\"\n}"
+  },
+  "vars" : {
+    "encryptionClientId" : "afdfsdfd",
+    "sitHost" : "random123.free.beeceptor.com",
+    "encryptionClientSecret" : "afdgdsgsd"
+  },
+  "checks" : [ {
+    "name" : "Assertion",
+    "type" : "assertion",
+    "passed" : true
+  } ],
+  "postResponseLog" : [ {
+    "requestId" : "87fbf992-5d23-46ac-961f-8ff74ec44380",
+    "inputBody" : "{\n  \"RESPONSE\": \"mMFJtKkKjUkhMzb0uhDy\",\n  \"DIGI_SIGN\": \"RR41SJ8R9ZLKBtAEkejjoH1TWVznnqcF\",\n  \"RESPONSE_DATE\": \"2026-08-13T15:18:13.682+00:00\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n\"bdy\": \"{\n  &quot;REQUEST&quot;: &quot;default_data&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;cYsfa9bTQW5tJhFQpY6vqj85y8vgU9JM&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;e06247d3-5367-4de0-95c9-56f17253b3c9&quot;,\n  &quot;ACCESS_TOKEN&quot;: &quot;eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjAzMTIsImV4cCI6MTc4NjY5MjMwNywibmJmIjoxODE2OTEyNjM5LCJpc3MiOiJSb2dhaG4sIEphY29ic29uIGFuZCBUZXJyeSIsInN1YiI6ImY5MWI3ZmQxLTU0NmEtNDUxNS1hM2MyLTc1MTkwNTljMzdlOSIsImF1ZCI6ImQ5MWM4Y2YwLTJmMjgtNDZhYS1iNjkzLTkwMjIxYjQyYzc0NSIsImp0aSI6IjdhOTY5NjM3LWU2N2EtNDBlOS05MjM3LWUyMDA1ZDc3YmFmZSJ9.JAs1i1e89ucJTWExICFrIDoWvwm1TXrIoaWpR50GCpfq0sRkZrGlXiY40AGFGBv7&quot;\n}\"\n}",
+    "inputHeaders" : {
+      "Access-Control-Allow-Origin" : "*",
+      "Alt-Svc" : "h3=\":443\"; ma=2592000",
+      "Content-Length" : "840",
+      "Content-Type" : "application/json",
+      "Date" : "Thu, 13 Aug 2026 15:18:13 GMT",
+      "httpMethod" : "POST",
+      "httpResponseCode" : "200",
+      "httpResponseText" : "OK",
+      "Vary" : "Accept-Encoding",
+      "X-Beeceptor-Rule-Id" : "dffmchsj9g"
+    },
+    "subRunId" : "run-c6e1981de23b",
+    "subStatus" : "success",
+    "subResponseStatus" : 200,
+    "subResponseBody" : "{\n  \"ERROR_CODE\": \"\",\n  \"ERROR_DESCRIPTION\": \"\",\n  \"REQUEST_REFERENCE_NUMBER\": \"\",\n  \"RESPONSE_STATUS\": \"0\",\n  \"TRANSACTION_STATUS\": \"success\",\n  \"bdy\": {\n  &quot;RESPONSE&quot;: &quot;mMFJtKkKjUkhMzb0uhDy&quot;,\n  &quot;DIGI_SIGN&quot;: &quot;RR41SJ8R9ZLKBtAEkejjoH1TWVznnqcF&quot;,\n  &quot;RESPONSE_DATE&quot;: &quot;2026-08-13T15:18:13.682+00:00&quot;,\n  &quot;REQUEST_REFERENCE_NUMBER&quot;: &quot;&quot;,\n&quot;bdy&quot;: &quot;{\n  &amp;quot;REQUEST&amp;quot;: &amp;quot;default_data&amp;quot;,\n  &amp;quot;DIGI_SIGN&amp;quot;: &amp;quot;cYsfa9bTQW5tJhFQpY6vqj85y8vgU9JM&amp;quot;,\n  &amp;quot;REQUEST_REFERENCE_NUMBER&amp;quot;: &amp;quot;e06247d3-5367-4de0-95c9-56f17253b3c9&amp;quot;,\n  &amp;quot;ACCESS_TOKEN&amp;quot;: &amp;quot;eyJhbGciOiJQUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODY2MjAzMTIsImV4cCI6MTc4NjY5MjMwNywibmJmIjoxODE2OTEyNjM5LCJpc3MiOiJSb2dhaG4sIEphY29ic29uIGFuZCBUZXJyeSIsInN1YiI6ImY5MWI3ZmQxLTU0NmEtNDUxNS1hM2MyLTc1MTkwNTljMzdlOSIsImF1ZCI6ImQ5MWM4Y2YwLTJmMjgtNDZhYS1iNjkzLTkwMjIxYjQyYzc0NSIsImp0aSI6IjdhOTY5NjM3LWU2N2EtNDBlOS05MjM3LWUyMDA1ZDc3YmFmZSJ9.JAs1i1e89ucJTWExICFrIDoWvwm1TXrIoaWpR50GCpfq0sRkZrGlXiY40AGFGBv7&amp;quot;\n}&quot;\n}\n}",
+    "status" : "ok"
+  } ]
+}

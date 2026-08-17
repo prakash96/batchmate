@@ -3,6 +3,10 @@
  * hover/focus states, transitions, scrollbars, selection color. Mirrors theme.js's palette
  * so the two stay visually in sync. */
 
+/* Default theme = "postman" (see store/themeStore.js). Switching to "classic" only overrides
+ * --accent/--accent-2/--accent-dim and the POST/PUT method colors below — everything else (bg,
+ * panel, text, success/danger/warn, etc.) is the same regardless of theme; those aren't part of
+ * what "switch the theme" toggles, just the brand accent + the two method colors that came with it. */
 :root {
     --bg: #f8fafc;
     --panel: #ffffff;
@@ -12,9 +16,9 @@
     --text: #0f172a;
     --text-dim: #475569;
     --text-faint: #94a3b8;
-    --accent: #2d6cdf;
-    --accent-2: #7c3aed;
-    --accent-dim: rgba(45, 108, 223, 0.12);
+    --accent: #FF6C37;
+    --accent-2: #E2492A;
+    --accent-dim: rgba(255, 108, 55, 0.12);
     --success: #10b981;
     --danger: #ef4444;
     --warn: #eab308;
@@ -23,6 +27,36 @@
     --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
     --shadow-md: 0 4px 10px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.06);
     --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.14), 0 4px 10px rgba(15, 23, 42, 0.08);
+
+    /* Method badge colors + a precomputed ~10%-alpha "dim" background per method (methodBadgeStyle
+     * looks these up directly rather than hex-suffixing the solid color, since these are all var()
+     * references now — see theme.js). */
+    --method-get: #10B981;
+    --method-post: #F5A623;
+    --method-put: #2B7FD0;
+    --method-patch: #8b5cf6;
+    --method-delete: #ef4444;
+    --method-head: #64748b;
+    --method-options: #64748b;
+    --method-get-dim: rgba(16, 185, 129, 0.1);
+    --method-post-dim: rgba(245, 166, 35, 0.1);
+    --method-put-dim: rgba(43, 127, 208, 0.1);
+    --method-patch-dim: rgba(139, 92, 246, 0.1);
+    --method-delete-dim: rgba(239, 68, 68, 0.1);
+    --method-head-dim: rgba(100, 116, 139, 0.1);
+    --method-options-dim: rgba(100, 116, 139, 0.1);
+}
+
+/* "Classic" theme — the app's original blue→violet accent, from before the Postman-style change.
+ * Only POST/PUT differ from the default method colors; GET/PATCH/DELETE/HEAD/OPTIONS are shared. */
+:root[data-theme="classic"] {
+    --accent: #2d6cdf;
+    --accent-2: #7c3aed;
+    --accent-dim: rgba(45, 108, 223, 0.12);
+    --method-post: #2d6cdf;
+    --method-put: #f59e0b;
+    --method-post-dim: rgba(45, 108, 223, 0.1);
+    --method-put-dim: rgba(245, 158, 11, 0.1);
 }
 
 * {
@@ -107,7 +141,7 @@ a {
     color: var(--accent);
 }
 
-/* Modal overlays (ConnectionsPanel/GlobalVarsPanel) fade + rise in rather than popping. */
+/* Modal overlays (GlobalVarsPanel) fade + rise in rather than popping. */
 @keyframes overlay-fade-in {
     from { opacity: 0; }
     to { opacity: 1; }

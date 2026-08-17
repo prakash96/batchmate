@@ -17,9 +17,13 @@
               constant: '429 - Too Many Requests. Refer: https://beeceptor.com/pricing/'
         - script:
             expression:
-              js: var _h = JSON.parse('{"client_id":"main-id-1","client_secret":"main-secret-1","AccessToken":""}');
+              js: var _h = JSON.parse('{"client_id":"","client_secret":"","AccessToken":""}');
                 Object.keys(_h).forEach(function(k){ exchange.getMessage().getHeaders().put(k,
                 String(_h[k])); });
+        - script:
+            expression:
+              js: var _snap=new java.util.LinkedHashMap();var _ks=exchange.getMessage().getHeaders().keySet().toArray();for(var
+                _i=0;_i<_ks.length;_i++){  var _k=String(_ks[_i]);  var _v=exchange.getMessage().getHeaders().get(_k);  _snap.put(_k,_v==null?null:String(_v));}exchange.setProperty('_outgoingHeaderSnapshot',_snap);
         - script:
             expression:
               js: exchange.getMessage().getHeaders().put('CamelHttpMethod','POST');exchange.setProperty('_httpUrl',
@@ -29,11 +33,12 @@
             uri: ${exchangeProperty._httpUrl}
         - script:
             expression:
-              js: var _b=exchange.getMessage().getBody();if(_b instanceof java.io.InputStream){  var
-                _ce=String(exchange.getMessage().getHeader('Content-Encoding')||'');  var
-                _is=_ce.toLowerCase().indexOf('gzip')>=0    ?new java.util.zip.GZIPInputStream(_b)    :_b;  var
+              js: var _b=exchange.getMessage().getBody();var _is=null;if(_b instanceof
+                java.io.InputStream){_is=_b;}else if(_b!=null && _b.getClass && _b.getClass().isArray()){_is=new
+                java.io.ByteArrayInputStream(_b);}if(_is!=null){  var _ce=String(exchange.getMessage().getHeader('Content-Encoding')||'');  var
+                _gz=_ce.toLowerCase().indexOf('gzip')>=0;  if(_gz)_is=new java.util.zip.GZIPInputStream(_is);  var
                 _isr=new java.io.InputStreamReader(_is,'UTF-8');  var _br=new java.io.BufferedReader(_isr);  var
-                _sb=new java.lang.StringBuilder();  var _ln;  while((_ln=_br.readLine())!==null){_sb.append(_ln).append('\n');}  _br.close();  exchange.getMessage().setBody(_sb.toString().trim());  if(_ce)exchange.getMessage().removeHeader('Content-Encoding');}
+                _sb=new java.lang.StringBuilder();  var _ln;  while((_ln=_br.readLine())!==null){_sb.append(_ln).append('\n');}  _br.close();  exchange.getMessage().setBody(_sb.toString().trim());  if(_gz)exchange.getMessage().removeHeader('Content-Encoding');}
         - script:
             expression:
               js: var _m=exchange.getMessage();var _ks=_m.getHeaders().keySet().toArray();for(var
@@ -41,7 +46,11 @@
                 _nk=_k.substring(5,6).toLowerCase()+_k.substring(6);    _m.getHeaders().put(_nk,_m.getHeaders().get(_k));  }}
         - script:
             expression:
-              js: 'var _failures=[];var _l0=(exchange.getMessage().getHeaders().get(''httpResponseCode''));var
-                _r0=(429);if(!(String(_l0)===String(_r0)))_failures.push(''Condition
-                1: ''+''actual="''+String(_l0)+''"  expected == "''+String(_r0)+''"'');if(_failures.length>0)throw
-                new Error(''Assertion failed:\n''+_failures.join(''\n''));'
+              js: var _snap=exchange.getProperty('_outgoingHeaderSnapshot');if(_snap!=null){  var
+                _ks=exchange.getMessage().getHeaders().keySet().toArray();  for(var
+                _i=0;_i<_ks.length;_i++){    var _k=String(_ks[_i]);    if(_snap.containsKey(_k)){      var
+                _before=_snap.get(_k);      var _now=exchange.getMessage().getHeaders().get(_k);      var
+                _nowStr=(_now==null?null:String(_now));      if(_before===_nowStr){exchange.getMessage().getHeaders().remove(_k);}    }  }  exchange.removeProperty('_outgoingHeaderSnapshot');}
+        - delay:
+            expression:
+              constant: '2000'

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- Mirrors RequestController.java's /requests endpoints. /requests/{id}/run is just an HTTP
+         entry point here — the actual execution logic (the hard part) lives in
+         execution-engine.xml's "run-request" flow; see the flow-ref below. -->
+
+    <flow name="list-requests">
+        <http:listener config-ref="HTTP_Listener_config" path="/requests" allowedMethods="GET" doc:name="GET /requests"/>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select all requests">
+            <db:sql>SELECT id, collection_id, name, description, pre_request_json, request_json, post_response_json, input_data_sets_json FROM syskm.requests ORDER BY name</db:sql>
+        </db:select>
+        <ee:transform doc:name="Rows to request objects">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+import * from dw::rowToRequest
+---
+vars.rows map ((r) -> rowToRequest(r))]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="get-request">
+        <http:listener config-ref="HTTP_Listener_config" path="/requests/{requestId}" allowedMethods="GET" doc:name="GET /requests/{requestId}">
+            <http:response statusCode="#[vars.httpStatus default 200]"/>
+        </http:listener>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select one request">
+            <db:sql>SELECT id, collection_id, name, description, pre_request_json, request_json, post_response_json, input_data_sets_json FROM syskm.requests WHERE id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.requestId}]]]></db:input-parameters>
+        </db:select>
+        <choice doc:name="Found?">
+            <when expression="#[sizeOf(vars.rows) == 0]">
+                <ee:transform doc:name="404">
+                    <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+""]]></ee:set-payload></ee:message>
+                    <ee:variables><ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable></ee:variables>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <ee:transform doc:name="Row to request object">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+import * from dw::rowToRequest
+---
+rowToRequest(vars.rows[0])]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </otherwise>
+        </choice>
+    </flow>
+
+    <flow name="save-request">
+        <http:listener config-ref="HTTP_Listener_config" path="/requests/{requestId}/save" allowedMethods="POST" doc:name="POST /requests/{requestId}/save"/>
+        <!-- Oracle MERGE (upsert) — apitester-app's own RequestService.save() writes the whole
+             file wholesale either way (create or update), so this needs no separate insert-vs-update
+             check. Oracle's MERGE syntax (USING ... ON ... WHEN MATCHED/NOT MATCHED) is quite
+             different from H2's "MERGE INTO t (...) KEY(id) VALUES (...)" shorthand. -->
+        <db:update config-ref="Database_Config" doc:name="Upsert request">
+            <db:sql><![CDATA[
+MERGE INTO syskm.requests t
+USING (SELECT :id AS id, :collectionId AS collection_id, :name AS name, :description AS description,
+              :preRequest AS pre_request_json, :request AS request_json,
+              :postResponse AS post_response_json, :inputDataSets AS input_data_sets_json
+       FROM DUAL) s
+ON (t.id = s.id)
+WHEN MATCHED THEN UPDATE SET
+    t.collection_id = s.collection_id, t.name = s.name, t.description = s.description,
+    t.pre_request_json = s.pre_request_json, t.request_json = s.request_json,
+    t.post_response_json = s.post_response_json, t.input_data_sets_json = s.input_data_sets_json
+WHEN NOT MATCHED THEN INSERT (id, collection_id, name, description, pre_request_json, request_json, post_response_json, input_data_sets_json)
+    VALUES (s.id, s.collection_id, s.name, s.description, s.pre_request_json, s.request_json, s.post_response_json, s.input_data_sets_json)
+]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: attributes.uriParams.requestId,
+                collectionId: payload.collectionId default null,
+                name: payload.name default "",
+                description: payload.description default "",
+                preRequest: write(payload.preRequest default [], "application/json"),
+                request: write(payload.request default {}, "application/json"),
+                postResponse: write(payload.postResponse default [], "application/json"),
+                inputDataSets: write(payload.inputDataSets default [], "application/json")
+            }]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+"Request saved"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="run-request-http">
+        <http:listener config-ref="HTTP_Listener_config" path="/requests/{requestId}/run" allowedMethods="POST" doc:name="POST /requests/{requestId}/run"/>
+        <set-variable variableName="requestId" value="#[attributes.uriParams.requestId]" doc:name="requestId"/>
+        <set-variable variableName="overrideVars" value="#[ if (payload != null) (payload.variables default {}) else {}]" doc:name="overrideVars"/>
+        <flow-ref name="run-request" doc:name="Run (execution-engine.xml)"/>
+    </flow>
+
+    <flow name="list-request-runs">
+        <http:listener config-ref="HTTP_Listener_config" path="/requests/{requestId}/runs" allowedMethods="GET" doc:name="GET /requests/{requestId}/runs"/>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select run logs">
+            <db:sql>SELECT run_id, status, result_json, created_at FROM syskm.run_logs WHERE request_id = :id ORDER BY created_at DESC</db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.requestId}]]]></db:input-parameters>
+        </db:select>
+        <ee:transform doc:name="Rows to run log objects">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.rows map ((r) -> read(r.result_json, "application/json"))]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+</mule>

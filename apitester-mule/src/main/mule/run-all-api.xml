@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+        http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+
+    <!-- Mirrors CollectionRunController.java's /collections/{id}/run-all endpoints. "Main request"
+         = one no other request anywhere calls via a Call Request step (in preRequest OR
+         postResponse) — see the DataWeave in run-all below. Each main request is re-run via the
+         SAME loopback-HTTP mechanism call-request-step uses (a genuine top-level call, not the
+         nested-headers form, so each main request's own Input Data Set setting is still honored).
+         Runs are sequential (<foreach>, not scatter-gather) for the same reason call-request-step's
+         own nested calls are sequential — see execution-engine.xml's file-level comment. -->
+
+    <flow name="run-all">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/run-all" allowedMethods="POST" doc:name="POST .../run-all"/>
+        <set-variable variableName="raStartMs" value="#[now() as Number {unit: 'milliseconds'}]"/>
+        <set-variable variableName="raCollectionId" value="#[attributes.uriParams.collectionId]"/>
+
+        <db:select config-ref="Database_Config" target="raCols" doc:name="Select all collections">
+            <db:sql>SELECT id, name, parent_id FROM syskm.collections</db:sql>
+        </db:select>
+        <db:select config-ref="Database_Config" target="raReqs" doc:name="Select all requests">
+            <db:sql>SELECT id, collection_id, name, pre_request_json, post_response_json FROM syskm.requests</db:sql>
+        </db:select>
+
+        <ee:transform doc:name="Find main requests">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var cols = vars.raCols default []
+var reqs = vars.raReqs default []
+fun subtreeIds(id: String): Array<String> =
+    [id] ++ flatten((cols filter ((c) -> c.parent_id == id)) map ((c) -> subtreeIds(c.id)))
+fun callRequestIdsIn(stepsJson) =
+    ((read(stepsJson default "[]", "application/json")) filter ((s) -> s.'type' == "callRequest")) map ((s) -> s.requestId)
+var calledIds = flatten(reqs map ((r) -> callRequestIdsIn(r.pre_request_json) ++ callRequestIdsIn(r.post_response_json)))
+var scopeIds = subtreeIds(vars.raCollectionId)
+---
+reqs filter ((r) -> (scopeIds contains r.collection_id) and !(calledIds contains r.id))
+     map ((r) -> {id: r.id, name: r.name})]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <set-variable variableName="mainRequests" value="#[payload]" doc:name="mainRequests"/>
+        <set-variable variableName="raResults" value="#[[]]"/>
+
+        <foreach collection="#[vars.mainRequests]" doc:name="Run each main request (loopback, sequential)">
+            <!-- Capture the loop item BEFORE the http:request call overwrites payload with the
+                 callee's own response body. -->
+            <set-variable variableName="raCurrentItem" value="#[payload]" doc:name="current item"/>
+            <try doc:name="Run one (never throw — reported as a failed entry instead)">
+                <http:request method="POST" url="#['http://localhost:' ++ (p('listener.port') as String) ++ '/requests/' ++ vars.raCurrentItem.id ++ '/run']" config-ref="Loopback_Request_config" doc:name="Loopback run">
+                    <http:body><![CDATA[#[output application/json --- {}]]]></http:body>
+                    <http:headers><![CDATA[#[{"Content-Type": "application/json"}]]]></http:headers>
+                    <http:response-validator>
+                        <http:success-status-code-validator values="0..599"/>
+                    </http:response-validator>
+                </http:request>
+                <ee:transform doc:name="Build result entry">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+// http:request already parses a Content-Type: application/json response into a structured
+// value — read() (String/Binary -> Object) would reject that Object outright (see
+// call-request-step's identical "Parse callee result" transform in execution-engine.xml).
+var runResult = if (payload is String or payload is Binary) read(payload, "application/json") else payload
+fun checksOf(r) = if (r.iterating == true) flatten((r.iterations default []) map ((it) -> (it.checks default []))) else (r.checks default [])
+var checks = checksOf(runResult)
+var checksFailed = sizeOf(checks filter ((c) -> c.passed == false))
+var ok = runResult.status == "success" and checksFailed == 0
+---
+{
+    requestId: vars.raCurrentItem.id,
+    requestName: vars.raCurrentItem.name,
+    status: if (ok) "success" else "failed",
+    durationMs: runResult.durationMs default 0,
+    error: runResult.error,
+    checksPassed: sizeOf(checks filter ((c) -> c.passed == true)),
+    checksFailed: checksFailed,
+    checksTotal: sizeOf(checks),
+    fullResult: runResult
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <set-variable variableName="raEntry" value="#[payload]" doc:name="capture entry"/>
+                <error-handler>
+                    <on-error-continue type="ANY" doc:name="Run threw — record as failed">
+                        <set-variable variableName="raEntry" value="#[output application/java --- {
+                            requestId: vars.raCurrentItem.id,
+                            requestName: vars.raCurrentItem.name,
+                            status: 'failed',
+                            durationMs: 0,
+                            error: error.description,
+                            checksPassed: 0, checksFailed: 0, checksTotal: 0,
+                            fullResult: {}
+                        }]"/>
+                    </on-error-continue>
+                </error-handler>
+            </try>
+            <set-variable variableName="raResults" value="#[output application/java --- vars.raResults ++ [vars.raEntry]]" doc:name="accumulate"/>
+        </foreach>
+
+        <db:select config-ref="Database_Config" target="raColRow" doc:name="Collection name">
+            <db:sql>SELECT name FROM syskm.collections WHERE id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: vars.raCollectionId}]]]></db:input-parameters>
+        </db:select>
+
+        <ee:transform doc:name="Build report">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var passed = sizeOf(vars.raResults filter ((r) -> r.status == "success"))
+var failed = sizeOf(vars.raResults) - passed
+---
+{
+    collectionId: vars.raCollectionId,
+    collectionName: (vars.raColRow[0]).name default vars.raCollectionId,
+    runAt: now(),
+    totalRequests: sizeOf(vars.raResults),
+    passedRequests: passed,
+    failedRequests: failed,
+    durationMs: (now() as Number {unit: "milliseconds"}) - vars.raStartMs,
+    results: vars.raResults
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <set-variable variableName="raReport" value="#[payload]"/>
+
+        <!-- NOT wrapped in <try transactionalAction="ALWAYS_BEGIN"> — see collections-api.xml's
+             delete-collection for the full writeup on why: that wrapper was live-confirmed (curl
+             + a direct sqlplus check against the table) to let an earlier statement's effect
+             persist while a later one in the same ambient transaction silently didn't commit, no
+             exception thrown either way. Independent, unwrapped, auto-committing statements is
+             what was confirmed to actually work. -->
+        <db:delete config-ref="Database_Config" doc:name="Clear previous report">
+            <db:sql>DELETE FROM syskm.run_all_reports WHERE collection_id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: vars.raCollectionId}]]]></db:input-parameters>
+        </db:delete>
+        <db:insert config-ref="Database_Config" doc:name="Save report">
+            <db:sql>INSERT INTO syskm.run_all_reports (collection_id, report_json, run_at) VALUES (:id, :report, SYSTIMESTAMP)</db:sql>
+            <db:input-parameters><![CDATA[#[{id: vars.raCollectionId, report: write(vars.raReport, "application/json")}]]]></db:input-parameters>
+        </db:insert>
+        <set-payload value="#[%dw 2.0 output application/json --- vars.raReport]" doc:name="Result as payload"/>
+    </flow>
+
+    <flow name="last-report">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/run-all/last" allowedMethods="GET" doc:name="GET .../run-all/last">
+            <http:response statusCode="#[vars.httpStatus default 200]"/>
+        </http:listener>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select last report">
+            <db:sql>SELECT report_json FROM syskm.run_all_reports WHERE collection_id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.collectionId}]]]></db:input-parameters>
+        </db:select>
+        <choice doc:name="Found?">
+            <when expression="#[sizeOf(vars.rows) == 0]">
+                <set-variable variableName="httpStatus" value="#[404]"/>
+                <set-payload value="#['']"/>
+            </when>
+            <otherwise>
+                <set-payload value="#[%dw 2.0 output application/json --- read((vars.rows[0]).report_json, 'application/json')]" doc:name="Parsed report"/>
+            </otherwise>
+        </choice>
+    </flow>
+
+    <flow name="last-report-excel">
+        <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/run-all/last/excel" allowedMethods="GET" doc:name="GET .../run-all/last/excel">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.excelHeaders default {}]]]></http:headers>
+            </http:response>
+        </http:listener>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select last report">
+            <db:sql>SELECT report_json FROM syskm.run_all_reports WHERE collection_id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.collectionId}]]]></db:input-parameters>
+        </db:select>
+        <choice doc:name="Found?">
+            <when expression="#[sizeOf(vars.rows) == 0]">
+                <set-variable variableName="httpStatus" value="#[404]"/>
+                <set-payload value="#['']"/>
+            </when>
+            <otherwise>
+                <set-variable variableName="excelReport" value="#[read((vars.rows[0]).report_json, 'application/json')]"/>
+                <flow-ref name="build-excel-report" doc:name="Build xlsx (Groovy + POI) — also sets vars.excelHeaders"/>
+            </otherwise>
+        </choice>
+    </flow>
+
+    <!-- Builds the xlsx via Groovy + POI (same approach/version as apitester-app's own
+         ExcelReportService: Summary sheet with metrics + a bar chart, Detailed Results sheet).
+         Reads vars.excelReport, sets payload to the raw xlsx bytes and vars.excelHeaders to the
+         download headers. -->
+    <flow name="build-excel-report">
+        <scripting:execute engine="groovy" target="excelBytes" doc:name="Generate xlsx">
+            <scripting:code><![CDATA[
+import org.apache.poi.ss.usermodel.*
+import org.apache.poi.ss.util.CellRangeAddress
+import org.apache.poi.xddf.usermodel.chart.*
+import org.apache.poi.xssf.usermodel.*
+import java.io.ByteArrayOutputStream
+
+def report = reportData
+def results = report.results ?: []
+def total = (report.totalRequests ?: 0) as int
+def passedCount = (report.passedRequests ?: 0) as int
+def failedCount = (report.failedRequests ?: 0) as int
+def duration = (report.durationMs ?: 0) as long
+
+def wb = new XSSFWorkbook()
+def title = wb.createCellStyle(); def titleFont = wb.createFont()
+titleFont.setBold(true); titleFont.setFontHeightInPoints((short) 22); titleFont.setColor(new XSSFColor([255,255,255] as byte[], null))
+title.setFont(titleFont); title.setFillForegroundColor(new XSSFColor([31,78,121] as byte[], null)); title.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+
+def hdrStyle = wb.createCellStyle(); def hdrFont = wb.createFont()
+hdrFont.setBold(true); hdrFont.setColor(new XSSFColor([255,255,255] as byte[], null))
+hdrStyle.setFont(hdrFont); hdrStyle.setFillForegroundColor(new XSSFColor([79,129,189] as byte[], null)); hdrStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+
+def passStyle = wb.createCellStyle(); passStyle.setFillForegroundColor(new XSSFColor([146,208,80] as byte[], null)); passStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+def failStyle = wb.createCellStyle(); def failFont = wb.createFont(); failFont.setColor(new XSSFColor([255,255,255] as byte[], null))
+failStyle.setFont(failFont); failStyle.setFillForegroundColor(new XSSFColor([255,0,0] as byte[], null)); failStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+
+def summary = wb.createSheet("Summary")
+summary.setColumnWidth(0, 7000); summary.setColumnWidth(1, 4000)
+int r = 0
+def titleRow = summary.createRow(r++); def tc = titleRow.createCell(0); tc.setCellValue("Run All — " + (report.collectionName ?: '')); tc.setCellStyle(title)
+summary.addMergedRegion(new CellRangeAddress(0, 0, 0, 1))
+r++
+def mh = summary.createRow(r++); mh.createCell(0).setCellValue("Metric"); mh.getCell(0).setCellStyle(hdrStyle); mh.createCell(1).setCellValue("Value"); mh.getCell(1).setCellStyle(hdrStyle)
+def addRow = { label, value, style ->
+    def row = summary.createRow(r++)
+    row.createCell(0).setCellValue(label)
+    def c = row.createCell(1)
+    if (value instanceof Number) c.setCellValue(((Number) value).doubleValue()) else c.setCellValue(value.toString())
+    if (style != null) c.setCellStyle(style)
+}
+addRow("Total Requests", total, null)
+addRow("Passed", passedCount, passStyle)
+addRow("Failed", failedCount, failStyle)
+addRow("Pass Rate", total > 0 ? String.format("%.1f%%", passedCount * 100.0 / total) : "0.0%", null)
+addRow("Total Duration (ms)", duration, null)
+r++
+
+// Bar chart — Pass/Fail counts (same XDDF pattern apitester-app's own report generator uses)
+def drawing = summary.createDrawingPatriarch()
+def anchor = drawing.createAnchor(0, 0, 0, 0, 0, r, 6, r + 16)
+def chart = drawing.createChart(anchor)
+chart.setTitleText("Pass / Fail Counts")
+chart.setTitleOverlay(false)
+def legend = chart.getOrAddLegend(); legend.setPosition(LegendPosition.BOTTOM)
+def catAxis = chart.createCategoryAxis(AxisPosition.BOTTOM)
+def valAxis = chart.createValueAxis(AxisPosition.LEFT); valAxis.setCrosses(AxisCrosses.AUTO_ZERO)
+def cats = XDDFDataSourcesFactory.fromArray(["Pass", "Fail"] as String[])
+def vals = XDDFDataSourcesFactory.fromArray([passedCount, failedCount] as Integer[])
+def barData = (XDDFBarChartData) chart.createData(ChartTypes.BAR, catAxis, valAxis)
+barData.setBarDirection(BarDirection.COL); barData.setBarGrouping(BarGrouping.CLUSTERED)
+def series = barData.addSeries(cats, vals); series.setTitle("Count", null)
+chart.plot(barData)
+
+def detail = wb.createSheet("Detailed Results")
+[1400, 7000, 3500, 3500, 3500, 3500, 3500, 8000].eachWithIndex { w, i -> detail.setColumnWidth(i, w) }
+detail.createFreezePane(0, 1)
+def dh = detail.createRow(0)
+["#", "Request", "Status", "Duration (ms)", "Checks Passed", "Checks Failed", "Checks Total", "Error"].eachWithIndex { h, i ->
+    def c = dh.createCell(i); c.setCellValue(h); c.setCellStyle(hdrStyle)
+}
+results.eachWithIndex { entry, i ->
+    def row = detail.createRow(i + 1)
+    def ok = entry.status == "success"
+    row.createCell(0).setCellValue((i + 1) as double)
+    row.createCell(1).setCellValue((entry.requestName ?: '').toString())
+    def sc = row.createCell(2); sc.setCellValue(ok ? "Pass" : "Fail"); sc.setCellStyle(ok ? passStyle : failStyle)
+    row.createCell(3).setCellValue(((entry.durationMs ?: 0) as Number).doubleValue())
+    row.createCell(4).setCellValue(((entry.checksPassed ?: 0) as Number).doubleValue())
+    row.createCell(5).setCellValue(((entry.checksFailed ?: 0) as Number).doubleValue())
+    row.createCell(6).setCellValue(((entry.checksTotal ?: 0) as Number).doubleValue())
+    row.createCell(7).setCellValue((entry.error ?: '').toString())
+}
+
+// Checks Detail — one GROUP per check (per request/iteration): the check's own row, then its
+// conditions as indented, collapsible sub-rows right under it (Excel outline grouping) — every
+// condition shown, not just the failing ones, mirroring ResponseViewer.jsx's CheckEntry, which
+// nests the same way on screen.
+def checkGroups = []
+results.each { entry ->
+    def fullResult = entry.fullResult
+    def addChecks = { iterLabel, checks ->
+        (checks ?: []).each { chk ->
+            def conds = chk.conditions
+            def condRows = []
+            if (conds) {
+                conds.each { cond ->
+                    // Plain concatenation, not Groovy GString interpolation — Mule's own
+                    // config-property scanner flags a literal dollar sign anywhere in the
+                    // deployed source (comments included, see collections-api.xml's own
+                    // "New request object" transform for the same quirk) and tries to resolve
+                    // it as a property, which fails for anything that isn't one.
+                    def conditionText = (cond.left ?: '').toString() + ' ' + (cond.operator ?: '').toString() + ' ' + (cond.right ?: '').toString()
+                    condRows << [conditionText, (cond.passed ? 'Pass' : 'Fail'), (cond.message ?: '').toString()]
+                }
+            }
+            checkGroups << [entry.requestName ?: '', iterLabel, chk.name ?: '', (chk.passed ? 'Pass' : 'Fail'), (chk.message ?: '').toString(), condRows]
+        }
+    }
+    if (fullResult?.iterating == true) {
+        (fullResult.iterations ?: []).eachWithIndex { it, idx -> addChecks('Iteration ' + (idx + 1), it.checks) }
+    } else {
+        addChecks('', fullResult?.checks)
+    }
+}
+
+def checksSheet = wb.createSheet("Checks Detail")
+[1200, 6500, 2200, 5500, 4500, 2200, 9000].eachWithIndex { w, i -> checksSheet.setColumnWidth(i, w) }
+checksSheet.createFreezePane(0, 1)
+def ckh = checksSheet.createRow(0)
+["#", "Request", "Iteration", "Check", "Condition", "Result", "Detail"].eachWithIndex { h, i ->
+    def c = ckh.createCell(i); c.setCellValue(h); c.setCellStyle(hdrStyle)
+}
+def checkNameFont = wb.createFont(); checkNameFont.setBold(true)
+def checkNameStyle = wb.createCellStyle(); checkNameStyle.setFont(checkNameFont)
+def indentStyle = wb.createCellStyle(); indentStyle.setIndention((short) 1)
+
+int excelRow = 1
+checkGroups.each { g ->
+    def (reqName, iterLabel, checkName, checkResult, checkDetail, condRows) = g
+    def headerRow = checksSheet.createRow(excelRow)
+    headerRow.createCell(0).setCellValue(excelRow as double)
+    headerRow.createCell(1).setCellValue(reqName.toString())
+    headerRow.createCell(2).setCellValue(iterLabel.toString())
+    def nameCell = headerRow.createCell(3); nameCell.setCellValue(checkName.toString()); nameCell.setCellStyle(checkNameStyle)
+    headerRow.createCell(4).setCellValue('')
+    def hrc = headerRow.createCell(5); hrc.setCellValue(checkResult.toString()); hrc.setCellStyle(checkResult == 'Pass' ? passStyle : failStyle)
+    // Only shown here when there's no per-condition breakdown (predates this, or a future
+    // jsoncompare/textcompare/dbcheck step) — otherwise each condition carries its own detail below.
+    headerRow.createCell(6).setCellValue(condRows.isEmpty() ? checkDetail.toString() : '')
+    excelRow++
+
+    def firstConditionRow = excelRow
+    condRows.each { cond ->
+        def (conditionText, condResult, condDetail) = cond
+        def condRow = checksSheet.createRow(excelRow)
+        condRow.createCell(0).setCellValue(excelRow as double)
+        // Request/Iteration/Check left blank — already shown on this group's header row above.
+        def condCell = condRow.createCell(4); condCell.setCellValue(conditionText.toString()); condCell.setCellStyle(indentStyle)
+        def crc = condRow.createCell(5); crc.setCellValue(condResult.toString()); crc.setCellStyle(condResult == 'Pass' ? passStyle : failStyle)
+        condRow.createCell(6).setCellValue(condDetail.toString())
+        excelRow++
+    }
+    if (!condRows.isEmpty()) checksSheet.groupRow(firstConditionRow, excelRow - 1)
+}
+checksSheet.setRowSumsBelow(false)
+
+def out = new ByteArrayOutputStream()
+wb.write(out)
+wb.close()
+out.toByteArray()
+            ]]></scripting:code>
+            <scripting:parameters><![CDATA[#[%dw 2.0 output application/java --- {reportData: vars.excelReport}]]]></scripting:parameters>
+        </scripting:execute>
+        <set-payload value="#[vars.excelBytes]" doc:name="xlsx bytes as payload"/>
+        <set-variable variableName="excelHeaders" value="#[{
+            'Content-Disposition': 'attachment; filename=\'run-all-' ++ ((vars.excelReport.collectionName default 'collection') replace /[^a-zA-Z0-9_-]+/ with '_') ++ '.xlsx\'',
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }]" doc:name="download headers"/>
+    </flow>
+
+</mule>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+
+    <!-- Same port as apitester-app (Spring Boot) by default, so apitester-ui's hardcoded ":8082"
+         (see config.js) works unchanged against either backend — just not both at once on one host.
+         Override via -M-mule.env.listener.port if you do need to run them side by side. -->
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+        <http:listener-connection host="0.0.0.0" port="${listener.port}" />
+    </http:listener-config>
+
+    <!-- Outbound calls — this IS the "just use httprequester with tls insecure" ask: no Camel, a
+         plain Mule HTTP Request config with a trust-all TLS context (self-signed/internal-CA
+         endpoints, e.g. an internal SIT host, connect without needing their cert imported anywhere).
+         insecure="true" skips BOTH certificate chain validation and hostname verification — same
+         trust posture as apitester-app's Apache HttpClient config had. -->
+    <http:request-config name="HTTP_Request_config" doc:name="HTTP Request config" responseTimeout="60000">
+        <http:request-connection protocol="HTTPS">
+            <tls:context>
+                <tls:trust-store insecure="true" />
+            </tls:context>
+        </http:request-connection>
+    </http:request-config>
+
+    <!-- Loopback-only config for the Call Request feature's self-call (execution-engine.xml's
+         call-request-step posts to its own http://localhost:${listener.port}/requests/{id}/run).
+         HTTP_Request_config above is pinned to protocol="HTTPS" for real (mostly TLS) target
+         endpoints; HTTP_Listener_config has no TLS context at all, so a loopback call routed
+         through the HTTPS-pinned config mismatches its own plain-HTTP listener. Kept as a separate
+         config so this doesn't change behavior for actual target-endpoint calls. -->
+    <http:request-config name="Loopback_Request_config" doc:name="Loopback HTTP Request config (Call Request self-call)" responseTimeout="60000">
+        <http:request-connection protocol="HTTP" />
+    </http:request-config>
+
+    <!-- Persistence — Oracle ONLY (see pom.xml/schema.sql's file comments). Unlike H2, there's no
+         "run schema.sql automatically" trick here — run schema.sql once against this schema/user
+         yourself before first deploying (see its own header comment). -->
+    <db:config name="Database_Config" doc:name="Database Config">
+		<db:oracle-connection host="${db.host}" user="${db.user}" password="${db.password}" instance="XE" />
+    
+</db:config>
+
+    <configuration-properties file="config.properties" doc:name="Configuration properties" />
+
+</mule>
