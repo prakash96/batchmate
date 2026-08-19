@@ -32,7 +32,7 @@ export default function PostResponseFields({ checks, onChange, allRequests, curr
         if (type === 'callRequest') onChange([...checks, { type: 'callRequest', requestId: '' }]);
         else if (type === 'setVariable') onChange([...checks, { type: 'setVariable', name: '', expression: '' }]);
         else if (type === 'wait') onChange([...checks, { type: 'wait', name: '', waitTime: 1000 }]);
-        else if (type === 'assertion') onChange([...checks, { ...base, logic: 'AND', conditions: [{ left: 'headers.httpResponseCode', operator: '==', right: '200' }], onFail: 'stop' }]);
+        else if (type === 'assertion') onChange([...checks, { ...base, logic: 'AND', conditions: [{ left: 'attributes.statusCode', operator: '==', right: '200' }], onFail: 'stop' }]);
         else if (type === 'jsoncompare') onChange([...checks, { ...base, leftSource: 'body', leftExpr: '', leftLiteral: '', rightSource: 'literal', rightExpr: '', rightLiteral: '', mode: 'partial', ignoreArrayOrder: true, resultVar: '', onMismatch: 'stop' }]);
         else if (type === 'textcompare') onChange([...checks, { ...base, leftSource: 'body', leftExpr: '', leftLiteral: '', rightSource: 'literal', rightExpr: '', rightLiteral: '', mode: 'exact', caseSensitive: true, resultVar: '', onMismatch: 'stop' }]);
     };
@@ -95,7 +95,7 @@ function SetVariableFields({ check, onChange }) {
     return (
         <input
             style={{ ...inputStyle, width: '100%', fontFamily: C.mono }}
-            placeholder='literal value, or ${vars.x} / ${body.x} / ${headers.x} / ${new Date()}'
+            placeholder="literal value, or $(vars.x) / $(payload.x) / $(attributes.headers.x) / $(attributes.statusCode) / $(now())"
             value={check.expression}
             onChange={e => onChange({ expression: e.target.value })}
         />

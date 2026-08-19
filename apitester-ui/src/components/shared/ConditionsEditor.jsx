@@ -26,7 +26,7 @@ export default function ConditionsEditor({ logic, onLogicChange, conditions, onC
                 <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
                     <input
                         style={{ ...inputStyle, flex: 2, fontFamily: C.mono }}
-                        placeholder="headers.httpResponseCode"
+                        placeholder="attributes.statusCode"
                         value={c.left}
                         onChange={e => update(i, { left: e.target.value })}
                     />
@@ -45,8 +45,10 @@ export default function ConditionsEditor({ logic, onLogicChange, conditions, onC
             ))}
             <button onClick={add} style={btnStyle}>+ Add condition</button>
             <div style={{ fontSize: 10, color: C.textFaint, marginTop: 6 }}>
-                Left/right accept <code style={{ color: C.textDim }}>vars.x</code>, <code style={{ color: C.textDim }}>body.x</code>,{' '}
-                <code style={{ color: C.textDim }}>headers.x</code>, numbers, or a quoted string literal (<code style={{ color: C.textDim }}>'text'</code>).
+                Left/right accept <code style={{ color: C.textDim }}>vars.x</code>, <code style={{ color: C.textDim }}>payload.x</code> (the response body),{' '}
+                <code style={{ color: C.textDim }}>attributes.headers.x</code>, <code style={{ color: C.textDim }}>attributes.statusCode</code>, numbers,
+                or a quoted string literal (<code style={{ color: C.textDim }}>'text'</code>). No <code style={{ color: C.textDim }}>$(...)</code> wrapper here —
+                unlike templated fields (URL/body/headers/Set Variable), these are bare expressions.
             </div>
         </div>
     );

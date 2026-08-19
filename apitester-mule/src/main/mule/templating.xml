@@ -31,9 +31,13 @@
         correctly via matching-paren scanning, not a naive "first close paren" search.
 
         Call via <flow-ref name="eval-template"/> after setting these flow vars:
-          vars.etTemplate — the string to evaluate
-          vars.etRaw      — boolean, default false (see above)
+          vars.etTemplate    — the string to evaluate
+          vars.etRaw         — boolean, default false (see above)
           vars.etVars/etBody/etHeaders — the vars/body/headers bindings the template expressions see
+          vars.etStatusCode  — optional; attributes.statusCode's value (null if unset/not applicable
+                               — every caller templating something that runs BEFORE the actual HTTP
+                               call, e.g. the outgoing body/header rows/URL, has no response yet to
+                               get a real one from)
         Result lands in vars.etResult — payload itself is snapshotted before and restored after,
         since <ee:transform> writes its result into payload (unlike the old JS scripting:execute's
         target= attribute, which wrote straight into a variable without ever touching payload) —
@@ -94,23 +98,28 @@ fun tokenize(s: String): Array =
 // Wraps a user-authored DataWeave expression in a tiny standalone script, exposed under
 // Mule/DataWeave's own native names only — payload for the body, attributes.headers for headers
 // (a real MultiMap-shaped object, same access pattern DataWeave natively supports for
-// attributes.headers elsewhere in this app, e.g. execution-engine.xml's rsResponse capture), vars
-// unchanged. No body/headers aliases.
+// attributes.headers elsewhere in this app, e.g. execution-engine.xml's rsResponse capture),
+// attributes.statusCode for the HTTP status (null wherever there's no response yet to have one —
+// every templated field that runs BEFORE the actual call: the outgoing body/header rows/URL, and
+// an Input Data Set entry's own body — only fields that template AFTER a response exists, like a
+// Set Variable post-response step, ever have a real value here), vars unchanged. No body/headers
+// aliases.
 //
-// bodyJson/headersJson/varsJson are already-serialized JSON text (from THIS script's own ambient
-// vars.etBody/etHeaders/etVars, resolved by evalExpr below, where `vars` is still genuinely
-// ambient/unshadowed) spliced in as literal values — NOT built by having the inner script
-// reference vars.etBody/etHeaders/etVars itself. A local `var vars = vars.etVars default {}`
-// inside the inner script would shadow the name `vars` for the WHOLE script, including its own
-// right-hand side, so `vars.etVars` there would resolve to the not-yet-initialized local `vars`
-// (a self-reference) rather than the ambient one — DataWeave throws "Variable: `vars` is not yet
-// initialized." JSON literals (valid DataWeave literal syntax too) sidestep that entirely: the
-// inner script's var declarations never need to name-reference vars/payload/attributes at all.
-fun buildScript(expr: String, bodyJson: String, headersJson: String, varsJson: String): String =
-    "%dw 2.0\noutput application/java\nvar payload = " ++ bodyJson ++ "\nvar attributes = {headers: (" ++ headersJson ++ ")}\nvar vars = " ++ varsJson ++ "\n---\n" ++ expr
+// bodyJson/headersJson/varsJson/statusCodeJson are already-serialized JSON text (from THIS
+// script's own ambient vars.etBody/etHeaders/etVars/etStatusCode, resolved by evalExpr below,
+// where `vars` is still genuinely ambient/unshadowed) spliced in as literal values — NOT built by
+// having the inner script reference vars.etBody/etHeaders/etVars/etStatusCode itself. A local
+// `var vars = vars.etVars default {}` inside the inner script would shadow the name `vars` for
+// the WHOLE script, including its own right-hand side, so `vars.etVars` there would resolve to
+// the not-yet-initialized local `vars` (a self-reference) rather than the ambient one — DataWeave
+// throws "Variable: `vars` is not yet initialized." JSON literals (valid DataWeave literal syntax
+// too) sidestep that entirely: the inner script's var declarations never need to name-reference
+// vars/payload/attributes at all.
+fun buildScript(expr: String, bodyJson: String, headersJson: String, varsJson: String, statusCodeJson: String): String =
+    "%dw 2.0\noutput application/java\nvar payload = " ++ bodyJson ++ "\nvar attributes = {headers: (" ++ headersJson ++ "), statusCode: (" ++ statusCodeJson ++ ")}\nvar vars = " ++ varsJson ++ "\n---\n" ++ expr
 
 fun evalExpr(expr: String) =
-    read(buildScript(expr, write(vars.etBody, "application/json"), write(vars.etHeaders default {}, "application/json"), write(vars.etVars default {}, "application/json")), "application/dw")
+    read(buildScript(expr, write(vars.etBody, "application/json"), write(vars.etHeaders default {}, "application/json"), write(vars.etVars default {}, "application/json"), write(vars.etStatusCode default null, "application/json")), "application/dw")
 
 fun stringifyResult(v): String =
     if (v == null) ""

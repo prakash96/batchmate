@@ -97,6 +97,7 @@
                             <set-variable variableName="etVars" value="#[vars.overrideVars default {}]" doc:name="entry vars"/>
                             <set-variable variableName="etBody" value="#[null]" doc:name="entry has no previous body"/>
                             <set-variable variableName="etHeaders" value="#[{}]" doc:name="entry has no previous headers"/>
+                            <set-variable variableName="etStatusCode" value="#[null]" doc:name="no response yet at this point"/>
                             <flow-ref name="eval-template" doc:name="Evaluate entry body"/>
                             <set-variable variableName="rsCallerBody" value="#[vars.etResult]" doc:name="seed body"/>
                             <set-variable variableName="rsCallerHeaders" value="#[output application/json --- (payload.headers default []) filter (h) -> (h.enabled default true) reduce ((h, acc = {}) -> acc ++ {(h.key): h.value})]" doc:name="seed headers (MultiMap-style, like attributes.headers — ++ on DataWeave objects appends rather than overwrites, so two rows with the same key survive as repeated entries; kept application/json, never coerced through application/java, which would collapse duplicate keys to last-value-wins)"/>
@@ -181,6 +182,7 @@ output application/json
         <set-variable variableName="etVars" value="#[vars.rsVars]"/>
         <set-variable variableName="etBody" value="#[vars.preChainBody]"/>
         <set-variable variableName="etHeaders" value="#[vars.preChainHeaders]"/>
+        <set-variable variableName="etStatusCode" value="#[null]" doc:name="no response yet — this builds the outgoing request"/>
         <flow-ref name="eval-template" doc:name="Evaluate outgoing body"/>
         <set-variable variableName="finalBody" value="#[vars.etResult]" doc:name="finalBody"/>
 
@@ -191,6 +193,7 @@ output application/json
             <set-variable variableName="etVars" value="#[vars.rsVars]"/>
             <set-variable variableName="etBody" value="#[vars.preChainBody]"/>
             <set-variable variableName="etHeaders" value="#[vars.preChainHeaders]"/>
+            <set-variable variableName="etStatusCode" value="#[null]" doc:name="no response yet — this builds the outgoing request"/>
             <flow-ref name="eval-template" doc:name="Evaluate header value"/>
             <set-variable variableName="finalHeaders" value="#[output application/json --- vars.finalHeaders ++ {(payload.key): vars.etResult}]" doc:name="accumulate header (append via ++, not overwrite — two rows with the same key both survive, sent as repeated header lines, same as a real MultiMap)"/>
         </foreach>
@@ -199,6 +202,7 @@ output application/json
         <set-variable variableName="etVars" value="#[vars.rsVars]"/>
         <set-variable variableName="etBody" value="#[vars.preChainBody]"/>
         <set-variable variableName="etHeaders" value="#[vars.preChainHeaders]"/>
+        <set-variable variableName="etStatusCode" value="#[null]" doc:name="no response yet — this builds the outgoing request"/>
         <flow-ref name="eval-template" doc:name="Evaluate URL"/>
         <set-variable variableName="finalUrl" value="#[vars.etResult]" doc:name="finalUrl"/>
 
@@ -236,6 +240,7 @@ output application/json
                         <set-variable variableName="etVars" value="#[vars.rsVars]"/>
                         <set-variable variableName="etBody" value="#[vars.postChainBody]"/>
                         <set-variable variableName="etHeaders" value="#[vars.postChainHeaders]"/>
+                        <set-variable variableName="etStatusCode" value="#[vars.rsResponse.status default null]" doc:name="the actual response's status is available here — this runs post-response"/>
                         <flow-ref name="eval-template" doc:name="Evaluate Set Variable expression"/>
                         <set-variable variableName="rsVars" value="#[vars.rsVars ++ {(payload.name): vars.etResult}]" doc:name="apply set variable"/>
                         <set-variable variableName="postResponseLog" value="#[vars.postResponseLog ++ [{'type': 'setVariable', name: payload.name, value: vars.etResult, status: 'ok'}]]"/>
@@ -407,7 +412,7 @@ fun stripQuotes(s: String): String =
         substring(s, 1, sizeOf(s) - 1)
     else s
 
-fun resolveValue(exprRaw, b, h, uv) =
+fun resolveValue(exprRaw, b, h, uv, sc) =
     do {
         var expr = trim(exprRaw default "")
         ---
@@ -418,12 +423,14 @@ fun resolveValue(exprRaw, b, h, uv) =
                     (firstChar(expr) == "\"" and lastChar(expr) == "\"")
                 ))
             stripQuotes(expr)
-        // payload/attributes.headers are Mule/DataWeave's own native names for these (attributes.headers
-        // being a real MultiMap-shaped object) — the only names recognized, no body/headers aliases.
+        // payload/attributes.headers/attributes.statusCode are Mule/DataWeave's own native names
+        // for these (attributes.headers being a real MultiMap-shaped object) — the only names
+        // recognized, no body/headers aliases.
         else if (expr == "payload") b
         else if (startsWith(expr, "payload.")) resolveField(b, substring(expr, 8, sizeOf(expr)))
         else if (expr == "attributes.headers") h
         else if (startsWith(expr, "attributes.headers.")) (if (h != null) h[(substring(expr, 19, sizeOf(expr)))] else null)
+        else if (expr == "attributes.statusCode") sc
         else if (startsWith(expr, "vars.")) do {
             var rest = substring(expr, 5, sizeOf(expr))
             var parts = rest splitBy "."
@@ -480,6 +487,10 @@ fun compareVal(l, r, op: String): Boolean =
 var b = vars.postChainBody
 var h = vars.postChainHeaders default {}
 var uv = vars.rsVars default {}
+// The status code from the actual HTTP call this postResponse chain is running after — captured
+// into vars.rsResponse back where the response itself was captured (still in scope here via
+// flow-ref's shared vars, same as postChainBody/postChainHeaders above).
+var sc = vars.rsResponse.status default null
 var step = payload
 var stepName = if (step.name != null and trim(step.name) != "") step.name else "Assertion"
 var isOr = upper(step.logic default "AND") == "OR"
@@ -487,7 +498,7 @@ var stepOnFail = step.onFail default "stop"
 var stepConditions = step.conditions default []
 
 var conditionResults = stepConditions map ((c, idx) -> do {
-    var left = resolveValue(c.left default "", b, h, uv)
+    var left = resolveValue(c.left default "", b, h, uv, sc)
     var op = c.operator default "=="
     var right = trim(c.right default "")
     ---
@@ -495,7 +506,7 @@ var conditionResults = stepConditions map ((c, idx) -> do {
         { left: (c.left default ""), operator: op, right: (c.right default ""), passed: (left != null), message: ("actual=" ++ stringifyVal(left) ++ "  expected: not null"), idx: idx }
     else if (op == "contains")
         do {
-            var rv = resolveValue(right, b, h, uv)
+            var rv = resolveValue(right, b, h, uv, sc)
             var passed = stringifyVal(left) contains stringifyVal(rv)
             ---
             { left: (c.left default ""), operator: op, right: (c.right default ""), passed: passed, message: ("actual=\"" ++ stringifyVal(left) ++ "\"  expected to contain: \"" ++ stringifyVal(rv) ++ "\""), idx: idx }
@@ -509,7 +520,7 @@ var conditionResults = stepConditions map ((c, idx) -> do {
         }
     else
         do {
-            var rv2 = resolveValue(right, b, h, uv)
+            var rv2 = resolveValue(right, b, h, uv, sc)
             var passed = compareVal(left, rv2, op)
             ---
             { left: (c.left default ""), operator: op, right: (c.right default ""), passed: passed, message: ("actual=\"" ++ stringifyVal(left) ++ "\"  expected " ++ op ++ " \"" ++ stringifyVal(rv2) ++ "\""), idx: idx }

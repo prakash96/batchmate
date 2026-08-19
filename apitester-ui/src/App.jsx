@@ -4,6 +4,7 @@ import RequestPanel from './components/panels/RequestPanel';
 import GlobalVarsPanel from './components/GlobalVarsPanel';
 import JsonCompareModal from './components/JsonCompareModal';
 import SwaggerPayloadModal from './components/SwaggerPayloadModal';
+import AuditLogModal from './components/AuditLogModal';
 import { useThemeStore, THEMES } from './store/themeStore';
 import { C, btnStyle, inputStyle } from './theme';
 
@@ -11,6 +12,7 @@ export default function App() {
     const [showGlobalVars, setShowGlobalVars] = useState(false);
     const [showJsonCompare, setShowJsonCompare] = useState(false);
     const [showSwaggerPayload, setShowSwaggerPayload] = useState(false);
+    const [showAuditLog, setShowAuditLog] = useState(false);
     const { theme, setTheme } = useThemeStore();
 
     // Reflects the selected theme onto <html> so every inline style built from theme.js's
@@ -41,6 +43,7 @@ export default function App() {
                     <button onClick={() => setShowGlobalVars(true)} style={btnStyle}>🌐 Global Variables</button>
                     <button onClick={() => setShowJsonCompare(true)} style={btnStyle}>🔍 JSON Compare</button>
                     <button onClick={() => setShowSwaggerPayload(true)} style={btnStyle}>🧬 Swagger Payloads</button>
+                    <button onClick={() => setShowAuditLog(true)} style={btnStyle}>📜 Audit Log</button>
                 </div>
             </div>
             <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
@@ -54,6 +57,7 @@ export default function App() {
             {showGlobalVars && <GlobalVarsPanel onClose={() => setShowGlobalVars(false)} />}
             {showJsonCompare && <JsonCompareModal onClose={() => setShowJsonCompare(false)} />}
             {showSwaggerPayload && <SwaggerPayloadModal onClose={() => setShowSwaggerPayload(false)} />}
+            {showAuditLog && <AuditLogModal onClose={() => setShowAuditLog(false)} />}
         </div>
     );
 }

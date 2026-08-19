@@ -283,6 +283,116 @@ results.eachWithIndex { entry, i ->
     row.createCell(7).setCellValue((entry.error ?: '').toString())
 }
 
+// Cell values are capped well under Excel's real 32,767-char-per-cell limit — a big response
+// body would otherwise make POI throw instead of just writing a clipped cell.
+def truncate = { s, max = 30000 -> s == null ? '' : (s.length() > max ? s.substring(0, max) + '…(truncated)' : s) }
+// Hand-rolled, not groovy.json.JsonOutput — the groovy-json module isn't on this embedded
+// scripting engine's classpath (confirmed live: "unable to resolve class groovy.json.JsonOutput"
+// at deploy time). toJsonStr passes an already-JSON-text String straight through (sentBody/
+// response.body are already serialized JSON coming out of the app) and only actually encodes
+// Maps/Lists (sentHeaders, response.headers, and the Call Request log objects, which are real
+// Groovy Maps at this point, not text).
+def jsonEscape = { s -> s.toString().replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t') }
+def toJsonVal
+toJsonVal = { v ->
+    if (v == null) 'null'
+    else if (v instanceof CharSequence) ('"' + jsonEscape(v) + '"')
+    else if (v instanceof Boolean || v instanceof Number) v.toString()
+    else if (v instanceof Map) ('{' + v.collect { k, vv -> '"' + jsonEscape(k.toString()) + '":' + toJsonVal(vv) }.join(',') + '}')
+    else if (v instanceof Collection) ('[' + v.collect { toJsonVal(it) }.join(',') + ']')
+    else ('"' + jsonEscape(v.toString()) + '"')
+}
+def toJsonStr = { v -> v == null ? '' : (v instanceof CharSequence ? v.toString() : toJsonVal(v)) }
+def wrapStyle = wb.createCellStyle(); wrapStyle.setWrapText(true); wrapStyle.setVerticalAlignment(VerticalAlignment.TOP)
+
+// Request/Response Detail — the actual sent body/headers and received status/headers/body for
+// the MAIN http call of every request (one row per iteration for an iterating request) — this
+// (and Pre/Post Steps Detail right after it) is what was missing before: Detailed Results only
+// ever had pass/fail counts, never the real traffic.
+def reqRespSheet = wb.createSheet("Request-Response Detail")
+[1200, 6500, 2600, 9000, 6000, 2800, 6000, 9000].eachWithIndex { w, i -> reqRespSheet.setColumnWidth(i, w) }
+reqRespSheet.createFreezePane(0, 1)
+def rrh = reqRespSheet.createRow(0)
+["#", "Request", "Iteration", "Sent Body", "Sent Headers", "Response Status", "Response Headers", "Response Body"].eachWithIndex { h, i ->
+    def c = rrh.createCell(i); c.setCellValue(h); c.setCellStyle(hdrStyle)
+}
+def reqRespRows = []
+results.each { entry ->
+    def fullResult = entry.fullResult
+    def addReqResp = { iterLabel, runResult ->
+        reqRespRows << [
+            (entry.requestName ?: '').toString(), iterLabel.toString(),
+            truncate(toJsonStr(runResult?.sentBody)), truncate(toJsonStr(runResult?.sentHeaders)),
+            (runResult?.response?.status ?: '').toString(), truncate(toJsonStr(runResult?.response?.headers)), truncate(toJsonStr(runResult?.response?.body)),
+        ]
+    }
+    if (fullResult?.iterating == true) {
+        (fullResult.iterations ?: []).eachWithIndex { it, idx -> addReqResp('Iteration ' + (idx + 1), it) }
+    } else {
+        addReqResp('', fullResult)
+    }
+}
+reqRespRows.eachWithIndex { rr, i ->
+    def row = reqRespSheet.createRow(i + 1)
+    row.createCell(0).setCellValue((i + 1) as double)
+    rr.eachWithIndex { val, ci ->
+        def cell = row.createCell(ci + 1); cell.setCellValue(val); cell.setCellStyle(wrapStyle)
+    }
+}
+
+// Pre/Post Steps Detail — every Call Request/Set Variable step that ran, pre-request or
+// post-response, with what it sent/received (Call Request) or what it set (Set Variable). Same
+// per-iteration expansion as the sheet above.
+def stepsSheet = wb.createSheet("Pre-Post Steps Detail")
+[1200, 6500, 2600, 3400, 3200, 8000, 8000].eachWithIndex { w, i -> stepsSheet.setColumnWidth(i, w) }
+stepsSheet.createFreezePane(0, 1)
+def sth = stepsSheet.createRow(0)
+["#", "Request", "Iteration", "Phase", "Step Type", "Input (target / value)", "Result"].eachWithIndex { h, i ->
+    def c = sth.createCell(i); c.setCellValue(h); c.setCellStyle(hdrStyle)
+}
+def stepRows = []
+results.each { entry ->
+    def fullResult = entry.fullResult
+    def resultOfCallRequest = { step ->
+        // Plain concatenation, not GString interpolation — see the "Plain concatenation, not
+        // Groovy GString interpolation" comment further down this same script for why.
+        if (step.status == 'error') ('ERROR: ' + (step.error ?: 'unknown error'))
+        else truncate(toJsonStr([subStatus: step.subStatus, responseStatus: step.subResponseStatus, responseBody: step.subResponseBody, error: step.subError]))
+    }
+    def addSteps = { iterLabel, pre, post ->
+        (pre ?: []).each { step ->
+            stepRows << [(entry.requestName ?: '').toString(), iterLabel.toString(), 'Pre-Request', 'Call Request',
+                truncate(toJsonStr([targetRequestId: step.requestId, body: step.inputBody, headers: step.inputHeaders])), resultOfCallRequest(step)]
+        }
+        (post ?: []).each { step ->
+            if (step.type == 'setVariable') {
+                stepRows << [(entry.requestName ?: '').toString(), iterLabel.toString(), 'Post-Response', 'Set Variable',
+                    (step.name ?: '').toString(), truncate(toJsonStr(step.value))]
+            } else {
+                stepRows << [(entry.requestName ?: '').toString(), iterLabel.toString(), 'Post-Response', 'Call Request',
+                    truncate(toJsonStr([targetRequestId: step.requestId, body: step.inputBody, headers: step.inputHeaders])), resultOfCallRequest(step)]
+            }
+        }
+    }
+    if (fullResult?.iterating == true) {
+        (fullResult.iterations ?: []).eachWithIndex { it, idx -> addSteps('Iteration ' + (idx + 1), it.preRequestLog, it.postResponseLog) }
+    } else {
+        addSteps('', fullResult?.preRequestLog, fullResult?.postResponseLog)
+    }
+}
+if (stepRows.isEmpty()) {
+    def emptyRow = stepsSheet.createRow(1)
+    emptyRow.createCell(1).setCellValue('(no pre-request or post-response steps ran across any request in this report)')
+} else {
+    stepRows.eachWithIndex { sr, i ->
+        def row = stepsSheet.createRow(i + 1)
+        row.createCell(0).setCellValue((i + 1) as double)
+        sr.eachWithIndex { val, ci ->
+            def cell = row.createCell(ci + 1); cell.setCellValue(val); cell.setCellStyle(wrapStyle)
+        }
+    }
+}
+
 // Checks Detail — one GROUP per check (per request/iteration): the check's own row, then its
 // conditions as indented, collapsible sub-rows right under it (Excel outline grouping) — every
 // condition shown, not just the failing ones, mirroring ResponseViewer.jsx's CheckEntry, which

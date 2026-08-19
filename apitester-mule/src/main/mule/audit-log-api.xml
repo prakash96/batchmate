@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- Log tailing over the syskm.AUDIT_LOG table — assumed to ALREADY EXIST in the connected
+         schema (this app doesn't create or own it, unlike every other syskm.* table in
+         schema.sql; it's someone/something else's audit trail we're just reading). Its column
+         set is NOT hardcoded anywhere here on purpose (per the ask: "columns on UI will not be
+         fixed as it will come in response of API") — get-audit-log-columns introspects the real
+         columns via ALL_TAB_COLUMNS every time, and get-audit-log-rows validates every query-param
+         filter against that SAME live column list before it's anywhere near a SQL string, so a
+         column being renamed/added/removed in AUDIT_LOG just works on both ends without a
+         redeploy. apitester-ui's AuditLogModal renders one filter box + one table column per
+         entry in get-audit-log-columns' response — nothing about the column set is baked into
+         the frontend either. -->
+
+    <flow name="get-audit-log-columns">
+        <http:listener config-ref="HTTP_Listener_config" path="/audit-log/columns" allowedMethods="GET" doc:name="GET /audit-log/columns"/>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Introspect AUDIT_LOG's real columns">
+            <db:sql><![CDATA[SELECT column_name, data_type FROM all_tab_columns WHERE owner = 'SYSKM' AND table_name = 'AUDIT_LOG' ORDER BY column_id]]></db:sql>
+        </db:select>
+        <choice doc:name="Table actually exists?">
+            <when expression="#[sizeOf(vars.rows) == 0]">
+                <set-variable variableName="httpStatus" value="#[404]"/>
+                <set-payload value="#[%dw 2.0 output application/json --- {error: 'AUDIT_LOG has no columns visible to this connection — does the table exist under the SYSKM schema?'}]"/>
+            </when>
+            <otherwise>
+                <!-- lower(...) — Mule's DB connector lowercases row-object keys coming out of
+                     "SELECT *" (same convention every other flow in this app already relies on,
+                     e.g. get-workspaces reading r.password_hash off a column that's UPPERCASE in
+                     Oracle's own catalog), but column_name here comes straight from
+                     ALL_TAB_COLUMNS' stored value, which is whatever case Oracle's catalog has
+                     it in (uppercase for an unquoted-identifier table, almost always). Without
+                     lowering it to match, apitester-ui's row[column.name] lookups would all
+                     silently come back undefined. -->
+                <ee:transform doc:name="Column list as JSON">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Strings
+output application/json
+---
+vars.rows map (r) -> { name: lower(r.column_name), "type": r.data_type }]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </otherwise>
+        </choice>
+    </flow>
+
+    <!-- Query params: one per column name to filter on (case-insensitive "contains", via
+         TO_CHAR(col) so it works uniformly whether the column is a NUMBER, VARCHAR2, or
+         DATE/TIMESTAMP — no per-type filter UI needed), plus three reserved control params:
+           orderBy    — column to sort by (falls back to the first real column if absent/invalid)
+           orderDir   — "ASC" or anything else treated as "DESC" (tailing wants newest first)
+           limit      — max rows (default 200, hard-capped at 2000 so a stray huge value can't
+                        pull the whole table into apitester-ui's memory)
+         Every OTHER query param is checked against the live column list from
+         get-audit-log-columns before it's allowed anywhere near the SQL text — an unrecognized
+         param name is silently ignored rather than erroring, so old filter UI state pointed at a
+         since-renamed column just stops filtering instead of breaking the whole request. Column
+         NAMES only ever get string-concatenated after that whitelist check; every filter VALUE
+         is a bind parameter, never concatenated — the one part of this flow that must never
+         change without keeping that guarantee. -->
+    <flow name="get-audit-log-rows">
+        <http:listener config-ref="HTTP_Listener_config" path="/audit-log/rows" allowedMethods="GET" doc:name="GET /audit-log/rows"/>
+        <db:select config-ref="Database_Config" target="colRows" doc:name="Load the real column list (for whitelisting + date-type detection)">
+            <db:sql><![CDATA[SELECT column_name, data_type FROM all_tab_columns WHERE owner = 'SYSKM' AND table_name = 'AUDIT_LOG' ORDER BY column_id]]></db:sql>
+        </db:select>
+        <choice doc:name="Table actually exists?">
+            <when expression="#[sizeOf(vars.colRows) == 0]">
+                <set-variable variableName="httpStatus" value="#[404]"/>
+                <set-payload value="#[%dw 2.0 output application/json --- {error: 'AUDIT_LOG has no columns visible to this connection — does the table exist under the SYSKM schema?'}]"/>
+            </when>
+            <otherwise>
+                <!-- filterEntries: every query param whose (uppercased) name is a real column, in
+                     encounter order, each given a short positional bind name (f0, f1, ...) — not
+                     bound directly on the column name since it might collide with a reserved SQL
+                     keyword. limitRaw uses try/orElse rather than "as Number default ..." —
+                     default only catches null, not a coercion error, and a malformed ?limit=abc
+                     would otherwise throw all the way out as a raw 500. The response's own
+                     "orderBy" is lower(orderBy) — needs to match get-audit-log-columns' own
+                     lowercased names for the frontend to recognize it (relevant when the
+                     requested column was invalid/absent and this fell back to the first one);
+                     the SQL text itself still uses the plain (uppercase) orderBy var. -->
+                <ee:transform doc:name="Build the filtered/sorted query plan (SQL text + bind params)">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Strings
+import * from dw::Runtime
+output application/json
+var validColumns = vars.colRows map (c) -> upper(c.column_name)
+var colTypes = vars.colRows reduce ((c, acc = {}) -> acc ++ {(upper(c.column_name)): upper(c.data_type)})
+fun isDateLike(col) = ((colTypes[col] default "") contains "DATE") or ((colTypes[col] default "") contains "TIMESTAMP")
+var reserved = ["ORDERBY", "ORDERDIR", "LIMIT"]
+var qp = attributes.queryParams default {}
+var filterEntries = (namesOf(qp) filter ((k) -> (validColumns contains upper(k)) and !(reserved contains upper(k))))
+    map ((k, i) -> { column: upper(k), bindName: "f" ++ (i as String), value: qp[k] as String })
+var whereSql = if (isEmpty(filterEntries)) ""
+    else " WHERE " ++ ((filterEntries map (f) -> "UPPER(TO_CHAR(" ++ f.column ++ ")) LIKE UPPER(:" ++ f.bindName ++ ")") joinBy " AND ")
+var orderByRaw = upper(qp.orderBy default "")
+var orderBy = if (validColumns contains orderByRaw) orderByRaw else validColumns[0]
+var orderDir = if (upper(qp.orderDir default "DESC") == "ASC") "ASC" else "DESC"
+var limitRaw = try(() -> (qp.limit default "200") as Number) orElse 200
+var limitVal = if (limitRaw > 2000) 2000 else (if (limitRaw < 1) 1 else limitRaw)
+// Explicit column list, not "SELECT *" — a date/timestamp column fetched via "SELECT *" comes
+// back from Oracle's JDBC driver as its own proprietary internal representation (a byte-stream
+// wrapper, not a usable date) rather than a plain value; TO_CHAR-ing it in the SQL itself makes
+// Oracle do that conversion before the value ever reaches the driver boundary, sidestepping the
+// problem entirely. Every column keeps its own name as its alias either way, so the result set's
+// column labels stay exactly the real column names (still Oracle's native uppercase, matching
+// validColumns) for the re-keying step below to work from.
+var selectCols = validColumns map ((col) -> if (isDateLike(col)) ("TO_CHAR(" ++ col ++ ", 'YYYY-MM-DD HH24:MI:SS.FF3') " ++ col) else col)
+---
+{
+    sql: "SELECT " ++ (selectCols joinBy ", ") ++ " FROM syskm.audit_log" ++ whereSql ++ " ORDER BY " ++ orderBy ++ " " ++ orderDir ++ " FETCH FIRST :alLimit ROWS ONLY",
+    params: (filterEntries reduce ((f, acc = {}) -> acc ++ {(f.bindName): "%" ++ f.value ++ "%"})) ++ {alLimit: limitVal},
+    orderBy: lower(orderBy),
+    orderDir: orderDir,
+    columnNames: validColumns
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <set-variable variableName="alPlan" value="#[payload]" doc:name="snapshot the plan before the select below clobbers payload"/>
+                <db:select config-ref="Database_Config" target="rows" doc:name="Run the built query">
+                    <db:sql><![CDATA[#[vars.alPlan.sql]]]></db:sql>
+                    <db:input-parameters><![CDATA[#[vars.alPlan.params]]]></db:input-parameters>
+                </db:select>
+                <!-- Re-key every row from Oracle's native uppercase column names to lowercase —
+                     matching get-audit-log-columns' own lowercased names, which is what
+                     apitester-ui's row[column.name] lookups are keyed on. r[col] is a dynamic
+                     selector using the REAL (uppercase) key the driver actually produced, from
+                     alPlan.columnNames computed above — not a guess. -->
+                <ee:transform doc:name="Rows as JSON (re-keyed to lowercase column names)">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Strings
+output application/json
+---
+{
+    orderBy: vars.alPlan.orderBy,
+    orderDir: vars.alPlan.orderDir,
+    rows: vars.rows map ((r) -> (vars.alPlan.columnNames reduce ((col, acc = {}) -> acc ++ {(lower(col)): r[col]})))
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </otherwise>
+        </choice>
+    </flow>
+
+</mule>
