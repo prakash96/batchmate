@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { useRunAllStore } from '../store/runAllStore';
 import { C, btnStyle, primaryBtnStyle } from '../theme';
 import ResponseViewer from './ResponseViewer';
+import { downloadRunAllExcel } from '../utils/runAllExcel';
 
 /** Shows a collection's "Run All" consolidated report — the last persisted one on open (or
  *  triggers+shows a fresh run when opened via the "▶ Run All" sidebar button, see autoRun).
  *  Each main request's row expands into the SAME ResponseViewer used for a single Send — its
  *  stored "fullResult" is exactly what RequestExecutionService.run() returned for that request. */
 export default function RunAllReportModal({ collectionId, collectionName, onClose, autoRun }) {
-    const { runAll, fetchLastReport, downloadExcel } = useRunAllStore();
+    const { runAll, fetchLastReport } = useRunAllStore();
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
     const [running, setRunning] = useState(false);
+    const [exporting, setExporting] = useState(false);
     const [error, setError] = useState(null);
     const [openIndex, setOpenIndex] = useState(null);
 
@@ -51,8 +53,12 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
         }
     };
 
+    // Built entirely client-side (ExcelJS) from the SAME report object already loaded above —
+    // no backend round trip, see utils/runAllExcel.js.
     const doDownload = async () => {
-        try { await downloadExcel(collectionId); } catch (e) { setError(e.message); }
+        if (!report) return;
+        setExporting(true);
+        try { await downloadRunAllExcel(report); } catch (e) { setError(e.message); } finally { setExporting(false); }
     };
 
     const results = report?.results || [];
@@ -102,7 +108,7 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
                                 </div>
                                 <div style={{ fontSize: 10, color: C.textFaint, marginTop: 4 }}>{passPct}% passed</div>
                             </div>
-                            <button onClick={doDownload} style={btnStyle}>⬇ Download Excel</button>
+                            <button onClick={doDownload} style={btnStyle} disabled={exporting}>{exporting ? 'Exporting…' : '⬇ Download Excel'}</button>
                         </div>
 
                         <div>

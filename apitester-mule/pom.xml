@@ -13,21 +13,26 @@
 		shapes) as the Spring Boot version, so apitester-ui can point at either interchangeably.
 		No Camel here: the outbound HTTP call is Mule's own HTTP Request operation (TLS insecure —
 		see global-config.xml's tls:context), not an embedded integration framework. Persistence is
-		Oracle ONLY — the only database this app knows how to talk to, both for its own storage
-		(collections/requests/run logs/global vars/connections/reports — see global-config.xml's
-		Database_Config and schema.sql) and for the "Test Connection" feature (connections-api.xml).
-		No H2/PostgreSQL/MySQL support anywhere in this app.
+		Oracle ONLY — the only database this app knows how to talk to (collections/requests/run
+		logs/global vars/reports — see global-config.xml's Database_Config and schema.sql). No
+		H2/PostgreSQL/MySQL support anywhere in this app.
 
-		${...} templating (the same convention apitester-app's stored request JSON already uses —
-		${vars.x}, ${body.field}, ${new Date()}, etc.) is evaluated via the Scripting module
-		(engine="js", GraalVM JS) — see templating.xml.
+		Deliberately NOT here: mule-json-module (JSON is handled natively by DataWeave —
+		output/read "application/json" — nothing in this app ever used the JSON module's own
+		operations), and the Scripting module / GraalVM JS / Groovy / Apache POI (all four were
+		here at one point: GraalVM JS for a since-removed "${...}"-via-JavaScript templating
+		engine, replaced with pure DataWeave — see templating.xml's "$(...)" syntax; Groovy+POI
+		for Run All's Excel export, replaced with a client-side ExcelJS build in apitester-ui — see
+		utils/runAllExcel.js. Don't re-add any of these without a real new user for them; grep the
+		whole src/main/mule tree for the relevant namespace/engine first to confirm there's
+		nothing this comment forgot about.
 	-->
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<app.runtime>4.6.16</app.runtime>
 		<mule.maven.plugin.version>4.3.0</mule.maven.plugin.version>
-		
+
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
@@ -39,70 +44,14 @@
 			<version>1.16.0</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
-		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-json-module</artifactId>
-			<version>2.5.5</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<!-- No dedicated "Java module" connector on the public MuleSoft repo (only the private,
-			 credential-gated Anypoint Exchange one, which isn't reachable here) — the Scripting
-			 module fills that gap instead: <scripting:execute engine="js"> runs GraalVM JS
-			 directly (see js-scriptengine below), which is what evaluates every "${...}" template
-			 already stored in apitester-app's request JSON, with no custom Java class needed. -->
-		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-scripting-module</artifactId>
-			<version>2.1.1</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
 
-		<!-- Oracle JDBC driver — the ONLY database this app persists to (app storage, via
-			 global-config.xml's Database_Config) or tests connections against (connections-api.xml's
-			 test-connection flow, via raw JDBC through a Groovy script — Mule's DB connector config
-			 is static/design-time only, so testing a connection's config at request time needs plain
-			 JDBC instead). Publicly available on Maven Central, no licensed/authenticated repo needed. -->
+		<!-- Oracle JDBC driver — the ONLY database this app persists to, via global-config.xml's
+			 Database_Config. Publicly available on Maven Central, no licensed/authenticated
+			 repo needed. -->
 		<dependency>
 			<groupId>com.oracle.database.jdbc</groupId>
 			<artifactId>ojdbc11</artifactId>
 			<version>23.26.3.0.0</version>
-		</dependency>
-
-		<!-- GraalVM JS — registers the "js" JSR-223 engine the Scripting module invokes for
-			 ${...} template evaluation (see mule-scripting-module's comment above). -->
-		<dependency>
-			<groupId>org.graalvm.js</groupId>
-			<artifactId>js</artifactId>
-			<version>22.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.graalvm.js</groupId>
-			<artifactId>js-scriptengine</artifactId>
-			<version>22.3.1</version>
-		</dependency>
-
-		<!-- Groovy — the Scripting module's "groovy" engine, used ONLY for Run All's Excel export
-			 (excel-report.groovy): POI's object-construction-heavy API reads far better as real
-			 Groovy code than as DataWeave, and Groovy runs on the JVM so it can use POI directly. -->
-		<dependency>
-			<groupId>org.apache.groovy</groupId>
-			<artifactId>groovy</artifactId>
-			<version>4.0.33</version>
-		</dependency>
-		<!-- Registers "groovy" as a JSR-223 ScriptEngine name (the plain groovy jar alone doesn't) —
-			 needed for the Scripting module's engine="groovy" to resolve at all. -->
-		<dependency>
-			<groupId>org.apache.groovy</groupId>
-			<artifactId>groovy-jsr223</artifactId>
-			<version>4.0.33</version>
-		</dependency>
-
-		<!-- Apache POI — Run All consolidated report xlsx export, same approach/version as
-			 apitester-app's own ExcelReportService. -->
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>5.2.5</version>
 		</dependency>
 
 		<dependency>
@@ -130,26 +79,6 @@
 						<sharedLibrary>
 							<groupId>com.oracle.database.jdbc</groupId>
 							<artifactId>ojdbc11</artifactId>
-						</sharedLibrary>
-						<sharedLibrary>
-							<groupId>org.graalvm.js</groupId>
-							<artifactId>js</artifactId>
-						</sharedLibrary>
-						<sharedLibrary>
-							<groupId>org.graalvm.js</groupId>
-							<artifactId>js-scriptengine</artifactId>
-						</sharedLibrary>
-						<sharedLibrary>
-							<groupId>org.apache.poi</groupId>
-							<artifactId>poi-ooxml</artifactId>
-						</sharedLibrary>
-						<sharedLibrary>
-							<groupId>org.apache.groovy</groupId>
-							<artifactId>groovy</artifactId>
-						</sharedLibrary>
-						<sharedLibrary>
-							<groupId>org.apache.groovy</groupId>
-							<artifactId>groovy-jsr223</artifactId>
 						</sharedLibrary>
 					</sharedLibraries>
 					<classifier>mule-application</classifier>

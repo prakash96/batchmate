@@ -23,6 +23,8 @@ export const useRunAllStore = create(() => ({
         return report;
     },
 
+    // Excel export is now client-side (see utils/runAllExcel.js) — this report JSON already has
+    // everything the old backend Excel endpoint used to build; no separate download call needed.
     fetchLastReport: async (collectionId) => {
         const res = await fetch(`${BASE_URL}/collections/${collectionId}/run-all/last`);
         if (res.status === 404) return null;
@@ -30,22 +32,5 @@ export const useRunAllStore = create(() => ({
         const report = await res.json();
         applyStatuses(report);
         return report;
-    },
-
-    downloadExcel: async (collectionId) => {
-        const res = await fetch(`${BASE_URL}/collections/${collectionId}/run-all/last/excel`);
-        if (!res.ok) throw new Error(`Excel download failed (${res.status})`);
-        const blob = await res.blob();
-        const disposition = res.headers.get('Content-Disposition') || '';
-        const match = /filename="([^"]+)"/.exec(disposition);
-        const filename = match ? match[1] : 'run-all-report.xlsx';
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
     },
 }));
