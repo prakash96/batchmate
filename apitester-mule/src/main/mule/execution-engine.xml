@@ -71,6 +71,7 @@
         <set-variable variableName="rsGlobalVars" value="#[output application/json --- vars.globalRows reduce ((row, acc = {}) -> acc ++ {(row.name): row.value})]" doc:name="globalVars map"/>
         <set-variable variableName="rsCallerBody" value="#[null]" doc:name="no caller body"/>
         <set-variable variableName="rsCallerHeaders" value="#[{}]" doc:name="no caller headers"/>
+        <set-variable variableName="rsCallerVars" value="#[{}]" doc:name="no caller vars — genuine top-level call, see run-single's own rsVars-seeding comment"/>
 
         <db:select config-ref="Database_Config" target="reqRows" doc:name="Select request (for inputDataSets/inputSource check)">
             <db:sql>SELECT input_data_sets_json, request_json FROM syskm.requests WHERE id = :id</db:sql>
@@ -93,6 +94,7 @@
                     <set-variable variableName="rsCallerHeaders" value="#[output application/json --- (payload.headers default []) filter (h) -> (h.enabled default true) reduce ((h, acc = {}) -> acc ++ {(h.key): h.value})]" doc:name="seed headers (MultiMap-style, like attributes.headers — ++ on DataWeave objects appends rather than overwrites, so two rows with the same key survive as repeated entries; kept application/json, never coerced through application/java, which would collapse duplicate keys to last-value-wins)"/>
                     <set-variable variableName="rsChain" value="#[[]]" doc:name="fresh cycle-guard chain per iteration (mirrors Java's new LinkedHashSet&lt;&gt;() per entry) — run-single appends to this var in place, so without resetting it here iteration 2+ always trips the cycle guard"/>
                     <set-variable variableName="rsDepth" value="#[0]" doc:name="fresh depth per iteration"/>
+                    <set-variable variableName="rsCallerVars" value="#[{}]" doc:name="fresh — no caller vars for a top-level iteration"/>
                     <flow-ref name="run-single" doc:name="Run one iteration"/>
                     <set-variable variableName="iterations" value="#[(vars.iterations default []) ++ [(vars.rsResult ++ {iterationIndex: sizeOf(vars.iterations default [])})]]" doc:name="accumulate iteration"/>
                 </foreach>
@@ -150,7 +152,16 @@ output application/json
             <db:sql>SELECT variables_json FROM syskm.collections WHERE id = :id</db:sql>
             <db:input-parameters><![CDATA[#[{id: (vars.rsRows[0]).collection_id default ''}]]]></db:input-parameters>
         </db:select>
-        <set-variable variableName="rsVars" value="#[output application/json --- (vars.rsGlobalVars default {}) ++ (read((vars.rsColRows[0]).variables_json default '{}', 'application/json')) ++ (vars.overrideVars default {}) ++ {throwOff: 'false'}]" doc:name="seed vars (global -> collection -> override)"/>
+        <!-- global -> collection -> caller -> override. "caller" (vars.rsCallerVars, {} for a
+             genuine top-level call — see run-request) is the CALLING request's own CURRENT vars
+             floor at the moment it reached this Call Request step, deliberately layered ABOVE
+             this callee's own collection defaults: a variable set earlier in the chain (an
+             earlier pre-request Call Request's response, or a Set Variable step) needs to reach
+             a LATER nested Call Request's own templating too, not just the outer request's own
+             body/url/headers — without this, only the OUTER request ever saw it, since
+             run-nested-request only ever passed rsGlobalVars down, never the caller's current
+             rsVars. -->
+        <set-variable variableName="rsVars" value="#[output application/json --- (vars.rsGlobalVars default {}) ++ (read((vars.rsColRows[0]).variables_json default '{}', 'application/json')) ++ (vars.rsCallerVars default {}) ++ (vars.overrideVars default {}) ++ {throwOff: 'false'}]" doc:name="seed vars (global -> collection -> caller -> override)"/>
 
         <set-variable variableName="preChainBody" value="#[vars.rsCallerBody]" doc:name="preChain body"/>
         <set-variable variableName="preChainHeaders" value="#[vars.rsCallerHeaders default {}]" doc:name="preChain headers"/>
@@ -330,7 +341,7 @@ output application/json
             postResponseLog: vars.postResponseLog, checks: vars.checks, rsResult: vars.rsResult,
             requestId: vars.requestId, overrideVars: vars.overrideVars,
             rsCallerBody: vars.rsCallerBody, rsCallerHeaders: vars.rsCallerHeaders,
-            rsWorkspaceId: vars.rsWorkspaceId
+            rsCallerVars: vars.rsCallerVars, rsWorkspaceId: vars.rsWorkspaceId
         }]" doc:name="snapshot everything run-single (and what it calls) could write"/>
 
         <set-variable variableName="requestId" value="#[vars.crTargetId]" doc:name="the nested call's own target"/>
@@ -341,6 +352,7 @@ output application/json
              loopback's X-At-Global-Vars header always just forwarded the caller's own floor. -->
         <set-variable variableName="rsCallerBody" value="#[vars.preChainBody]" doc:name="what the nested call's OWN pre-request chain starts from"/>
         <set-variable variableName="rsCallerHeaders" value="#[vars.preChainHeaders default {}]"/>
+        <set-variable variableName="rsCallerVars" value="#[vars.rsVars]" doc:name="the CALLER's current vars floor, read here BEFORE it's touched below — see run-single's own rsVars-seeding comment for why this needs to flow down to a nested call too, not just rsGlobalVars"/>
 
         <!-- on-error-propagate, not on-error-continue — the restore below must run whether
              run-single succeeds OR throws uncaught (e.g. the depth/cycle guard, or anything else
@@ -395,6 +407,7 @@ output application/json
         <set-variable variableName="overrideVars" value="#[vars.nrSaved.overrideVars]"/>
         <set-variable variableName="rsCallerBody" value="#[vars.nrSaved.rsCallerBody]"/>
         <set-variable variableName="rsCallerHeaders" value="#[vars.nrSaved.rsCallerHeaders]"/>
+        <set-variable variableName="rsCallerVars" value="#[vars.nrSaved.rsCallerVars]"/>
         <set-variable variableName="rsWorkspaceId" value="#[vars.nrSaved.rsWorkspaceId]"/>
         <set-variable variableName="rsVars" value="#[vars.nrSaved.rsVars]" doc:name="plain restore here — run-nested-request's own success path overrides this again with the merged version right after calling this flow"/>
     </flow>
