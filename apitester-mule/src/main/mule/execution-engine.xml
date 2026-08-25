@@ -15,17 +15,19 @@
         Mirrors RequestExecutionService.run()'s two-shape entry point (public: checks Input Data
         Set iteration; private: the actual recursive per-run logic) — see run-request-http below.
 
-        RECURSION STRATEGY: Mule flows have no native call-stack scoping (a <flow-ref> shares the
-        SAME event/variables as its caller, so nested calls would collide on variable names with no
-        clean way to save/restore a "stack frame"). Rather than hand-roll fragile stack-indexed
-        variable juggling that can't be verified without a live Mule runtime, a Call Request step
-        (pre-request or post-response) invokes the callee via a LOOPBACK http:request back to this
-        same app's own /requests/{id}/run endpoint — depth, the visited-id chain (cycle guard), and
-        the global-vars floor travel as request headers (X-At-Depth/X-At-Chain/X-At-Global-Vars),
-        the caller's outgoing body/headers as X-At-Caller-Body/X-At-Caller-Headers. Each nested call
-        is then a genuinely fresh, isolated Mule event — the SAME isolation an inbound HTTP request
-        always gets — which eliminates the whole class of variable-collision bugs a shared-stack
-        approach would risk, at the cost of a (cheap, same-process) loopback HTTP hop per nested call.
+        RECURSION STRATEGY: a Call Request step (pre-request or post-response) invokes the callee
+        via <flow-ref name="run-single"> directly — NOT a loopback http:request back to this same
+        app's own /requests/{id}/run endpoint, which is what this used to do. flow-ref shares the
+        SAME event/variables as its caller (no native call-stack scoping the way a fresh inbound
+        HTTP request gets), so run-nested-request (below call-request-step) explicitly
+        snapshots every variable run-single/eval-template/run-assertion-step/run-compare-step
+        could possibly write, before the nested run-single, and restores all of them after —
+        rsVars is the one exception, deliberately MERGED (not simply restored) with the callee's
+        own final vars, matching a real inter-request "variable floor" the same way the old
+        loopback's response body carried subVars back up. Depth/cycle guard (rsDepth/rsChain) and
+        the global-vars floor (rsGlobalVars) are still exactly what they were, just passed as
+        plain flow variables now instead of X-At-Depth/X-At-Chain/X-At-Global-Vars headers on a
+        real HTTP call — same semantics, no network hop, no separate Mule event per nested call.
 
         NOT YET IMPLEMENTED here (see chat for the full status writeup): jsoncompare/textcompare/
         dbcheck postResponse step types, and the "wait" step. Call Request, Set Variable, and
@@ -42,73 +44,61 @@
     -->
 
     <!-- Public entry — matches requests-api.xml's run-request-http, which sets vars.requestId/
-         vars.overrideVars from the inbound HTTP request before calling this. Branches on whether
-         attributes.headers['x-at-chain'] is present: absent = a genuine top-level call (checks
-         Input Data Set iteration, exactly like RequestExecutionService.run()'s public overload);
-         present = a nested loopback call from a Call Request step (skips iteration entirely — "a
-         nested Call Request always just chains the previous response, regardless of the callee's
-         own Input setting", per the original design). -->
+         vars.overrideVars from the inbound HTTP request before calling this. Every call reaching
+         this flow is now a genuine top-level call (a Call Request step no longer loops back
+         through here at all — see run-nested-request, which flow-refs run-single directly and
+         skips this flow, Input Data Set iteration included, entirely — "a nested Call Request
+         always just chains the previous response, regardless of the callee's own Input setting",
+         per the original design). -->
     <flow name="run-request">
-        <choice doc:name="Nested loopback call?">
-            <when expression="#[attributes.headers['x-at-chain'] != null]">
-                <set-variable variableName="rsDepth" value="#[output application/json --- attributes.headers['x-at-depth'] as Number]" doc:name="depth from header"/>
-                <set-variable variableName="rsChain" value="#[output application/json --- attributes.headers['x-at-chain'] splitBy ',']" doc:name="chain from header"/>
-                <set-variable variableName="rsGlobalVars" value="#[output application/json --- read(attributes.headers['x-at-global-vars'] default '{}', 'application/json')]" doc:name="globalVars from header"/>
-                <set-variable variableName="rsCallerBody" value="#[output application/json --- attributes.headers['x-at-caller-body']]" doc:name="callerBody from header"/>
-                <set-variable variableName="rsCallerHeaders" value="#[output application/json --- read(attributes.headers['x-at-caller-headers'] default '{}', 'application/json')]" doc:name="callerHeaders from header"/>
-                <flow-ref name="run-single" doc:name="Run once (nested)"/>
-                <set-payload value="#[vars.rsResult]" doc:name="Result as payload (run-single's own last processor is a db:insert with no target, which otherwise leaves payload as its StatementResult)"/>
-            </when>
-            <otherwise>
-                <!-- Genuine top-level call: resolve this request's own workspace (via its
-                     collection) so global vars come from the RIGHT workspace's set, not a flat
-                     shared table (see schema.sql's global_vars) — then load them once, seed
-                     depth 0 / empty chain. A request whose collection has no workspace
-                     (unassigned) resolves rsWorkspaceId to null; "workspace_id = :wsId" then
-                     never matches (global_vars.workspace_id is NOT NULL), so it correctly gets
-                     no global vars rather than erroring. -->
-                <db:select config-ref="Database_Config" target="reqWsRows" doc:name="Select this request's workspace">
-                    <db:sql><![CDATA[SELECT c.workspace_id FROM syskm.requests r JOIN syskm.collections c ON r.collection_id = c.id WHERE r.id = :id]]></db:sql>
-                    <db:input-parameters><![CDATA[#[{id: vars.requestId}]]]></db:input-parameters>
-                </db:select>
-                <set-variable variableName="rsWorkspaceId" value="#[(vars.reqWsRows[0]).workspace_id default null]" doc:name="this request's workspace"/>
-                <db:select config-ref="Database_Config" target="globalRows" doc:name="Select this workspace's global vars">
-                    <db:sql><![CDATA[SELECT name, value FROM syskm.global_vars WHERE workspace_id = :wsId]]></db:sql>
-                    <db:input-parameters><![CDATA[#[{wsId: vars.rsWorkspaceId}]]]></db:input-parameters>
-                </db:select>
-                <set-variable variableName="rsDepth" value="#[0]" doc:name="depth 0"/>
-                <set-variable variableName="rsChain" value="#[[]]" doc:name="empty chain"/>
-                <set-variable variableName="rsGlobalVars" value="#[output application/json --- vars.globalRows reduce ((row, acc = {}) -> acc ++ {(row.name): row.value})]" doc:name="globalVars map"/>
-                <set-variable variableName="rsCallerBody" value="#[null]" doc:name="no caller body"/>
-                <set-variable variableName="rsCallerHeaders" value="#[{}]" doc:name="no caller headers"/>
+        <!-- Resolve this request's own workspace (via its collection) so global vars come from
+             the RIGHT workspace's set, not a flat shared table (see schema.sql's global_vars) —
+             then load them once, seed depth 0 / empty chain. A request whose collection has no
+             workspace (unassigned) resolves rsWorkspaceId to null; "workspace_id = :wsId" then
+             never matches (global_vars.workspace_id is NOT NULL), so it correctly gets no global
+             vars rather than erroring. -->
+        <db:select config-ref="Database_Config" target="reqWsRows" doc:name="Select this request's workspace">
+            <db:sql><![CDATA[SELECT c.workspace_id FROM syskm.requests r JOIN syskm.collections c ON r.collection_id = c.id WHERE r.id = :id]]></db:sql>
+            <db:input-parameters><![CDATA[#[{id: vars.requestId}]]]></db:input-parameters>
+        </db:select>
+        <set-variable variableName="rsWorkspaceId" value="#[(vars.reqWsRows[0]).workspace_id default null]" doc:name="this request's workspace"/>
+        <db:select config-ref="Database_Config" target="globalRows" doc:name="Select this workspace's global vars">
+            <db:sql><![CDATA[SELECT name, value FROM syskm.global_vars WHERE workspace_id = :wsId]]></db:sql>
+            <db:input-parameters><![CDATA[#[{wsId: vars.rsWorkspaceId}]]]></db:input-parameters>
+        </db:select>
+        <set-variable variableName="rsDepth" value="#[0]" doc:name="depth 0"/>
+        <set-variable variableName="rsChain" value="#[[]]" doc:name="empty chain"/>
+        <set-variable variableName="rsGlobalVars" value="#[output application/json --- vars.globalRows reduce ((row, acc = {}) -> acc ++ {(row.name): row.value})]" doc:name="globalVars map"/>
+        <set-variable variableName="rsCallerBody" value="#[null]" doc:name="no caller body"/>
+        <set-variable variableName="rsCallerHeaders" value="#[{}]" doc:name="no caller headers"/>
 
-                <db:select config-ref="Database_Config" target="reqRows" doc:name="Select request (for inputDataSets/inputSource check)">
-                    <db:sql>SELECT input_data_sets_json, request_json FROM syskm.requests WHERE id = :id</db:sql>
-                    <db:input-parameters><![CDATA[#[{id: vars.requestId}]]]></db:input-parameters>
-                </db:select>
-                <set-variable variableName="dataSets" value="#[read((vars.reqRows[0]).input_data_sets_json default '[]', 'application/json')]" doc:name="dataSets"/>
-                <set-variable variableName="reqDef" value="#[read((vars.reqRows[0]).request_json default '{}', 'application/json')]" doc:name="reqDef"/>
+        <db:select config-ref="Database_Config" target="reqRows" doc:name="Select request (for inputDataSets/inputSource check)">
+            <db:sql>SELECT input_data_sets_json, request_json FROM syskm.requests WHERE id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: vars.requestId}]]]></db:input-parameters>
+        </db:select>
+        <set-variable variableName="dataSets" value="#[read((vars.reqRows[0]).input_data_sets_json default '[]', 'application/json')]" doc:name="dataSets"/>
+        <set-variable variableName="reqDef" value="#[read((vars.reqRows[0]).request_json default '{}', 'application/json')]" doc:name="reqDef"/>
 
-                <choice doc:name="Iterating?">
-                    <when expression="#[vars.reqDef.inputSource == 'dataset' and sizeOf(vars.dataSets) > 0]">
-                        <foreach collection="#[vars.dataSets]" doc:name="For each Input Data Set entry">
-                            <set-variable variableName="etTemplate" value="#[payload.body default '']" doc:name="entry body template"/>
-                            <set-variable variableName="etRaw" value="#[false]" doc:name="stringify"/>
-                            <set-variable variableName="etVars" value="#[vars.overrideVars default {}]" doc:name="entry vars"/>
-                            <set-variable variableName="etBody" value="#[null]" doc:name="entry has no previous body"/>
-                            <set-variable variableName="etHeaders" value="#[{}]" doc:name="entry has no previous headers"/>
-                            <set-variable variableName="etStatusCode" value="#[null]" doc:name="no response yet at this point"/>
-                            <flow-ref name="eval-template" doc:name="Evaluate entry body"/>
-                            <set-variable variableName="rsCallerBody" value="#[vars.etResult]" doc:name="seed body"/>
-                            <set-variable variableName="rsCallerHeaders" value="#[output application/json --- (payload.headers default []) filter (h) -> (h.enabled default true) reduce ((h, acc = {}) -> acc ++ {(h.key): h.value})]" doc:name="seed headers (MultiMap-style, like attributes.headers — ++ on DataWeave objects appends rather than overwrites, so two rows with the same key survive as repeated entries; kept application/json, never coerced through application/java, which would collapse duplicate keys to last-value-wins)"/>
-                            <set-variable variableName="rsChain" value="#[[]]" doc:name="fresh cycle-guard chain per iteration (mirrors Java's new LinkedHashSet&lt;&gt;() per entry) — run-single appends to this var in place, so without resetting it here iteration 2+ always trips the cycle guard"/>
-                            <set-variable variableName="rsDepth" value="#[0]" doc:name="fresh depth per iteration"/>
-                            <flow-ref name="run-single" doc:name="Run one iteration"/>
-                            <set-variable variableName="iterations" value="#[(vars.iterations default []) ++ [(vars.rsResult ++ {iterationIndex: sizeOf(vars.iterations default [])})]]" doc:name="accumulate iteration"/>
-                        </foreach>
-                        <ee:transform doc:name="Wrap as iterating batch">
-                            <ee:message>
-                                <ee:set-payload><![CDATA[%dw 2.0
+        <choice doc:name="Iterating?">
+            <when expression="#[vars.reqDef.inputSource == 'dataset' and sizeOf(vars.dataSets) > 0]">
+                <foreach collection="#[vars.dataSets]" doc:name="For each Input Data Set entry">
+                    <set-variable variableName="etTemplate" value="#[payload.body default '']" doc:name="entry body template"/>
+                    <set-variable variableName="etRaw" value="#[false]" doc:name="stringify"/>
+                    <set-variable variableName="etVars" value="#[vars.overrideVars default {}]" doc:name="entry vars"/>
+                    <set-variable variableName="etBody" value="#[null]" doc:name="entry has no previous body"/>
+                    <set-variable variableName="etHeaders" value="#[{}]" doc:name="entry has no previous headers"/>
+                    <set-variable variableName="etStatusCode" value="#[null]" doc:name="no response yet at this point"/>
+                    <flow-ref name="eval-template" doc:name="Evaluate entry body"/>
+                    <set-variable variableName="rsCallerBody" value="#[vars.etResult]" doc:name="seed body"/>
+                    <set-variable variableName="rsCallerHeaders" value="#[output application/json --- (payload.headers default []) filter (h) -> (h.enabled default true) reduce ((h, acc = {}) -> acc ++ {(h.key): h.value})]" doc:name="seed headers (MultiMap-style, like attributes.headers — ++ on DataWeave objects appends rather than overwrites, so two rows with the same key survive as repeated entries; kept application/json, never coerced through application/java, which would collapse duplicate keys to last-value-wins)"/>
+                    <set-variable variableName="rsChain" value="#[[]]" doc:name="fresh cycle-guard chain per iteration (mirrors Java's new LinkedHashSet&lt;&gt;() per entry) — run-single appends to this var in place, so without resetting it here iteration 2+ always trips the cycle guard"/>
+                    <set-variable variableName="rsDepth" value="#[0]" doc:name="fresh depth per iteration"/>
+                    <flow-ref name="run-single" doc:name="Run one iteration"/>
+                    <set-variable variableName="iterations" value="#[(vars.iterations default []) ++ [(vars.rsResult ++ {iterationIndex: sizeOf(vars.iterations default [])})]]" doc:name="accumulate iteration"/>
+                </foreach>
+                <ee:transform doc:name="Wrap as iterating batch">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -119,14 +109,12 @@ output application/json
     durationMs: sum(vars.iterations map (i) -> (i.durationMs default 0)),
     iterations: vars.iterations
 }]]></ee:set-payload>
-                            </ee:message>
-                        </ee:transform>
-                    </when>
-                    <otherwise>
-                        <flow-ref name="run-single" doc:name="Run once"/>
-                        <set-payload value="#[vars.rsResult]" doc:name="Result as payload"/>
-                    </otherwise>
-                </choice>
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <flow-ref name="run-single" doc:name="Run once"/>
+                <set-payload value="#[vars.rsResult]" doc:name="Result as payload"/>
             </otherwise>
         </choice>
     </flow>
@@ -306,56 +294,139 @@ output application/json
         </db:insert>
     </flow>
 
+    <!-- Runs ONE target request as a genuinely isolated nested call, via <flow-ref name="run-single">
+         directly — NOT run-request (skips its Input Data Set iteration check entirely, same as
+         the old loopback always did: "a nested Call Request always just chains the previous
+         response, regardless of the callee's own Input setting"), and NOT an HTTP loopback either
+         anymore. Reads vars.crTargetId (set by call-request-step) plus the ambient
+         rsDepth/rsChain/rsGlobalVars/preChainBody/preChainHeaders already correctly populated at
+         this point in the CALLER's own run-single execution.
+
+         flow-ref shares the caller's entire variable scope — there's no separate Mule event, no
+         call-stack scoping, the way a real inbound HTTP request (the old loopback) got for free.
+         So every variable run-single (and everything IT calls: eval-template, run-assertion-step,
+         run-compare-step) could possibly write gets explicitly snapshotted into vars.nrSaved
+         BEFORE the nested run-single, and restored from it after — otherwise the nested call
+         would silently clobber the CALLER's own in-progress state (its OWN rsRequestConfig,
+         finalBody, checks, postResponseLog, ...) and the caller couldn't safely continue once
+         this returns. rsVars is the one deliberate exception: instead of a plain restore, the
+         restored caller value is MERGED with the callee's own final vars (only on success) —
+         this is what lets a variable a CALLED request's post-response sets flow back up into the
+         caller, same as the old loopback's response body carrying subVars back up used to.
+
+         Leaves the nested run's full result in vars.crNestedResult (call-request-step reads it
+         exactly like it used to read the loopback response's parsed JSON body — same shape,
+         run-single's own rsResult always has status/error/runId/response/vars/etc.). -->
+    <flow name="run-nested-request">
+        <set-variable variableName="nrSaved" value="#[output application/java --- {
+            rsStartMs: vars.rsStartMs, rsChain: vars.rsChain, rsDepth: vars.rsDepth,
+            rsRows: vars.rsRows, rsRequestName: vars.rsRequestName, rsPreRequest: vars.rsPreRequest,
+            rsRequestConfig: vars.rsRequestConfig, rsPostResponse: vars.rsPostResponse,
+            rsColRows: vars.rsColRows, rsVars: vars.rsVars,
+            preChainBody: vars.preChainBody, preChainHeaders: vars.preChainHeaders, preRequestLog: vars.preRequestLog,
+            finalBody: vars.finalBody, finalHeaders: vars.finalHeaders, finalUrl: vars.finalUrl,
+            rsResponse: vars.rsResponse, rsStatus: vars.rsStatus, rsError: vars.rsError,
+            postChainBody: vars.postChainBody, postChainHeaders: vars.postChainHeaders,
+            postResponseLog: vars.postResponseLog, checks: vars.checks, rsResult: vars.rsResult,
+            requestId: vars.requestId, overrideVars: vars.overrideVars,
+            rsCallerBody: vars.rsCallerBody, rsCallerHeaders: vars.rsCallerHeaders,
+            rsWorkspaceId: vars.rsWorkspaceId
+        }]" doc:name="snapshot everything run-single (and what it calls) could write"/>
+
+        <set-variable variableName="requestId" value="#[vars.crTargetId]" doc:name="the nested call's own target"/>
+        <set-variable variableName="overrideVars" value="#[{}]" doc:name="no override vars for a nested call, matching the old loopback's bodyless POST"/>
+        <set-variable variableName="rsDepth" value="#[vars.rsDepth + 1]" doc:name="one level deeper"/>
+        <!-- rsChain left as-is going IN — run-single itself extends it with the target's own id;
+             rsGlobalVars left as-is too — inherited from the caller unchanged, same as the old
+             loopback's X-At-Global-Vars header always just forwarded the caller's own floor. -->
+        <set-variable variableName="rsCallerBody" value="#[vars.preChainBody]" doc:name="what the nested call's OWN pre-request chain starts from"/>
+        <set-variable variableName="rsCallerHeaders" value="#[vars.preChainHeaders default {}]"/>
+
+        <!-- on-error-propagate, not on-error-continue — the restore below must run whether
+             run-single succeeds OR throws uncaught (e.g. the depth/cycle guard, or anything else
+             that isn't one of run-single's own internal try/catches), otherwise a thrown error
+             would skip the restore entirely and leave the CALLER's own state (its rsRequestConfig,
+             finalBody, checks, ...) sitting however the nested call left it. Propagate (not
+             continue) so the error still reaches call-request-step's own error-handler afterward,
+             which is what actually logs the failed Call Request step. -->
+        <try doc:name="Run target, restoring caller state on EITHER outcome">
+            <flow-ref name="run-single" doc:name="Run the target request (isolated via snapshot/restore, not a separate Mule event)"/>
+            <set-variable variableName="crNestedResult" value="#[vars.rsResult]" doc:name="capture the nested result BEFORE restoring rsResult below"/>
+            <error-handler>
+                <on-error-propagate type="ANY" doc:name="Restore caller state, then let the error keep propagating">
+                    <flow-ref name="restore-nested-request-vars"/>
+                </on-error-propagate>
+            </error-handler>
+        </try>
+        <flow-ref name="restore-nested-request-vars" doc:name="Restore caller state (success path)"/>
+        <set-variable variableName="rsVars" value="#[output application/json --- vars.nrSaved.rsVars ++ (if (vars.crNestedResult.status == 'success') (vars.crNestedResult.vars default {}) else {})]" doc:name="merge callee vars back into the restored caller floor (only on success, matching the old loopback's own behavior) — reads vars.crNestedResult, so this only ever runs on the success path (see the flow's own comment)"/>
+    </flow>
+
+    <!-- Split out of run-nested-request purely so both its success path and its error-handler can
+         call the SAME restore logic without duplicating it — restores everything EXCEPT rsVars,
+         which run-nested-request itself sets right after calling this (a plain restore on the
+         error path, since there's no crNestedResult to merge in there; a merge on the success
+         path — see run-nested-request's own comment on why that split exists). -->
+    <flow name="restore-nested-request-vars">
+        <set-variable variableName="rsStartMs" value="#[vars.nrSaved.rsStartMs]"/>
+        <set-variable variableName="rsChain" value="#[vars.nrSaved.rsChain]"/>
+        <set-variable variableName="rsDepth" value="#[vars.nrSaved.rsDepth]"/>
+        <set-variable variableName="rsRows" value="#[vars.nrSaved.rsRows]"/>
+        <set-variable variableName="rsRequestName" value="#[vars.nrSaved.rsRequestName]"/>
+        <set-variable variableName="rsPreRequest" value="#[vars.nrSaved.rsPreRequest]"/>
+        <set-variable variableName="rsRequestConfig" value="#[vars.nrSaved.rsRequestConfig]"/>
+        <set-variable variableName="rsPostResponse" value="#[vars.nrSaved.rsPostResponse]"/>
+        <set-variable variableName="rsColRows" value="#[vars.nrSaved.rsColRows]"/>
+        <set-variable variableName="preChainBody" value="#[vars.nrSaved.preChainBody]"/>
+        <set-variable variableName="preChainHeaders" value="#[vars.nrSaved.preChainHeaders]"/>
+        <set-variable variableName="preRequestLog" value="#[vars.nrSaved.preRequestLog]"/>
+        <set-variable variableName="finalBody" value="#[vars.nrSaved.finalBody]"/>
+        <set-variable variableName="finalHeaders" value="#[vars.nrSaved.finalHeaders]"/>
+        <set-variable variableName="finalUrl" value="#[vars.nrSaved.finalUrl]"/>
+        <set-variable variableName="rsResponse" value="#[vars.nrSaved.rsResponse]"/>
+        <set-variable variableName="rsStatus" value="#[vars.nrSaved.rsStatus]"/>
+        <set-variable variableName="rsError" value="#[vars.nrSaved.rsError]"/>
+        <set-variable variableName="postChainBody" value="#[vars.nrSaved.postChainBody]"/>
+        <set-variable variableName="postChainHeaders" value="#[vars.nrSaved.postChainHeaders]"/>
+        <set-variable variableName="postResponseLog" value="#[vars.nrSaved.postResponseLog]"/>
+        <set-variable variableName="checks" value="#[vars.nrSaved.checks]"/>
+        <set-variable variableName="rsResult" value="#[vars.nrSaved.rsResult]"/>
+        <set-variable variableName="requestId" value="#[vars.nrSaved.requestId]"/>
+        <set-variable variableName="overrideVars" value="#[vars.nrSaved.overrideVars]"/>
+        <set-variable variableName="rsCallerBody" value="#[vars.nrSaved.rsCallerBody]"/>
+        <set-variable variableName="rsCallerHeaders" value="#[vars.nrSaved.rsCallerHeaders]"/>
+        <set-variable variableName="rsWorkspaceId" value="#[vars.nrSaved.rsWorkspaceId]"/>
+        <set-variable variableName="rsVars" value="#[vars.nrSaved.rsVars]" doc:name="plain restore here — run-nested-request's own success path overrides this again with the merged version right after calling this flow"/>
+    </flow>
+
     <!-- One Call Request step: chains from vars.preChainBody/preChainHeaders (the previous step's
-         payload, or the caller's own seed for the first one), invokes the target via loopback HTTP
-         (see the file-level comment), updates preChainBody/preChainHeaders from the callee's
-         response, and merges the callee's own final vars into vars.rsVars — this is what lets a
-         variable a CALLED request's post-response sets flow back up into the caller. -->
+         payload, or the caller's own seed for the first one), invokes the target via
+         run-nested-request (flow-ref, not a loopback HTTP call — see its own comment above and
+         the file-level comment), updates preChainBody/preChainHeaders from the callee's response
+         — rsVars merging now happens inside run-nested-request itself, since that's also where
+         the restore has to happen. -->
     <flow name="call-request-step">
         <set-variable variableName="crTargetId" value="#[payload.requestId default '']" doc:name="target id"/>
         <set-variable variableName="crInputBody" value="#[vars.preChainBody]" doc:name="snapshot input body for the log before the call can overwrite preChainBody"/>
         <set-variable variableName="crInputHeaders" value="#[vars.preChainHeaders]" doc:name="snapshot input headers for the log"/>
         <choice doc:name="Has a target?">
             <when expression="#[!isEmpty(vars.crTargetId)]">
-                <try doc:name="Call target (never throw — reported as a failed step instead)">
-                    <http:request method="POST" url="#['http://localhost:' ++ (p('listener.port') as String) ++ '/requests/' ++ vars.crTargetId ++ '/run']" config-ref="Loopback_Request_config" doc:name="Loopback call">
-                        <http:body><![CDATA[#[output application/json --- {}]]]></http:body>
-                        <http:headers><![CDATA[#[{
-                            "Content-Type": "application/json",
-                            "x-at-depth": (vars.rsDepth + 1) as String,
-                            "x-at-chain": vars.rsChain joinBy ",",
-                            "x-at-global-vars": write(vars.rsGlobalVars default {}, "application/json"),
-                            "x-at-caller-body": vars.preChainBody default "",
-                            "x-at-caller-headers": write(vars.preChainHeaders default {}, "application/json")
-                        }]]]></http:headers>
-                        <http:response-validator>
-                            <http:success-status-code-validator values="0..599"/>
-                        </http:response-validator>
-                    </http:request>
-                    <ee:transform doc:name="Parse callee result">
-                        <ee:message><ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-// http:request already parses a Content-Type: application/json response body into a
-// structured value — read() (String/Binary -> Object) would reject that Object outright.
-// Only fall back to read() for the unlikely case payload still arrives unparsed.
-if (payload is String or payload is Binary) read(payload, "application/json") else payload]]></ee:set-payload></ee:message>
-                    </ee:transform>
+                <try doc:name="Run target (never throw — reported as a failed step instead)">
+                    <flow-ref name="run-nested-request" doc:name="Run target request (isolated flow-ref)"/>
                     <choice doc:name="Callee succeeded?">
-                        <when expression="#[payload.status == 'success']">
-                            <set-variable variableName="preChainBody" value="#[output application/java --- payload.response.body default vars.preChainBody]"/>
-                            <set-variable variableName="preChainHeaders" value="#[output application/java --- payload.response.headers default vars.preChainHeaders]"/>
-                            <set-variable variableName="rsVars" value="#[output application/java --- vars.rsVars ++ (payload.subVars default {})]" doc:name="merge callee vars back into caller"/>
-                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, subRunId: payload.runId, subStatus: payload.status, subResponseStatus: payload.response.status, subResponseBody: payload.response.body, status: 'ok'}]" doc:name="log: callee succeeded"/>
+                        <when expression="#[vars.crNestedResult.status == 'success']">
+                            <set-variable variableName="preChainBody" value="#[output application/java --- vars.crNestedResult.response.body default vars.preChainBody]"/>
+                            <set-variable variableName="preChainHeaders" value="#[output application/java --- vars.crNestedResult.response.headers default vars.preChainHeaders]"/>
+                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, subRunId: vars.crNestedResult.runId, subStatus: vars.crNestedResult.status, subResponseStatus: vars.crNestedResult.response.status, subResponseBody: vars.crNestedResult.response.body, status: 'ok'}]" doc:name="log: callee succeeded"/>
                         </when>
                         <otherwise>
-                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, subRunId: payload.runId, subStatus: payload.status, subError: payload.error, status: 'ok'}]" doc:name="log: call ran, callee itself reported a failed run"/>
+                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, subRunId: vars.crNestedResult.runId, subStatus: vars.crNestedResult.status, subError: vars.crNestedResult.error, status: 'ok'}]" doc:name="log: call ran, callee itself reported a failed run"/>
                         </otherwise>
                     </choice>
                     <error-handler>
-                        <on-error-continue type="ANY" doc:name="Call failed — keep previous payload, don't fail the whole run">
+                        <on-error-continue type="ANY" doc:name="Call failed (e.g. depth/cycle guard) — keep previous payload, don't fail the whole run">
                             <logger level="ERROR" category="apitester.callRequest" message="#['Call Request to ' ++ vars.crTargetId ++ ' failed: ' ++ (error.description default error.detailedDescription default 'unknown error')]" doc:name="Surface the swallowed error"/>
-                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, error: (error.description default error.detailedDescription default 'unknown error'), status: 'error'}]" doc:name="log: the loopback call itself failed"/>
+                            <set-variable variableName="crLastLog" value="#[output application/java --- {requestId: vars.crTargetId, inputBody: vars.crInputBody, inputHeaders: vars.crInputHeaders, error: (error.description default error.detailedDescription default 'unknown error'), status: 'error'}]" doc:name="log: the nested call itself failed"/>
                         </on-error-continue>
                     </error-handler>
                 </try>
