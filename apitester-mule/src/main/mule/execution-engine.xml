@@ -72,6 +72,7 @@
         <set-variable variableName="rsCallerBody" value="#[null]" doc:name="no caller body"/>
         <set-variable variableName="rsCallerHeaders" value="#[{}]" doc:name="no caller headers"/>
         <set-variable variableName="rsCallerVars" value="#[{}]" doc:name="no caller vars — genuine top-level call, see run-single's own rsVars-seeding comment"/>
+        <set-variable variableName="iterations" value="#[[]]" doc:name="fresh accumulator — the foreach below only ever does (vars.iterations default []) ++ [...], which is correct IF this var is truly absent; make that explicit instead of assuming it, since this flow is now the one and only entry point for every top-level run (including each of Run All's sequential loopback calls)"/>
 
         <db:select config-ref="Database_Config" target="reqRows" doc:name="Select request (for inputDataSets/inputSource check)">
             <db:sql>SELECT input_data_sets_json, request_json FROM syskm.requests WHERE id = :id</db:sql>
