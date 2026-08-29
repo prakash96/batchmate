@@ -11,7 +11,6 @@ const TITLE_FILL = 'FF1F4E79';
 const HEADER_FILL = 'FF4F81BD';
 const PASS_FILL = 'FF92D050';
 const FAIL_FILL = 'FFFF0000';
-const DATABAR_COLOR = 'FF638EC6';
 
 const MAX_CELL_CHARS = 30000; // Excel's real per-cell limit is 32,767 — stay comfortably under it.
 function truncate(s) {
@@ -81,16 +80,16 @@ function buildSummarySheet(wb, report) {
     sheet.addRow(['Pass Rate', total > 0 ? `${((passedCount * 100) / total).toFixed(1)}%` : '0.0%']);
     sheet.addRow(['Total Duration (ms)', duration]);
 
-    // In-cell data bars in place of the old Groovy/POI version's XDDF bar chart — ExcelJS has no
-    // chart-drawing API at all (confirmed: no such feature exists in this library), so this is
-    // the closest native-Excel visual equivalent to "Pass / Fail Counts" as a proportional bar.
-    sheet.addConditionalFormatting({
-        ref: `B${passRow.number}:B${failRow.number}`,
-        rules: [{
-            type: 'dataBar', priority: 1, minLength: 0, maxLength: 100,
-            cfvo: [{ type: 'min' }, { type: 'max' }], color: { argb: DATABAR_COLOR },
-        }],
-    });
+    // NOT an in-cell data bar (was, briefly) — ExcelJS has no chart-drawing API at all (confirmed:
+    // no such feature exists in this library), so a data bar was the closest native-Excel visual
+    // equivalent to the old Groovy/POI version's XDDF bar chart. But ExcelJS 4.4.0's
+    // addConditionalFormatting({type: 'dataBar', ...}) writes a second, x14-extension block
+    // alongside the legacy one, and that extension block is malformed in a way real Excel
+    // rejects outright ("the file format or file extension is not valid") even though it's
+    // well-formed XML — confirmed against https://github.com/exceljs/exceljs/issues/3015, open
+    // and unfixed as of this library's version. The colored Passed/Failed cells above are the
+    // whole visual now; don't re-add addConditionalFormatting here without checking that issue
+    // is actually fixed in whatever exceljs version is pinned at the time.
 
     return sheet;
 }
