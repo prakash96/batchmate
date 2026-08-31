@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRunAllStore } from '../store/runAllStore';
 import { C, btnStyle, primaryBtnStyle } from '../theme';
 import ResponseViewer from './ResponseViewer';
+import { PassRateMeter, DurationBarChart, ChecksStackedChart } from './RunAllCharts';
 
 /** Shows a collection's "Run All" consolidated report — the last persisted one on open (or
  *  triggers+shows a fresh run when opened via the "▶ Run All" sidebar button, see autoRun).
@@ -52,9 +53,9 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
         }
     };
 
-    // Built server-side (run-all-api.xml's build-excel-report, Groovy + POI) — GET .../excel
-    // streams the xlsx back; see runAllStore.js's downloadExcel for why this isn't client-side
-    // ExcelJS anymore.
+    // Built server-side (run-all-api.xml's build-excel-report, DataWeave's native xlsx writer) —
+    // GET .../excel streams the xlsx back; see runAllStore.js's downloadExcel for why this isn't
+    // client-side ExcelJS anymore.
     const doDownload = async () => {
         if (!report) return;
         setExporting(true);
@@ -65,11 +66,10 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
     const passed = report?.passedRequests ?? 0;
     const failed = report?.failedRequests ?? 0;
     const total = report?.totalRequests ?? 0;
-    const passPct = total > 0 ? Math.round((passed / total) * 100) : 0;
 
     return (
         <div className="at-overlay" style={overlayStyle}>
-            <div className="at-modal" style={{ background: C.panel, border: `1px solid ${C.border}`, borderRadius: C.radius, boxShadow: C.shadowLg, width: 720, maxHeight: '85vh', overflowY: 'auto', padding: 20 }}>
+            <div className="at-modal" style={{ background: C.panel, border: `1px solid ${C.border}`, borderRadius: C.radius, boxShadow: C.shadowLg, width: 900, maxHeight: '88vh', overflowY: 'auto', padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Run All — {collectionName}</span>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -97,20 +97,29 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
                             Last run: {formatDate(report.runAt)} · {report.durationMs} ms total
                         </div>
 
-                        <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 16 }}>
+                        <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 18 }}>
                             <SummaryBadge label="Total" value={total} color={C.text} />
                             <SummaryBadge label="Passed" value={passed} color={C.success} />
                             <SummaryBadge label="Failed" value={failed} color={C.danger} />
+                            <SummaryBadge label="Duration" value={`${report.durationMs ?? 0} ms`} color={C.text} />
                             <div style={{ flex: 1 }}>
-                                <div style={{ height: 10, borderRadius: 6, overflow: 'hidden', display: 'flex', background: C.surface }}>
-                                    <div style={{ width: `${passPct}%`, background: C.success }} />
-                                    <div style={{ width: `${100 - passPct}%`, background: C.danger }} />
-                                </div>
-                                <div style={{ fontSize: 10, color: C.textFaint, marginTop: 4 }}>{passPct}% passed</div>
+                                <PassRateMeter passed={passed} total={total} />
                             </div>
                             <button onClick={doDownload} style={btnStyle} disabled={exporting}>{exporting ? 'Exporting…' : '⬇ Download Excel'}</button>
                         </div>
 
+                        {results.length > 0 && (
+                            <div style={{
+                                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20,
+                                background: C.bg, border: `1px solid ${C.borderLo}`, borderRadius: C.radiusSm,
+                                padding: 14, marginBottom: 18,
+                            }}>
+                                <DurationBarChart results={results} />
+                                <ChecksStackedChart results={results} />
+                            </div>
+                        )}
+
+                        <div style={{ fontSize: 11, fontWeight: 700, color: C.text, marginBottom: 8 }}>Detailed results</div>
                         <div>
                             {results.length === 0 && (
                                 <div style={{ fontSize: 12, color: C.textFaint, fontStyle: 'italic' }}>

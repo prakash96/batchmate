@@ -3,15 +3,13 @@
       xmlns:http="http://www.mulesoft.org/schema/mule/http"
       xmlns:db="http://www.mulesoft.org/schema/mule/db"
       xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-      xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
       xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="
         http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
         http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
         http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-        http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 
     <!-- Mirrors CollectionRunController.java's /collections/{id}/run-all endpoints. "Main request"
          = one no other request anywhere calls via a Call Request step (in preRequest OR
@@ -188,302 +186,160 @@ var failed = sizeOf(vars.raResults) - passed
             </when>
             <otherwise>
                 <set-variable variableName="excelReport" value="#[read((vars.rows[0]).report_json, 'application/json')]"/>
-                <flow-ref name="build-excel-report" doc:name="Build xlsx (Groovy + POI) — also sets vars.excelHeaders"/>
+                <flow-ref name="build-excel-report" doc:name="Build xlsx (native DataWeave writer) — also sets vars.excelHeaders"/>
             </otherwise>
         </choice>
     </flow>
 
-    <!-- Builds the xlsx via Groovy + POI (same approach/version as apitester-app's own
-         ExcelReportService: Summary sheet with metrics + a bar chart, Detailed Results sheet).
-         Reads vars.excelReport, sets payload to the raw xlsx bytes and vars.excelHeaders to the
-         download headers.
+    <!-- Builds the xlsx via DataWeave's own native "output application/xlsx" writer — no Groovy,
+         no POI, no Scripting module: bundled with the DataWeave engine since Mule 4.2.2 (this app
+         targets 4.6.16), so nothing extra in pom.xml at all. Reads vars.excelReport; the
+         ee:transform's own payload IS the xlsx bytes (DataWeave streams the writer's output the
+         same way it already does for application/json/csv elsewhere in this app — no separate
+         byte-array step needed the way Groovy's ByteArrayOutputStream was).
 
-         Back here AGAIN after a detour through client-side ExcelJS (apitester-ui/utils/
-         runAllExcel.js, now deleted) — that version corrupted real Excel files: ExcelJS 4.4.0's
-         addConditionalFormatting({type: 'dataBar', ...}) writes a malformed x14 conditional-
-         formatting extension block that real Excel rejects outright ("the file format or file
-         extension is not valid"), a confirmed open/unfixed upstream bug —
-         https://github.com/exceljs/exceljs/issues/3015. POI's approach below doesn't touch that
-         code path at all (a real XDDF bar chart, not a data-bar conditional format), so it isn't
-         exposed to that bug. Don't re-migrate this to the frontend without checking that issue is
-         actually fixed in whatever exceljs version would be pinned at the time. -->
+         Trade-off, and why it's accepted: this writer does DATA only — "Formatting is currently
+         not supported" (MuleSoft's own words) — so no bold/colored header or Pass/Fail cells, no
+         frozen panes, no outline-grouped Checks rows, no bar chart. Two prior versions had that
+         polish (Groovy+POI, then client-side ExcelJS) and both got replaced: POI for this exact
+         dependency-footprint reason, then ExcelJS because its data-bar conditional formatting
+         corrupts real Excel files (confirmed open/unfixed upstream bug, exceljs#3015). The
+         "professional" visual experience now lives in apitester-ui's own Run All dashboard (see
+         RunAllDashboard.jsx) instead of the spreadsheet — this export is the plain-data
+         complement to that, not a second place trying to look the same. -->
     <flow name="build-excel-report">
-        <scripting:execute engine="groovy" target="excelBytes" doc:name="Generate xlsx">
-            <scripting:code><![CDATA[
-import org.apache.poi.ss.usermodel.*
-import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.xddf.usermodel.chart.*
-import org.apache.poi.xssf.usermodel.*
-import java.io.ByteArrayOutputStream
+        <ee:transform doc:name="Build xlsx (native DataWeave xlsx writer)">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xlsx header=true
+var report = vars.excelReport
+var results = report.results default []
+var total = report.totalRequests default 0
+var passedCount = report.passedRequests default 0
+var failedCount = report.failedRequests default 0
+var duration = report.durationMs default 0
 
-def report = reportData
-def results = report.results ?: []
-def total = (report.totalRequests ?: 0) as int
-def passedCount = (report.passedRequests ?: 0) as int
-def failedCount = (report.failedRequests ?: 0) as int
-def duration = (report.durationMs ?: 0) as long
+// Cell values are capped well under Excel's real 32,767-char-per-cell limit.
+fun truncate(s) = if (s == null) '' else (if (sizeOf(s) > 30000) (substring(s, 0, 30000) ++ '…(truncated)') else s)
+// sentBody/response.body are already serialized JSON text coming out of the app — pass those
+// straight through; only actually re-encode real objects (headers, the Call Request log maps).
+fun toJsonStr(v) = if (v == null) '' else (if (v is String) v else write(v, 'application/json'))
 
-def wb = new XSSFWorkbook()
-def title = wb.createCellStyle(); def titleFont = wb.createFont()
-titleFont.setBold(true); titleFont.setFontHeightInPoints((short) 22); titleFont.setColor(new XSSFColor([255,255,255] as byte[], null))
-title.setFont(titleFont); title.setFillForegroundColor(new XSSFColor([31,78,121] as byte[], null)); title.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+var summaryRows = [
+    { Metric: 'Total Requests', Value: total },
+    { Metric: 'Passed', Value: passedCount },
+    { Metric: 'Failed', Value: failedCount },
+    { Metric: 'Pass Rate', Value: if (total > 0) ((passedCount * 100.0 / total) as String {format: '0.0'}) ++ '%' else '0.0%' },
+    { Metric: 'Total Duration (ms)', Value: duration },
+]
 
-def hdrStyle = wb.createCellStyle(); def hdrFont = wb.createFont()
-hdrFont.setBold(true); hdrFont.setColor(new XSSFColor([255,255,255] as byte[], null))
-hdrStyle.setFont(hdrFont); hdrStyle.setFillForegroundColor(new XSSFColor([79,129,189] as byte[], null)); hdrStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND)
-
-def passStyle = wb.createCellStyle(); passStyle.setFillForegroundColor(new XSSFColor([146,208,80] as byte[], null)); passStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND)
-def failStyle = wb.createCellStyle(); def failFont = wb.createFont(); failFont.setColor(new XSSFColor([255,255,255] as byte[], null))
-failStyle.setFont(failFont); failStyle.setFillForegroundColor(new XSSFColor([255,0,0] as byte[], null)); failStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND)
-
-def summary = wb.createSheet("Summary")
-summary.setColumnWidth(0, 7000); summary.setColumnWidth(1, 4000)
-int r = 0
-def titleRow = summary.createRow(r++); def tc = titleRow.createCell(0); tc.setCellValue("Run All — " + (report.collectionName ?: '')); tc.setCellStyle(title)
-summary.addMergedRegion(new CellRangeAddress(0, 0, 0, 1))
-r++
-def mh = summary.createRow(r++); mh.createCell(0).setCellValue("Metric"); mh.getCell(0).setCellStyle(hdrStyle); mh.createCell(1).setCellValue("Value"); mh.getCell(1).setCellStyle(hdrStyle)
-def addRow = { label, value, style ->
-    def row = summary.createRow(r++)
-    row.createCell(0).setCellValue(label)
-    def c = row.createCell(1)
-    if (value instanceof Number) c.setCellValue(((Number) value).doubleValue()) else c.setCellValue(value.toString())
-    if (style != null) c.setCellStyle(style)
-}
-addRow("Total Requests", total, null)
-addRow("Passed", passedCount, passStyle)
-addRow("Failed", failedCount, failStyle)
-addRow("Pass Rate", total > 0 ? String.format("%.1f%%", passedCount * 100.0 / total) : "0.0%", null)
-addRow("Total Duration (ms)", duration, null)
-r++
-
-// Bar chart — Pass/Fail counts (same XDDF pattern apitester-app's own report generator uses)
-def drawing = summary.createDrawingPatriarch()
-def anchor = drawing.createAnchor(0, 0, 0, 0, 0, r, 6, r + 16)
-def chart = drawing.createChart(anchor)
-chart.setTitleText("Pass / Fail Counts")
-chart.setTitleOverlay(false)
-def legend = chart.getOrAddLegend(); legend.setPosition(LegendPosition.BOTTOM)
-def catAxis = chart.createCategoryAxis(AxisPosition.BOTTOM)
-def valAxis = chart.createValueAxis(AxisPosition.LEFT); valAxis.setCrosses(AxisCrosses.AUTO_ZERO)
-def cats = XDDFDataSourcesFactory.fromArray(["Pass", "Fail"] as String[])
-def vals = XDDFDataSourcesFactory.fromArray([passedCount, failedCount] as Integer[])
-def barData = (XDDFBarChartData) chart.createData(ChartTypes.BAR, catAxis, valAxis)
-barData.setBarDirection(BarDirection.COL); barData.setBarGrouping(BarGrouping.CLUSTERED)
-def series = barData.addSeries(cats, vals); series.setTitle("Count", null)
-chart.plot(barData)
-
-def detail = wb.createSheet("Detailed Results")
-[1400, 7000, 3500, 3500, 3500, 3500, 3500, 8000].eachWithIndex { w, i -> detail.setColumnWidth(i, w) }
-detail.createFreezePane(0, 1)
-def dh = detail.createRow(0)
-["#", "Request", "Status", "Duration (ms)", "Checks Passed", "Checks Failed", "Checks Total", "Error"].eachWithIndex { h, i ->
-    def c = dh.createCell(i); c.setCellValue(h); c.setCellStyle(hdrStyle)
-}
-results.eachWithIndex { entry, i ->
-    def row = detail.createRow(i + 1)
-    def ok = entry.status == "success"
-    row.createCell(0).setCellValue((i + 1) as double)
-    row.createCell(1).setCellValue((entry.requestName ?: '').toString())
-    def sc = row.createCell(2); sc.setCellValue(ok ? "Pass" : "Fail"); sc.setCellStyle(ok ? passStyle : failStyle)
-    row.createCell(3).setCellValue(((entry.durationMs ?: 0) as Number).doubleValue())
-    row.createCell(4).setCellValue(((entry.checksPassed ?: 0) as Number).doubleValue())
-    row.createCell(5).setCellValue(((entry.checksFailed ?: 0) as Number).doubleValue())
-    row.createCell(6).setCellValue(((entry.checksTotal ?: 0) as Number).doubleValue())
-    row.createCell(7).setCellValue((entry.error ?: '').toString())
-}
-
-// Cell values are capped well under Excel's real 32,767-char-per-cell limit — a big response
-// body would otherwise make POI throw instead of just writing a clipped cell.
-def truncate = { s, max = 30000 -> s == null ? '' : (s.length() > max ? s.substring(0, max) + '…(truncated)' : s) }
-// Hand-rolled, not groovy.json.JsonOutput — the groovy-json module isn't on this embedded
-// scripting engine's classpath (confirmed live: "unable to resolve class groovy.json.JsonOutput"
-// at deploy time). toJsonStr passes an already-JSON-text String straight through (sentBody/
-// response.body are already serialized JSON coming out of the app) and only actually encodes
-// Maps/Lists (sentHeaders, response.headers, and the Call Request log objects, which are real
-// Groovy Maps at this point, not text).
-def jsonEscape = { s -> s.toString().replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t') }
-def toJsonVal
-toJsonVal = { v ->
-    if (v == null) 'null'
-    else if (v instanceof CharSequence) ('"' + jsonEscape(v) + '"')
-    else if (v instanceof Boolean || v instanceof Number) v.toString()
-    else if (v instanceof Map) ('{' + v.collect { k, vv -> '"' + jsonEscape(k.toString()) + '":' + toJsonVal(vv) }.join(',') + '}')
-    else if (v instanceof Collection) ('[' + v.collect { toJsonVal(it) }.join(',') + ']')
-    else ('"' + jsonEscape(v.toString()) + '"')
-}
-def toJsonStr = { v -> v == null ? '' : (v instanceof CharSequence ? v.toString() : toJsonVal(v)) }
-def wrapStyle = wb.createCellStyle(); wrapStyle.setWrapText(true); wrapStyle.setVerticalAlignment(VerticalAlignment.TOP)
+var detailedBase = results map ((entry) -> {
+    Request: entry.requestName default '',
+    Status: if (entry.status == 'success') 'Pass' else 'Fail',
+    'Duration (ms)': entry.durationMs default 0,
+    'Checks Passed': entry.checksPassed default 0,
+    'Checks Failed': entry.checksFailed default 0,
+    'Checks Total': entry.checksTotal default 0,
+    Error: entry.error default '',
+})
+var detailedRows =
+    if (isEmpty(detailedBase)) [{ '#': '', Request: '(no main requests in this report)', Status: '', 'Duration (ms)': '', 'Checks Passed': '', 'Checks Failed': '', 'Checks Total': '', Error: '' }]
+    else (detailedBase map ((row, i) -> { '#': i + 1 } ++ row))
 
 // Request/Response Detail — the actual sent body/headers and received status/headers/body for
-// the MAIN http call of every request (one row per iteration for an iterating request) — this
-// (and Pre/Post Steps Detail right after it) is what was missing before: Detailed Results only
-// ever had pass/fail counts, never the real traffic.
-def reqRespSheet = wb.createSheet("Request-Response Detail")
-[1200, 6500, 2600, 9000, 6000, 2800, 6000, 9000].eachWithIndex { w, i -> reqRespSheet.setColumnWidth(i, w) }
-reqRespSheet.createFreezePane(0, 1)
-def rrh = reqRespSheet.createRow(0)
-["#", "Request", "Iteration", "Sent Body", "Sent Headers", "Response Status", "Response Headers", "Response Body"].eachWithIndex { h, i ->
-    def c = rrh.createCell(i); c.setCellValue(h); c.setCellStyle(hdrStyle)
-}
-def reqRespRows = []
-results.each { entry ->
-    def fullResult = entry.fullResult
-    def addReqResp = { iterLabel, runResult ->
-        reqRespRows << [
-            (entry.requestName ?: '').toString(), iterLabel.toString(),
-            truncate(toJsonStr(runResult?.sentBody)), truncate(toJsonStr(runResult?.sentHeaders)),
-            (runResult?.response?.status ?: '').toString(), truncate(toJsonStr(runResult?.response?.headers)), truncate(toJsonStr(runResult?.response?.body)),
-        ]
-    }
-    if (fullResult?.iterating == true) {
-        (fullResult.iterations ?: []).eachWithIndex { it, idx -> addReqResp('Iteration ' + (idx + 1), it) }
-    } else {
-        addReqResp('', fullResult)
-    }
-}
-reqRespRows.eachWithIndex { rr, i ->
-    def row = reqRespSheet.createRow(i + 1)
-    row.createCell(0).setCellValue((i + 1) as double)
-    rr.eachWithIndex { val, ci ->
-        def cell = row.createCell(ci + 1); cell.setCellValue(val); cell.setCellStyle(wrapStyle)
-    }
-}
+// the MAIN http call of every request (one row per iteration for an iterating request).
+fun reqRespEntriesOf(entry) =
+    if (entry.fullResult.iterating == true)
+        (entry.fullResult.iterations default []) map ((it, idx) -> { name: entry.requestName default '', iterLabel: 'Iteration ' ++ ((idx + 1) as String), rr: it })
+    else
+        [{ name: entry.requestName default '', iterLabel: '', rr: entry.fullResult }]
+var reqRespBase = (flatten(results map ((entry) -> reqRespEntriesOf(entry)))) map ((x) -> {
+    Request: x.name,
+    Iteration: x.iterLabel,
+    'Sent Body': truncate(toJsonStr(x.rr.sentBody)),
+    'Sent Headers': truncate(toJsonStr(x.rr.sentHeaders)),
+    'Response Status': (x.rr.response.status default '') as String,
+    'Response Headers': truncate(toJsonStr(x.rr.response.headers)),
+    'Response Body': truncate(toJsonStr(x.rr.response.body)),
+})
+var reqRespRows =
+    if (isEmpty(reqRespBase)) [{ '#': '', Request: '(no main requests in this report)', Iteration: '', 'Sent Body': '', 'Sent Headers': '', 'Response Status': '', 'Response Headers': '', 'Response Body': '' }]
+    else (reqRespBase map ((row, i) -> { '#': i + 1 } ++ row))
 
 // Pre/Post Steps Detail — every Call Request/Set Variable step that ran, pre-request or
-// post-response, with what it sent/received (Call Request) or what it set (Set Variable). Same
-// per-iteration expansion as the sheet above.
-def stepsSheet = wb.createSheet("Pre-Post Steps Detail")
-[1200, 6500, 2600, 3400, 3200, 8000, 8000].eachWithIndex { w, i -> stepsSheet.setColumnWidth(i, w) }
-stepsSheet.createFreezePane(0, 1)
-def sth = stepsSheet.createRow(0)
-["#", "Request", "Iteration", "Phase", "Step Type", "Input (target / value)", "Result"].eachWithIndex { h, i ->
-    def c = sth.createCell(i); c.setCellValue(h); c.setCellStyle(hdrStyle)
+// post-response, with what it sent/received (Call Request) or what it set (Set Variable).
+fun callRequestResultText(step) =
+    if (step.status == 'error') ('ERROR: ' ++ (step.error default 'unknown error'))
+    else truncate(toJsonStr({ subStatus: step.subStatus, responseStatus: step.subResponseStatus, responseBody: step.subResponseBody, error: step.subError }))
+fun stepRowsOf(name, iterLabel, pre, post) =
+    ((pre default []) map ((step) -> {
+        Request: name, Iteration: iterLabel, Phase: 'Pre-Request', 'Step Type': 'Call Request',
+        'Input (target / value)': truncate(toJsonStr({ targetRequestId: step.requestId, body: step.inputBody, headers: step.inputHeaders })),
+        Result: callRequestResultText(step),
+    }))
+    ++
+    ((post default []) map ((step) ->
+        if (step.'type' == 'setVariable')
+            { Request: name, Iteration: iterLabel, Phase: 'Post-Response', 'Step Type': 'Set Variable',
+              'Input (target / value)': step.name default '', Result: truncate(toJsonStr(step.value)) }
+        else
+            { Request: name, Iteration: iterLabel, Phase: 'Post-Response', 'Step Type': 'Call Request',
+              'Input (target / value)': truncate(toJsonStr({ targetRequestId: step.requestId, body: step.inputBody, headers: step.inputHeaders })),
+              Result: callRequestResultText(step) }
+    ))
+fun stepsOf(entry) = do {
+    var fr = entry.fullResult
+    var name = entry.requestName default ''
+    ---
+    if (fr.iterating == true)
+        flatten((fr.iterations default []) map ((it, idx) -> stepRowsOf(name, 'Iteration ' ++ ((idx + 1) as String), it.preRequestLog, it.postResponseLog)))
+    else
+        stepRowsOf(name, '', fr.preRequestLog, fr.postResponseLog)
 }
-def stepRows = []
-results.each { entry ->
-    def fullResult = entry.fullResult
-    def resultOfCallRequest = { step ->
-        // Plain concatenation, not GString interpolation — see the "Plain concatenation, not
-        // Groovy GString interpolation" comment further down this same script for why.
-        if (step.status == 'error') ('ERROR: ' + (step.error ?: 'unknown error'))
-        else truncate(toJsonStr([subStatus: step.subStatus, responseStatus: step.subResponseStatus, responseBody: step.subResponseBody, error: step.subError]))
-    }
-    def addSteps = { iterLabel, pre, post ->
-        (pre ?: []).each { step ->
-            stepRows << [(entry.requestName ?: '').toString(), iterLabel.toString(), 'Pre-Request', 'Call Request',
-                truncate(toJsonStr([targetRequestId: step.requestId, body: step.inputBody, headers: step.inputHeaders])), resultOfCallRequest(step)]
-        }
-        (post ?: []).each { step ->
-            if (step.type == 'setVariable') {
-                stepRows << [(entry.requestName ?: '').toString(), iterLabel.toString(), 'Post-Response', 'Set Variable',
-                    (step.name ?: '').toString(), truncate(toJsonStr(step.value))]
-            } else {
-                stepRows << [(entry.requestName ?: '').toString(), iterLabel.toString(), 'Post-Response', 'Call Request',
-                    truncate(toJsonStr([targetRequestId: step.requestId, body: step.inputBody, headers: step.inputHeaders])), resultOfCallRequest(step)]
-            }
-        }
-    }
-    if (fullResult?.iterating == true) {
-        (fullResult.iterations ?: []).eachWithIndex { it, idx -> addSteps('Iteration ' + (idx + 1), it.preRequestLog, it.postResponseLog) }
-    } else {
-        addSteps('', fullResult?.preRequestLog, fullResult?.postResponseLog)
-    }
-}
-if (stepRows.isEmpty()) {
-    def emptyRow = stepsSheet.createRow(1)
-    emptyRow.createCell(1).setCellValue('(no pre-request or post-response steps ran across any request in this report)')
-} else {
-    stepRows.eachWithIndex { sr, i ->
-        def row = stepsSheet.createRow(i + 1)
-        row.createCell(0).setCellValue((i + 1) as double)
-        sr.eachWithIndex { val, ci ->
-            def cell = row.createCell(ci + 1); cell.setCellValue(val); cell.setCellStyle(wrapStyle)
-        }
-    }
-}
+var stepsBase = flatten(results map ((entry) -> stepsOf(entry)))
+var stepsRows =
+    if (isEmpty(stepsBase)) [{ '#': '', Request: '', Iteration: '', Phase: '', 'Step Type': '', 'Input (target / value)': '(no pre-request or post-response steps ran across any request in this report)', Result: '' }]
+    else (stepsBase map ((row, i) -> { '#': i + 1 } ++ row))
 
-// Checks Detail — one GROUP per check (per request/iteration): the check's own row, then its
-// conditions as indented, collapsible sub-rows right under it (Excel outline grouping) — every
-// condition shown, not just the failing ones, mirroring ResponseViewer.jsx's CheckEntry, which
-// nests the same way on screen.
-def checkGroups = []
-results.each { entry ->
-    def fullResult = entry.fullResult
-    def addChecks = { iterLabel, checks ->
-        (checks ?: []).each { chk ->
-            def conds = chk.conditions
-            def condRows = []
-            if (conds) {
-                conds.each { cond ->
-                    // Plain concatenation, not Groovy GString interpolation — Mule's own
-                    // config-property scanner flags a literal dollar sign anywhere in the
-                    // deployed source (comments included, see collections-api.xml's own
-                    // "New request object" transform for the same quirk) and tries to resolve
-                    // it as a property, which fails for anything that isn't one.
-                    def conditionText = (cond.left ?: '').toString() + ' ' + (cond.operator ?: '').toString() + ' ' + (cond.right ?: '').toString()
-                    condRows << [conditionText, (cond.passed ? 'Pass' : 'Fail'), (cond.message ?: '').toString()]
-                }
-            }
-            checkGroups << [entry.requestName ?: '', iterLabel, chk.name ?: '', (chk.passed ? 'Pass' : 'Fail'), (chk.message ?: '').toString(), condRows]
-        }
-    }
-    if (fullResult?.iterating == true) {
-        (fullResult.iterations ?: []).eachWithIndex { it, idx -> addChecks('Iteration ' + (idx + 1), it.checks) }
-    } else {
-        addChecks('', fullResult?.checks)
-    }
+// Checks Detail — one row per check plus one row per condition right under it (every condition
+// shown, not just the failing ones, mirroring ResponseViewer.jsx's CheckEntry) — condition rows
+// leave Request/Iteration/Check blank and lead with a couple of spaces, since this writer has no
+// outline/grouping support to show the nesting visually the way the POI version's collapsible
+// groups did.
+fun checkRowsOf(name, iterLabel, checks) =
+    flatten((checks default []) map ((chk) -> do {
+        var conds = chk.conditions default []
+        var headerRow = { Check: chk.name default '', Condition: '', Result: if (chk.passed) 'Pass' else 'Fail', Detail: if (isEmpty(conds)) (chk.message default '') else '' }
+        var condRows = conds map ((cond) -> {
+            Check: '', Condition: '  ' ++ ((cond.left default '') ++ ' ' ++ (cond.operator default '') ++ ' ' ++ (cond.right default '')),
+            Result: if (cond.passed) 'Pass' else 'Fail', Detail: cond.message default '',
+        })
+        ---
+        [{ Request: name, Iteration: iterLabel } ++ headerRow] ++ (condRows map ((cr) -> { Request: '', Iteration: '' } ++ cr))
+    }))
+fun checksOf(entry) = do {
+    var fr = entry.fullResult
+    var name = entry.requestName default ''
+    ---
+    if (fr.iterating == true)
+        flatten((fr.iterations default []) map ((it, idx) -> checkRowsOf(name, 'Iteration ' ++ ((idx + 1) as String), it.checks)))
+    else
+        checkRowsOf(name, '', fr.checks)
 }
-
-def checksSheet = wb.createSheet("Checks Detail")
-[1200, 6500, 2200, 5500, 4500, 2200, 9000].eachWithIndex { w, i -> checksSheet.setColumnWidth(i, w) }
-checksSheet.createFreezePane(0, 1)
-def ckh = checksSheet.createRow(0)
-["#", "Request", "Iteration", "Check", "Condition", "Result", "Detail"].eachWithIndex { h, i ->
-    def c = ckh.createCell(i); c.setCellValue(h); c.setCellStyle(hdrStyle)
-}
-def checkNameFont = wb.createFont(); checkNameFont.setBold(true)
-def checkNameStyle = wb.createCellStyle(); checkNameStyle.setFont(checkNameFont)
-def indentStyle = wb.createCellStyle(); indentStyle.setIndention((short) 1)
-
-int excelRow = 1
-checkGroups.each { g ->
-    def (reqName, iterLabel, checkName, checkResult, checkDetail, condRows) = g
-    def headerRow = checksSheet.createRow(excelRow)
-    headerRow.createCell(0).setCellValue(excelRow as double)
-    headerRow.createCell(1).setCellValue(reqName.toString())
-    headerRow.createCell(2).setCellValue(iterLabel.toString())
-    def nameCell = headerRow.createCell(3); nameCell.setCellValue(checkName.toString()); nameCell.setCellStyle(checkNameStyle)
-    headerRow.createCell(4).setCellValue('')
-    def hrc = headerRow.createCell(5); hrc.setCellValue(checkResult.toString()); hrc.setCellStyle(checkResult == 'Pass' ? passStyle : failStyle)
-    // Only shown here when there's no per-condition breakdown (predates this, or a future
-    // jsoncompare/textcompare/dbcheck step) — otherwise each condition carries its own detail below.
-    headerRow.createCell(6).setCellValue(condRows.isEmpty() ? checkDetail.toString() : '')
-    excelRow++
-
-    def firstConditionRow = excelRow
-    condRows.each { cond ->
-        def (conditionText, condResult, condDetail) = cond
-        def condRow = checksSheet.createRow(excelRow)
-        condRow.createCell(0).setCellValue(excelRow as double)
-        // Request/Iteration/Check left blank — already shown on this group's header row above.
-        def condCell = condRow.createCell(4); condCell.setCellValue(conditionText.toString()); condCell.setCellStyle(indentStyle)
-        def crc = condRow.createCell(5); crc.setCellValue(condResult.toString()); crc.setCellStyle(condResult == 'Pass' ? passStyle : failStyle)
-        condRow.createCell(6).setCellValue(condDetail.toString())
-        excelRow++
-    }
-    if (!condRows.isEmpty()) checksSheet.groupRow(firstConditionRow, excelRow - 1)
-}
-checksSheet.setRowSumsBelow(false)
-
-def out = new ByteArrayOutputStream()
-wb.write(out)
-wb.close()
-out.toByteArray()
-            ]]></scripting:code>
-            <scripting:parameters><![CDATA[#[%dw 2.0 output application/java --- {reportData: vars.excelReport}]]]></scripting:parameters>
-        </scripting:execute>
-        <set-payload value="#[vars.excelBytes]" doc:name="xlsx bytes as payload"/>
+var checksBase = flatten(results map ((entry) -> checksOf(entry)))
+var checksRows =
+    if (isEmpty(checksBase)) [{ '#': '', Request: '', Iteration: '', Check: '', Condition: '', Result: '', Detail: '' }]
+    else (checksBase map ((row, i) -> { '#': i + 1 } ++ row))
+---
+{
+    Summary: summaryRows,
+    'Detailed Results': detailedRows,
+    'Request-Response Detail': reqRespRows,
+    'Pre-Post Steps Detail': stepsRows,
+    'Checks Detail': checksRows,
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
         <set-variable variableName="excelHeaders" value="#[{
             'Content-Disposition': 'attachment; filename=\'run-all-' ++ ((vars.excelReport.collectionName default 'collection') replace /[^a-zA-Z0-9_-]+/ with '_') ++ '.xlsx\'',
             'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
