@@ -19,13 +19,19 @@
 
 		Deliberately NOT here: mule-json-module (JSON is handled natively by DataWeave —
 		output/read "application/json" — nothing in this app ever used the JSON module's own
-		operations), and the Scripting module / GraalVM JS / Groovy / Apache POI (all four were
-		here at one point: GraalVM JS for a since-removed "${...}"-via-JavaScript templating
-		engine, replaced with pure DataWeave — see templating.xml's "$(...)" syntax; Groovy+POI
-		for Run All's Excel export, replaced with a client-side ExcelJS build in apitester-ui — see
-		utils/runAllExcel.js. Don't re-add any of these without a real new user for them; grep the
-		whole src/main/mule tree for the relevant namespace/engine first to confirm there's
-		nothing this comment forgot about.
+		operations), and GraalVM JS (was here at one point for a since-removed "${...}"-via-
+		JavaScript templating engine, replaced with pure DataWeave — see templating.xml's "$(...)"
+		syntax). Don't re-add either without a real new user for them; grep the whole src/main/mule
+		tree for the relevant namespace/engine first to confirm there's nothing this comment forgot
+		about.
+
+		The Scripting module / Groovy / Apache POI ARE here, ONLY for Run All's Excel export
+		(run-all-api.xml's build-excel-report) — this went client-side (ExcelJS, in apitester-ui)
+		for a while and came back: ExcelJS 4.4.0's data-bar conditional formatting corrupts real
+		Excel files (confirmed open/unfixed upstream bug, exceljs#3015 — see build-excel-report's
+		own comment), so the export is server-side again, using a real POI XDDF bar chart instead
+		of that broken code path. Don't re-migrate this to the frontend without checking that issue
+		is actually fixed in whatever exceljs version would be pinned at the time.
 	-->
 
 	<properties>
@@ -54,6 +60,41 @@
 			<version>23.26.3.0.0</version>
 		</dependency>
 
+		<!-- Scripting module — ONLY user is run-all-api.xml's build-excel-report (engine="groovy").
+			 No dedicated "Java module" connector on the public MuleSoft repo (only the private,
+			 credential-gated Anypoint Exchange one, which isn't reachable here), so this is also
+			 how Groovy gets a way to call POI's Java API directly. -->
+		<dependency>
+			<groupId>org.mule.modules</groupId>
+			<artifactId>mule-scripting-module</artifactId>
+			<version>2.1.1</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+
+		<!-- Groovy — the Scripting module's "groovy" engine, used ONLY for Run All's Excel export
+			 (build-excel-report): POI's object-construction-heavy API reads far better as real
+			 Groovy code than as DataWeave, and Groovy runs on the JVM so it can use POI directly. -->
+		<dependency>
+			<groupId>org.apache.groovy</groupId>
+			<artifactId>groovy</artifactId>
+			<version>4.0.33</version>
+		</dependency>
+		<!-- Registers "groovy" as a JSR-223 ScriptEngine name (the plain groovy jar alone doesn't) —
+			 needed for the Scripting module's engine="groovy" to resolve at all. -->
+		<dependency>
+			<groupId>org.apache.groovy</groupId>
+			<artifactId>groovy-jsr223</artifactId>
+			<version>4.0.33</version>
+		</dependency>
+
+		<!-- Apache POI — Run All consolidated report xlsx export, same approach/version as
+			 apitester-app's own ExcelReportService. -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.2.5</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.mule.connectors</groupId>
 			<artifactId>mule-http-connector</artifactId>
@@ -79,6 +120,18 @@
 						<sharedLibrary>
 							<groupId>com.oracle.database.jdbc</groupId>
 							<artifactId>ojdbc11</artifactId>
+						</sharedLibrary>
+						<sharedLibrary>
+							<groupId>org.apache.poi</groupId>
+							<artifactId>poi-ooxml</artifactId>
+						</sharedLibrary>
+						<sharedLibrary>
+							<groupId>org.apache.groovy</groupId>
+							<artifactId>groovy</artifactId>
+						</sharedLibrary>
+						<sharedLibrary>
+							<groupId>org.apache.groovy</groupId>
+							<artifactId>groovy-jsr223</artifactId>
 						</sharedLibrary>
 					</sharedLibraries>
 					<classifier>mule-application</classifier>

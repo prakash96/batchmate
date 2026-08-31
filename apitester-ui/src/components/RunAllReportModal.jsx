@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react';
 import { useRunAllStore } from '../store/runAllStore';
 import { C, btnStyle, primaryBtnStyle } from '../theme';
 import ResponseViewer from './ResponseViewer';
-import { downloadRunAllExcel } from '../utils/runAllExcel';
 
 /** Shows a collection's "Run All" consolidated report — the last persisted one on open (or
  *  triggers+shows a fresh run when opened via the "▶ Run All" sidebar button, see autoRun).
  *  Each main request's row expands into the SAME ResponseViewer used for a single Send — its
  *  stored "fullResult" is exactly what RequestExecutionService.run() returned for that request. */
 export default function RunAllReportModal({ collectionId, collectionName, onClose, autoRun }) {
-    const { runAll, fetchLastReport } = useRunAllStore();
+    const { runAll, fetchLastReport, downloadExcel } = useRunAllStore();
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
     const [running, setRunning] = useState(false);
@@ -53,12 +52,13 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
         }
     };
 
-    // Built entirely client-side (ExcelJS) from the SAME report object already loaded above —
-    // no backend round trip, see utils/runAllExcel.js.
+    // Built server-side (run-all-api.xml's build-excel-report, Groovy + POI) — GET .../excel
+    // streams the xlsx back; see runAllStore.js's downloadExcel for why this isn't client-side
+    // ExcelJS anymore.
     const doDownload = async () => {
         if (!report) return;
         setExporting(true);
-        try { await downloadRunAllExcel(report); } catch (e) { setError(e.message); } finally { setExporting(false); }
+        try { await downloadExcel(collectionId); } catch (e) { setError(e.message); } finally { setExporting(false); }
     };
 
     const results = report?.results || [];
