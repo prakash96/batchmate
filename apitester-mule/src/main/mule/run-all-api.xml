@@ -13,11 +13,15 @@
 
     <!-- Mirrors CollectionRunController.java's /collections/{id}/run-all endpoints. "Main request"
          = one no other request anywhere calls via a Call Request step (in preRequest OR
-         postResponse) — see the DataWeave in run-all below. Each main request is re-run via the
-         SAME loopback-HTTP mechanism call-request-step uses (a genuine top-level call, not the
-         nested-headers form, so each main request's own Input Data Set setting is still honored).
-         Runs are sequential (<foreach>, not scatter-gather) for the same reason call-request-step's
-         own nested calls are sequential — see execution-engine.xml's file-level comment. -->
+         postResponse) — see the DataWeave in run-all below. Each main request is re-run via
+         <flow-ref name="run-request"> — execution-engine.xml's own genuine-top-level-call flow,
+         same one requests-api.xml's run-request-http flow-refs into for a single Send — NOT
+         run-single or run-nested-request directly, so each main request's own Input Data Set
+         setting is still honored (run-nested-request explicitly skips that check; see its own
+         comment). No loopback HTTP call here anymore, matching execution-engine.xml's own
+         call-request-step — see that file's header comment for the full loopback-vs-flow-ref
+         writeup. Runs are still sequential (<foreach>, not scatter-gather), for the same reason
+         nested Call Request chains are: see execution-engine.xml's file-level comment. -->
 
     <flow name="run-all">
         <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/run-all" allowedMethods="POST" doc:name="POST .../run-all"/>
@@ -51,26 +55,28 @@ reqs filter ((r) -> (scopeIds contains r.collection_id) and !(calledIds contains
         <set-variable variableName="mainRequests" value="#[payload]" doc:name="mainRequests"/>
         <set-variable variableName="raResults" value="#[[]]"/>
 
-        <foreach collection="#[vars.mainRequests]" doc:name="Run each main request (loopback, sequential)">
-            <!-- Capture the loop item BEFORE the http:request call overwrites payload with the
-                 callee's own response body. -->
+        <foreach collection="#[vars.mainRequests]" doc:name="Run each main request (flow-ref, sequential)">
+            <!-- Capture the loop item BEFORE the flow-ref overwrites payload with run-request's
+                 own result. -->
             <set-variable variableName="raCurrentItem" value="#[payload]" doc:name="current item"/>
             <try doc:name="Run one (never throw — reported as a failed entry instead)">
-                <http:request method="POST" url="#['http://localhost:' ++ (p('listener.port') as String) ++ '/requests/' ++ vars.raCurrentItem.id ++ '/run']" config-ref="Loopback_Request_config" doc:name="Loopback run">
-                    <http:body><![CDATA[#[output application/json --- {}]]]></http:body>
-                    <http:headers><![CDATA[#[{"Content-Type": "application/json"}]]]></http:headers>
-                    <http:response-validator>
-                        <http:success-status-code-validator values="0..599"/>
-                    </http:response-validator>
-                </http:request>
+                <!-- Mirrors requests-api.xml's run-request-http: that flow sets these same two
+                     vars from the inbound HTTP request/body before its own flow-ref into
+                     run-request — this is that same call, just without a real HTTP hop to get
+                     there. No caller-vars/depth/chain vars to seed here (unlike
+                     run-nested-request): run-request sets rsDepth/rsChain/rsCallerVars etc. to
+                     their genuine-top-level-call values itself, unconditionally, every time it
+                     runs — see its own file-level comment. -->
+                <set-variable variableName="requestId" value="#[vars.raCurrentItem.id]" doc:name="requestId"/>
+                <set-variable variableName="overrideVars" value="#[{}]" doc:name="overrideVars"/>
+                <flow-ref name="run-request" doc:name="Run (execution-engine.xml)"/>
                 <ee:transform doc:name="Build result entry">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
-// http:request already parses a Content-Type: application/json response into a structured
-// value — read() (String/Binary -> Object) would reject that Object outright (see
-// call-request-step's identical "Parse callee result" transform in execution-engine.xml).
-var runResult = if (payload is String or payload is Binary) read(payload, "application/json") else payload
+// run-request's own payload IS the result already — a real DataWeave object, not JSON text
+// needing read() the way the old loopback http:request's response body sometimes did.
+var runResult = payload
 fun checksOf(r) = if (r.iterating == true) flatten((r.iterations default []) map ((it) -> (it.checks default []))) else (r.checks default [])
 var checks = checksOf(runResult)
 var checksFailed = sizeOf(checks filter ((c) -> c.passed == false))

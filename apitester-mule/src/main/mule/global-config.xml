@@ -31,15 +31,14 @@
         </http:request-connection>
     </http:request-config>
 
-    <!-- Loopback-only config for the Call Request feature's self-call (execution-engine.xml's
-         call-request-step posts to its own http://localhost:${listener.port}/requests/{id}/run).
-         HTTP_Request_config above is pinned to protocol="HTTPS" for real (mostly TLS) target
-         endpoints; HTTP_Listener_config has no TLS context at all, so a loopback call routed
-         through the HTTPS-pinned config mismatches its own plain-HTTP listener. Kept as a separate
-         config so this doesn't change behavior for actual target-endpoint calls. -->
-    <http:request-config name="Loopback_Request_config" doc:name="Loopback HTTP Request config (Call Request self-call)" responseTimeout="60000">
-        <http:request-connection protocol="HTTP" />
-    </http:request-config>
+    <!-- No loopback HTTP config anymore — execution-engine.xml's call-request-step and
+         run-all-api.xml's run-all flow both used to POST back to this app's own
+         /requests/{id}/run over a plain-HTTP loopback connection (a separate config from
+         HTTP_Request_config above, since that one's pinned to protocol="HTTPS" for real target
+         endpoints and this app's own listener has no TLS context). Both now reach that same logic
+         via <flow-ref name="run-request">/run-single instead — no network hop, so no connection
+         config needed for it at all. Don't re-add a loopback http:request-config without a real
+         new user for it. -->
 
     <!-- Persistence — Oracle ONLY (see pom.xml/schema.sql's file comments). Unlike H2, there's no
          "run schema.sql automatically" trick here — run schema.sql once against this schema/user
