@@ -173,6 +173,12 @@ public class RequestExecutionService {
             Map<String, Object> iterResult = run(requestId, overrideVars, 0, new LinkedHashSet<>(), globalVars, seed.body, seed.headers);
             Map<String, Object> withIndex = new LinkedHashMap<>(iterResult);
             withIndex.put("iterationIndex", index);
+            // The Input Data Set entry's own scenario name (e.g. "SOURCE_ID" empty string" — see
+            // swaggerImport.js's negativeVariantsForSchema) — shown by apitester-ui instead of a
+            // bare "Iteration N" wherever this iteration's result is displayed. Absent/blank →
+            // null, same as it was never set (ResponseViewer falls back to "Iteration N" itself).
+            String scenarioName = entry.path("name").asText(null);
+            if (scenarioName != null && !scenarioName.isBlank()) withIndex.put("scenarioName", scenarioName);
             iterations.add(withIndex);
             if (!"success".equals(iterResult.get("status"))) anyFailed = true;
             index++;

@@ -170,6 +170,30 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0) {
         }
     }
 
+    // A couple of identifier fields that recur across this org's own APIs — SOURCE_ID and
+    // REQUEST_REFERENCE_NUMBER (the latter already seen in real production request definitions)
+    // — get their own dedicated negative variants regardless of what the schema itself declares:
+    // specs commonly leave these as a bare `type: string` with no minLength/maxLength/pattern, so
+    // the constraint-based loop above produces nothing for them even though they're exactly the
+    // fields worth testing missing/empty/null/wrong-type against. Matched case-insensitively
+    // (schemas vary between SOURCE_ID/sourceId/source_id for the "same" field) and only for
+    // properties that actually exist on THIS schema.
+    const CRITICAL_FIELD_NAMES = ['SOURCE_ID', 'REQUEST_REFERENCE_NUMBER'];
+    for (const key of Object.keys(props)) {
+        if (!CRITICAL_FIELD_NAMES.some(n => n.toLowerCase() === key.toLowerCase())) continue;
+        const fieldSchema = deref(spec, props[key]);
+        if (!required.includes(key)) {
+            // Only add this if the required-field loop above didn't already cover the exact
+            // same "omit this key" case.
+            const rest = { ...positive };
+            delete rest[key];
+            variants.push({ label: `Missing "${key}"`, payload: rest });
+        }
+        variants.push({ label: `"${key}" empty string`, payload: { ...positive, [key]: '' } });
+        variants.push({ label: `"${key}" null`, payload: { ...positive, [key]: null } });
+        variants.push({ label: `"${key}" wrong type`, payload: { ...positive, [key]: wrongTypeValue(fieldSchema.type || 'string') } });
+    }
+
     if (!variants.length) {
         const keys = Object.keys(props);
         if (keys.length) {

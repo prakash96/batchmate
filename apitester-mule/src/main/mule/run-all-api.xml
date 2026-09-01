@@ -230,6 +230,10 @@ fun truncate(s) = if (s == null) '' else (if (sizeOf(s) > 30000) (substring(s, 0
 // sentBody/response.body are already serialized JSON text coming out of the app — pass those
 // straight through; only actually re-encode real objects (headers, the Call Request log maps).
 fun toJsonStr(v) = if (v == null) '' else (if (v is String) v else write(v, 'application/json'))
+// The Input Data Set entry's own scenario name (e.g. "SOURCE_ID" empty string" — see
+// swaggerImport.js's negativeVariantsForSchema) — falls back to a bare "Iteration N" only for an
+// entry with no name (or a report generated before execution-engine.xml started setting it).
+fun iterLabelOf(it, idx) = it.scenarioName default ('Iteration ' ++ ((idx + 1) as String))
 
 var summaryRows = [
     { Metric: 'Total Requests', Value: total },
@@ -256,7 +260,7 @@ var detailedRows =
 // the MAIN http call of every request (one row per iteration for an iterating request).
 fun reqRespEntriesOf(entry) =
     if (entry.fullResult.iterating == true)
-        (entry.fullResult.iterations default []) map ((it, idx) -> { name: entry.requestName default '', iterLabel: 'Iteration ' ++ ((idx + 1) as String), rr: it })
+        (entry.fullResult.iterations default []) map ((it, idx) -> { name: entry.requestName default '', iterLabel: iterLabelOf(it, idx), rr: it })
     else
         [{ name: entry.requestName default '', iterLabel: '', rr: entry.fullResult }]
 var reqRespBase = (flatten(results map ((entry) -> reqRespEntriesOf(entry)))) map ((x) -> {
@@ -298,7 +302,7 @@ fun stepsOf(entry) = do {
     var name = entry.requestName default ''
     ---
     if (fr.iterating == true)
-        flatten((fr.iterations default []) map ((it, idx) -> stepRowsOf(name, 'Iteration ' ++ ((idx + 1) as String), it.preRequestLog, it.postResponseLog)))
+        flatten((fr.iterations default []) map ((it, idx) -> stepRowsOf(name, iterLabelOf(it, idx), it.preRequestLog, it.postResponseLog)))
     else
         stepRowsOf(name, '', fr.preRequestLog, fr.postResponseLog)
 }
@@ -328,7 +332,7 @@ fun checksOf(entry) = do {
     var name = entry.requestName default ''
     ---
     if (fr.iterating == true)
-        flatten((fr.iterations default []) map ((it, idx) -> checkRowsOf(name, 'Iteration ' ++ ((idx + 1) as String), it.checks)))
+        flatten((fr.iterations default []) map ((it, idx) -> checkRowsOf(name, iterLabelOf(it, idx), it.checks)))
     else
         checkRowsOf(name, '', fr.checks)
 }

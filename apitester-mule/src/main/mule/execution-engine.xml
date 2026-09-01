@@ -84,6 +84,12 @@
         <choice doc:name="Iterating?">
             <when expression="#[vars.reqDef.inputSource == 'dataset' and sizeOf(vars.dataSets) > 0]">
                 <foreach collection="#[vars.dataSets]" doc:name="For each Input Data Set entry">
+                    <!-- Captured BEFORE anything below overwrites payload (eval-template/
+                         run-single both do) — the entry's own scenario name (e.g. "SOURCE_ID"
+                         empty string" — see swaggerImport.js's negativeVariantsForSchema), shown
+                         by apitester-ui/the xlsx export instead of a bare "Iteration N" wherever
+                         this iteration's result is displayed. null for an entry with no name. -->
+                    <set-variable variableName="etName" value="#[payload.name default null]" doc:name="entry scenario name"/>
                     <set-variable variableName="etTemplate" value="#[payload.body default '']" doc:name="entry body template"/>
                     <set-variable variableName="etRaw" value="#[false]" doc:name="stringify"/>
                     <set-variable variableName="etVars" value="#[vars.overrideVars default {}]" doc:name="entry vars"/>
@@ -97,7 +103,7 @@
                     <set-variable variableName="rsDepth" value="#[0]" doc:name="fresh depth per iteration"/>
                     <set-variable variableName="rsCallerVars" value="#[{}]" doc:name="fresh — no caller vars for a top-level iteration"/>
                     <flow-ref name="run-single" doc:name="Run one iteration"/>
-                    <set-variable variableName="iterations" value="#[(vars.iterations default []) ++ [(vars.rsResult ++ {iterationIndex: sizeOf(vars.iterations default [])})]]" doc:name="accumulate iteration"/>
+                    <set-variable variableName="iterations" value="#[(vars.iterations default []) ++ [(vars.rsResult ++ {iterationIndex: sizeOf(vars.iterations default []), scenarioName: vars.etName})]]" doc:name="accumulate iteration"/>
                 </foreach>
                 <ee:transform doc:name="Wrap as iterating batch">
                     <ee:message>

@@ -50,7 +50,7 @@ function IterationsList({ iterations }) {
                             }}
                         >
                             <span style={{ fontSize: 10, color: C.textFaint, transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▶</span>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>Iteration {i + 1}</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>{r.scenarioName || `Iteration ${i + 1}`}</span>
                             <span style={{
                                 fontSize: 11, fontWeight: 700, color: statusColor(r.response?.status),
                                 background: `${statusColor(r.response?.status)}18`, borderRadius: 6, padding: '1px 8px',
