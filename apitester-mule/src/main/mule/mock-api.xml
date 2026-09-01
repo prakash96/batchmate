@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- Mock server — a hand-defined set of canned HTTP responses this app itself serves, so a
+         request under test can point at http://<this app>/mock/... instead of a real backend that
+         may not exist yet (or that you don't want to hit repeatedly). Deliberately GLOBAL, not
+         scoped to a workspace or collection — one shared namespace, one flat list of endpoints,
+         same as e.g. connections-api.xml's saved connections. Manually defined only (method, path,
+         status, headers, body) — no import-from-OpenAPI here; that's a different, separate ask.
+
+         Matching (see serve-mock below): "path" is a template like /users/{id} — a {segment}
+         matches ANY literal value in that position. The incoming request's path (everything after
+         /mock) is compared segment-by-segment against every ENABLED endpoint whose method matches
+         (exact verb, or a stored '*' meaning "any"); among matches, the one with the most literal
+         (non-{}) segments wins — /users/123 prefers a stored "/users/{id}" over a stored
+         "/users/{id}/{extra}" only because the LENGTH already has to match first, but between two
+         same-length templates a more literal one (fewer {} segments) wins, e.g. "/users/active"
+         beats "/users/{id}" for an incoming "/users/active". No artificial response delay — Mule
+         core has no sleep/wait operation, and adding one back via the Scripting module just for
+         this would reintroduce the exact dependency this app spent two rounds of cleanup removing
+         (see pom.xml's own file comment) for a feature nobody asked for yet. -->
+
+    <flow name="list-mock-endpoints">
+        <http:listener config-ref="HTTP_Listener_config" path="/mock-endpoints" allowedMethods="GET" doc:name="GET /mock-endpoints"/>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select all mock endpoints">
+            <db:sql>SELECT id, name, method, path, status_code, content_type, response_headers_json, response_body, enabled FROM syskm.mock_endpoints ORDER BY path, method</db:sql>
+        </db:select>
+        <ee:transform doc:name="Rows to endpoint objects">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.rows map ((r) -> {
+    id: r.id,
+    name: r.name,
+    method: r.method,
+    path: r.path,
+    statusCode: r.status_code,
+    contentType: r.content_type,
+    responseHeaders: read(r.response_headers_json default '{}', 'application/json'),
+    responseBody: r.response_body default '',
+    enabled: r.enabled == 'Y'
+})]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="create-mock-endpoint">
+        <http:listener config-ref="HTTP_Listener_config" path="/mock-endpoints" allowedMethods="POST" doc:name="POST /mock-endpoints"/>
+        <set-variable variableName="newId" value="#[uuid()]" doc:name="new id"/>
+        <db:insert config-ref="Database_Config" doc:name="Insert mock endpoint">
+            <db:sql><![CDATA[INSERT INTO syskm.mock_endpoints (id, name, method, path, status_code, content_type, response_headers_json, response_body, enabled)
+                VALUES (:id, :name, :method, :path, :statusCode, :contentType, :responseHeaders, :responseBody, :enabled)]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: vars.newId,
+                name: payload.name default 'New mock endpoint',
+                method: (payload.method default '*') as String,
+                path: payload.path default '/',
+                statusCode: payload.statusCode default 200,
+                contentType: payload.contentType default 'application/json',
+                responseHeaders: write(payload.responseHeaders default {}, 'application/json'),
+                responseBody: payload.responseBody default '',
+                enabled: if ((payload.enabled default true) == true) 'Y' else 'N'
+            }]]]></db:input-parameters>
+        </db:insert>
+        <ee:transform doc:name="Response — the new endpoint's id">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0 output application/json --- {id: vars.newId}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="save-mock-endpoint">
+        <http:listener config-ref="HTTP_Listener_config" path="/mock-endpoints/{id}/save" allowedMethods="POST" doc:name="POST /mock-endpoints/{id}/save"/>
+        <!-- Oracle MERGE (upsert) — same pattern as requests-api.xml's save-request, so editing an
+             endpoint that was somehow deleted out from under the UI (another tab, a stale page)
+             just recreates it instead of erroring. -->
+        <db:update config-ref="Database_Config" doc:name="Upsert mock endpoint">
+            <db:sql><![CDATA[
+MERGE INTO syskm.mock_endpoints t
+USING (SELECT :id AS id, :name AS name, :method AS method, :path AS path, :statusCode AS status_code,
+              :contentType AS content_type, :responseHeaders AS response_headers_json,
+              :responseBody AS response_body, :enabled AS enabled
+       FROM DUAL) s
+ON (t.id = s.id)
+WHEN MATCHED THEN UPDATE SET
+    t.name = s.name, t.method = s.method, t.path = s.path, t.status_code = s.status_code,
+    t.content_type = s.content_type, t.response_headers_json = s.response_headers_json,
+    t.response_body = s.response_body, t.enabled = s.enabled
+WHEN NOT MATCHED THEN INSERT (id, name, method, path, status_code, content_type, response_headers_json, response_body, enabled)
+    VALUES (s.id, s.name, s.method, s.path, s.status_code, s.content_type, s.response_headers_json, s.response_body, s.enabled)
+]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: attributes.uriParams.id,
+                name: payload.name default 'New mock endpoint',
+                method: (payload.method default '*') as String,
+                path: payload.path default '/',
+                statusCode: payload.statusCode default 200,
+                contentType: payload.contentType default 'application/json',
+                responseHeaders: write(payload.responseHeaders default {}, 'application/json'),
+                responseBody: payload.responseBody default '',
+                enabled: if ((payload.enabled default true) == true) 'Y' else 'N'
+            }]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0 output text/plain --- "Mock endpoint saved"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="delete-mock-endpoint">
+        <http:listener config-ref="HTTP_Listener_config" path="/mock-endpoints/{id}" allowedMethods="DELETE" doc:name="DELETE /mock-endpoints/{id}"/>
+        <db:delete config-ref="Database_Config" doc:name="Delete mock endpoint">
+            <db:sql>DELETE FROM syskm.mock_endpoints WHERE id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.id}]]]></db:input-parameters>
+        </db:delete>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0 output text/plain --- "Mock endpoint deleted"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- The mock server itself — catches every method under /mock/** (no allowedMethods filter, so
+         GET/POST/PUT/PATCH/DELETE/... all land here alike). Matches the request against every
+         ENABLED stored endpoint whose method is an exact match or '*'; on no match, a 404 with a
+         small JSON body naming what was looked up (so "why didn't my mock fire" is answerable from
+         the response alone, not just server logs). -->
+    <flow name="serve-mock">
+        <http:listener config-ref="HTTP_Listener_config" path="/mock/**" doc:name="ANY /mock/**">
+            <http:response statusCode="#[vars.mockStatus default 200]">
+                <http:headers><![CDATA[#[vars.mockHeaders default {}]]]></http:headers>
+            </http:response>
+        </http:listener>
+        <set-variable variableName="mockPath" value="#[if (startsWith(attributes.requestPath, '/mock')) substring(attributes.requestPath, 5, sizeOf(attributes.requestPath)) else attributes.requestPath]" doc:name="path after /mock"/>
+        <db:select config-ref="Database_Config" target="candidateRows" doc:name="Select enabled endpoints for this method">
+            <db:sql>SELECT id, name, method, path, status_code, content_type, response_headers_json, response_body FROM syskm.mock_endpoints WHERE enabled = 'Y' AND (method = :method OR method = '*')</db:sql>
+            <db:input-parameters><![CDATA[#[{method: attributes.method}]]]></db:input-parameters>
+        </db:select>
+        <ee:transform doc:name="Pick best match (or none)">
+            <ee:message>
+                <ee:variables>
+                    <ee:set-variable variableName="matched"><![CDATA[%dw 2.0
+output application/json
+fun segments(p) = (p default '') splitBy '/' filter ((s) -> s != '')
+fun isParam(seg) = startsWith(seg, '{') and endsWith(seg, '}')
+fun segMatches(tSeg, aSeg) = isParam(tSeg) or (tSeg == aSeg)
+var actualSegs = segments(vars.mockPath)
+fun templateMatches(template) = do {
+    var tSegs = segments(template)
+    ---
+    (sizeOf(tSegs) == sizeOf(actualSegs)) and isEmpty(tSegs filter ((seg, idx) -> !segMatches(seg, actualSegs[idx])))
+}
+fun specificity(template) = sizeOf(segments(template) filter ((seg) -> !isParam(seg)))
+var candidates = (vars.candidateRows default []) filter ((r) -> templateMatches(r.path))
+var ranked = candidates orderBy ((c) -> specificity(c.path) * -1)
+---
+ranked[0]]]></ee:set-variable>
+                </ee:variables>
+            </ee:message>
+        </ee:transform>
+        <choice doc:name="Matched?">
+            <when expression="#[vars.matched == null]">
+                <set-variable variableName="mockStatus" value="#[404]"/>
+                <ee:transform doc:name="No match — explain why">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: "No mock endpoint configured for this method/path",
+    method: attributes.method,
+    path: vars.mockPath
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <set-variable variableName="mockStatus" value="#[vars.matched.status_code default 200]"/>
+                <!-- content_type is its own dedicated column specifically so it always wins as
+                     THE Content-Type header — strip any Content-Type the stored headers JSON
+                     might also (redundantly) carry first, so the two can never both survive into
+                     a double header (DataWeave's ++ appends rather than overwrites on a key
+                     collision headed into a MultiMap-shaped http:headers block — see
+                     execution-engine.xml's own comment on that exact ++ behavior). -->
+                <set-variable variableName="mockHeaders" value="#[output application/json ---
+                    ((read(vars.matched.response_headers_json default '{}', 'application/json')) filterObject ((v, k) -> lower(k) != 'content-type'))
+                    ++ {'Content-Type': vars.matched.content_type default 'application/json'}]" doc:name="stored headers + content-type"/>
+                <set-payload value="#[vars.matched.response_body default '']" doc:name="raw stored body, as-is"/>
+            </otherwise>
+        </choice>
+    </flow>
+
+</mule>

@@ -5,13 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.batchmate.apitester.service.CollectionService;
 import com.batchmate.apitester.service.RequestService;
+import com.batchmate.apitester.service.WorkspaceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/collections")
@@ -19,13 +22,16 @@ public class CollectionController {
 
     private final CollectionService collectionService;
     private final RequestService    requestService;
+    private final WorkspaceService  workspaceService;
     private final ObjectMapper      objectMapper;
 
     public CollectionController(CollectionService collectionService,
                                  RequestService requestService,
+                                 WorkspaceService workspaceService,
                                  ObjectMapper objectMapper) {
         this.collectionService = collectionService;
         this.requestService    = requestService;
+        this.workspaceService  = workspaceService;
         this.objectMapper      = objectMapper;
     }
 
@@ -34,7 +40,15 @@ public class CollectionController {
     @GetMapping
     public ResponseEntity<List<ObjectNode>> listCollections() {
         try {
-            return ResponseEntity.ok(collectionService.getCollectionsWithRequests());
+            // A collection whose WORKSPACE is password-protected is withheld from this tree
+            // entirely (not merely hidden in the UI) — the only way to get it back is
+            // WorkspaceController's unlock, for this session. See CollectionService#pruneByWorkspace.
+            Set<String> lockedWorkspaceIds = workspaceService.list().stream()
+                    .filter(w -> w.path("locked").asBoolean(false))
+                    .map(w -> w.path("id").asText(null))
+                    .collect(Collectors.toSet());
+            List<ObjectNode> tree = collectionService.getCollectionsWithRequests();
+            return ResponseEntity.ok(collectionService.pruneByWorkspace(tree, wsId -> !lockedWorkspaceIds.contains(wsId)));
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -43,9 +57,10 @@ public class CollectionController {
     @PostMapping
     public ResponseEntity<ObjectNode> createCollection(@RequestBody Map<String, String> body) {
         try {
-            String name     = body.getOrDefault("name", "New Collection");
-            String parentId = body.get("parentId");
-            return ResponseEntity.ok(collectionService.createCollection(name, parentId));
+            String name        = body.getOrDefault("name", "New Collection");
+            String parentId    = body.get("parentId");
+            String workspaceId = body.get("workspaceId");
+            return ResponseEntity.ok(collectionService.createCollection(name, parentId, workspaceId));
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }

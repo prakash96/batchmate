@@ -5,6 +5,7 @@ import GlobalVarsPanel from './components/GlobalVarsPanel';
 import JsonCompareModal from './components/JsonCompareModal';
 import SwaggerPayloadModal from './components/SwaggerPayloadModal';
 import AuditLogModal from './components/AuditLogModal';
+import MockServerModal from './components/MockServerModal';
 import { useThemeStore, THEMES } from './store/themeStore';
 import { C, btnStyle, inputStyle } from './theme';
 
@@ -13,6 +14,7 @@ export default function App() {
     const [showJsonCompare, setShowJsonCompare] = useState(false);
     const [showSwaggerPayload, setShowSwaggerPayload] = useState(false);
     const [showAuditLog, setShowAuditLog] = useState(false);
+    const [showMockServer, setShowMockServer] = useState(false);
     const { theme, setTheme } = useThemeStore();
 
     // Reflects the selected theme onto <html> so every inline style built from theme.js's
@@ -44,6 +46,7 @@ export default function App() {
                     <button onClick={() => setShowJsonCompare(true)} style={btnStyle}>🔍 JSON Compare</button>
                     <button onClick={() => setShowSwaggerPayload(true)} style={btnStyle}>🧬 Swagger Payloads</button>
                     <button onClick={() => setShowAuditLog(true)} style={btnStyle}>📜 Audit Log</button>
+                    <button onClick={() => setShowMockServer(true)} style={btnStyle}>🎭 Mock Server</button>
                 </div>
             </div>
             <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
@@ -58,6 +61,7 @@ export default function App() {
             {showJsonCompare && <JsonCompareModal onClose={() => setShowJsonCompare(false)} />}
             {showSwaggerPayload && <SwaggerPayloadModal onClose={() => setShowSwaggerPayload(false)} />}
             {showAuditLog && <AuditLogModal onClose={() => setShowAuditLog(false)} />}
+            {showMockServer && <MockServerModal onClose={() => setShowMockServer(false)} />}
         </div>
     );
 }

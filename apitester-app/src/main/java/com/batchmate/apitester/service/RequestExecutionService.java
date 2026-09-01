@@ -140,7 +140,11 @@ public class RequestExecutionService {
 
         Map<String, Object> globalVars;
         try {
-            globalVars = globalVarsService.readAsMap();
+            // Global vars now come from THIS request's own workspace (via its collection) — a
+            // request whose collection has no workspace (the "Unassigned" bucket) gets none at
+            // all, matching apitester-mule's "workspace_id = :wsId never matches NULL" behavior.
+            String workspaceId = resolveWorkspaceId(reqNode.path("collectionId").asText(null));
+            globalVars = globalVarsService.readAsMap(workspaceId);
         } catch (IOException e) {
             log.warn("Failed to load global variables, proceeding with none: {}", e.getMessage());
             globalVars = Collections.emptyMap();
@@ -182,6 +186,20 @@ public class RequestExecutionService {
         batch.put("durationMs", System.currentTimeMillis() - startMs);
         batch.put("iterations", iterations);
         return batch;
+    }
+
+    /** Resolves the workspace a collection (and therefore any request in it) belongs to, or null
+     *  for an unassigned/missing collection — used to pick the right global-vars "floor" (see
+     *  GlobalVarsService's per-workspace storage) without an extra file read: CollectionService
+     *  already keeps workspaceId on the collection node returned here. */
+    private String resolveWorkspaceId(String collectionId) {
+        if (collectionId == null || collectionId.isBlank()) return null;
+        try {
+            ObjectNode col = collectionService.findCollection(collectionId);
+            return col != null ? col.path("workspaceId").asText(null) : null;
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     /**

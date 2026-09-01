@@ -59,11 +59,17 @@ public class CollectionService {
 
     // ── CRUD ─────────────────────────────────────────────────────────────────
 
-    public ObjectNode createCollection(String name, String parentId) throws IOException {
+    /** workspaceId is required in practice — the UI always creates a collection inside a
+     *  specific, already-unlocked workspace, and passes the parent's own workspaceId down for a
+     *  nested sub-folder too (so every node in a subtree carries the SAME workspaceId as its
+     *  root, an invariant #pruneByWorkspace below relies on) — mirrors apitester-mule's
+     *  collections-api.xml create-collection exactly. */
+    public ObjectNode createCollection(String name, String parentId, String workspaceId) throws IOException {
         List<ObjectNode> collections = readCollections();
         ObjectNode col = objectMapper.createObjectNode();
         col.put("id", UUID.randomUUID().toString());
         col.put("name", name);
+        if (workspaceId == null) col.putNull("workspaceId"); else col.put("workspaceId", workspaceId);
         col.set("folders", objectMapper.createArrayNode());
         col.set("variables", objectMapper.createObjectNode());
 
@@ -126,7 +132,7 @@ public class CollectionService {
     public List<ObjectNode> getCollectionsWithRequests() throws IOException {
         List<ObjectNode> collections = readCollections();
         if (collections.isEmpty()) {
-            createCollection("My Collection", null);
+            createCollection("My Collection", null, null);
             collections = readCollections();
         }
         Map<String, List<JsonNode>> byCollection = buildRequestIndex();
@@ -142,6 +148,29 @@ public class CollectionService {
             unassigned.forEach(reqArr::add);
             uncategorized.set("requests", reqArr);
             result.add(uncategorized);
+        }
+        return result;
+    }
+
+    /** Recursively drops any node (and its whole subtree — pruned along with it, since children
+     *  are nested inside) whose OWN workspaceId fails {@code keep}. Every node in a subtree
+     *  carries the SAME workspaceId as its root (see createCollection's own comment on that
+     *  invariant), so this one utility serves both call sites: locked-filtering (keep = "not a
+     *  locked workspace", used on the FULL tree by CollectionController) and unlock-scoping
+     *  (keep = "equals this one workspace", used by WorkspaceController to build the tree
+     *  unlock-workspace hands back). Operates on the AGGREGATED shape getCollectionsWithRequests()
+     *  returns (folders/requests already attached), not the raw _collections.json tree. */
+    public List<ObjectNode> pruneByWorkspace(List<ObjectNode> nodes, java.util.function.Predicate<String> keep) {
+        List<ObjectNode> result = new ArrayList<>();
+        for (ObjectNode node : nodes) {
+            String workspaceId = node.path("workspaceId").asText(null);
+            if (!keep.test(workspaceId)) continue;
+            ObjectNode copy = node.deepCopy();
+            List<ObjectNode> prunedChildren = pruneByWorkspace(toList(node.path("folders")), keep);
+            ArrayNode arr = objectMapper.createArrayNode();
+            prunedChildren.forEach(arr::add);
+            copy.set("folders", arr);
+            result.add(copy);
         }
         return result;
     }
