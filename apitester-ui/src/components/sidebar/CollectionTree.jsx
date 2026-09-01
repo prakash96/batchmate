@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useCollectionStore } from '../../store/collectionStore';
+import { useTemplateStore } from '../../store/templateStore';
 import { C, btnStyle, inputStyle, methodBadgeStyle } from '../../theme';
 import { readFileAsText, buildFoldersFromSwagger } from '../../utils/swaggerImport';
 import { buildFoldersFromPostman } from '../../utils/postmanImport';
@@ -23,6 +24,7 @@ export default function CollectionTree() {
     const [reportTarget, setReportTarget] = useState(null); // {id, name, autoRun} for RunAllReportModal
     const [newWorkspaceOpen, setNewWorkspaceOpen] = useState(false);
     const [unlockTarget, setUnlockTarget] = useState(null); // locked workspace {id, name} being unlocked
+    const [newRequestTarget, setNewRequestTarget] = useState(null); // {folderId} for NewRequestModal
 
     useEffect(() => { fetchWorkspaces(); fetchCollections(); }, []);
 
@@ -169,6 +171,7 @@ export default function CollectionTree() {
                         onImport={(kind) => triggerImport(ws.id, null, kind)}
                         onCopy={setClipboard} onPaste={pasteRequest} hasClipboard={!!clipboard}
                         onReport={(folder, autoRun) => setReportTarget({ id: folder.id, name: folder.name, autoRun })}
+                        onAddRequest={(folder) => setNewRequestTarget({ folderId: folder.id })}
                     />
                 ))}
                 {unassigned.length > 0 && (
@@ -181,6 +184,7 @@ export default function CollectionTree() {
                                 key={f.id} folder={f} depth={0}
                                 onCopy={setClipboard} onPaste={pasteRequest} hasClipboard={!!clipboard}
                                 onReport={(folder, autoRun) => setReportTarget({ id: folder.id, name: folder.name, autoRun })}
+                                onAddRequest={(folder) => setNewRequestTarget({ folderId: folder.id })}
                             />
                         ))}
                     </div>
@@ -212,11 +216,33 @@ export default function CollectionTree() {
                     onClose={() => setUnlockTarget(null)}
                 />
             )}
+            {newRequestTarget && (
+                <NewRequestModal
+                    onClose={() => setNewRequestTarget(null)}
+                    onCreate={async (name, templateId) => {
+                        const { addRequestToCollection, saveRequest } = useCollectionStore.getState();
+                        const created = await addRequestToCollection(newRequestTarget.folderId, name);
+                        if (templateId) {
+                            const { templates } = useTemplateStore.getState();
+                            const tpl = templates.find(t => t.id === templateId);
+                            if (tpl) {
+                                // A brand-new request's own preRequest/postResponse start empty, so
+                                // applying a template here is just setting them to its arrays — no
+                                // prepend/append merge needed the way SwaggerPayloadModal's
+                                // already-populated generated scenarios require.
+                                await saveRequest({ ...created, preRequest: tpl.preRequest, postResponse: tpl.postResponse });
+                            }
+                        }
+                        setActiveRequest(created.id);
+                        setNewRequestTarget(null);
+                    }}
+                />
+            )}
         </div>
     );
 }
 
-function WorkspaceRow({ workspace, collections, importing, onUnlock, onImport, onCopy, onPaste, hasClipboard, onReport }) {
+function WorkspaceRow({ workspace, collections, importing, onUnlock, onImport, onCopy, onPaste, hasClipboard, onReport, onAddRequest }) {
     const [showImportMenu, setShowImportMenu] = useState(false);
     const { addCollection, renameWorkspace, deleteWorkspace, expandedWorkspaces, setWorkspaceExpanded } = useCollectionStore();
     // Lifted into the store (not local useState) so anything created here from elsewhere — e.g.
@@ -289,6 +315,7 @@ function WorkspaceRow({ workspace, collections, importing, onUnlock, onImport, o
                         <FolderRow
                             key={f.id} folder={f} depth={0}
                             onCopy={onCopy} onPaste={onPaste} hasClipboard={hasClipboard} onReport={onReport}
+                            onAddRequest={onAddRequest}
                         />
                     ))}
                 </div>
@@ -297,7 +324,7 @@ function WorkspaceRow({ workspace, collections, importing, onUnlock, onImport, o
     );
 }
 
-function FolderRow({ folder, depth, onCopy, onPaste, hasClipboard, onReport }) {
+function FolderRow({ folder, depth, onCopy, onPaste, hasClipboard, onReport, onAddRequest }) {
     const [dragOver, setDragOver] = useState(false);
     const {
         addRequestToCollection, addCollection, renameCollection, deleteCollection, moveRequest,
@@ -314,13 +341,9 @@ function FolderRow({ folder, depth, onCopy, onPaste, hasClipboard, onReport }) {
             setFolderExpanded(folder.id, true);
         }
     };
-    const addRequest = async (e) => {
+    const addRequest = (e) => {
         e.stopPropagation();
-        const name = window.prompt('Request name', 'New Request');
-        if (name) {
-            const req = await addRequestToCollection(folder.id, name);
-            setActiveRequest(req.id);
-        }
+        onAddRequest(folder);
     };
     const rename = async (e) => {
         e.stopPropagation();
@@ -397,6 +420,7 @@ function FolderRow({ folder, depth, onCopy, onPaste, hasClipboard, onReport }) {
                         <FolderRow
                             key={f.id} folder={f} depth={depth + 1}
                             onCopy={onCopy} onPaste={onPaste} hasClipboard={hasClipboard} onReport={onReport}
+                            onAddRequest={onAddRequest}
                         />
                     ))}
                 </div>
@@ -534,6 +558,56 @@ function NewWorkspaceModal({ onClose, onCreate }) {
                 <div style={{ fontSize: 10, color: C.textFaint, marginBottom: 14 }}>
                     If set, every collection in this workspace is hidden from everyone else on this backend until the correct password is entered.
                 </div>
+                {error && <div style={{ fontSize: 11, color: C.danger, marginBottom: 10 }}>{error}</div>}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                    <button type="button" onClick={onClose} style={btnStyle}>Cancel</button>
+                    <button type="submit" disabled={saving || !name.trim()} style={{ ...btnStyle, background: C.accent, color: '#fff', opacity: saving ? 0.6 : 1 }}>
+                        {saving ? 'Creating…' : 'Create'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
+/** Replaces the old window.prompt("Request name") — same trigger (sidebar's "+req"), now with an
+ *  optional template to seed the new request's Pre-Request/Post-Response from (see
+ *  templates-api.xml's own file comment; templateId is looked up and applied by the caller). */
+function NewRequestModal({ onClose, onCreate }) {
+    const { templates, fetchTemplates } = useTemplateStore();
+    const [name, setName] = useState('New Request');
+    const [templateId, setTemplateId] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => { if (templates.length === 0) fetchTemplates().catch(() => {}); }, []);
+
+    const submit = async (e) => {
+        e.preventDefault();
+        if (!name.trim()) return;
+        setSaving(true);
+        setError(null);
+        try {
+            await onCreate(name.trim(), templateId || null);
+        } catch (err) {
+            setError(err.message);
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="at-overlay" style={overlayStyle}>
+            <form onSubmit={submit} className="at-modal" style={{ background: C.panel, border: `1px solid ${C.border}`, borderRadius: C.radius, boxShadow: C.shadowLg, width: 340, padding: 20 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 14 }}>New Request</div>
+                <label style={{ fontSize: 10, color: C.textFaint, display: 'block', marginBottom: 4 }}>NAME</label>
+                <input autoFocus style={{ ...inputStyle, width: '100%', marginBottom: 12 }} value={name} onChange={e => setName(e.target.value)} />
+                <label style={{ fontSize: 10, color: C.textFaint, display: 'block', marginBottom: 4 }}>
+                    TEMPLATE <span style={{ fontWeight: 400, fontStyle: 'italic' }}>(optional — seeds Pre-Request/Post-Response)</span>
+                </label>
+                <select style={{ ...inputStyle, width: '100%', marginBottom: 14 }} value={templateId} onChange={e => setTemplateId(e.target.value)}>
+                    <option value="">No template</option>
+                    {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
                 {error && <div style={{ fontSize: 11, color: C.danger, marginBottom: 10 }}>{error}</div>}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                     <button type="button" onClick={onClose} style={btnStyle}>Cancel</button>

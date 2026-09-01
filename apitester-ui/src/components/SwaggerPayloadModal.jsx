@@ -5,6 +5,7 @@ import {
     exampleForSchema, negativeVariantsForSchema, readFileAsText,
 } from '../utils/swaggerImport';
 import { useCollectionStore } from '../store/collectionStore';
+import { useTemplateStore } from '../store/templateStore';
 import UnlockWorkspaceModal from './UnlockWorkspaceModal';
 
 // DataWeave, not JS — see templating.xml's file comment. Only the NEGATIVE-variant request (see
@@ -43,8 +44,14 @@ export default function SwaggerPayloadModal({ onClose }) {
         setWorkspaceExpanded, expandPathToCollection,
     } = useCollectionStore();
     const [targetWorkspaceId, setTargetWorkspaceId] = useState(null);
+    const { templates, fetchTemplates } = useTemplateStore();
+    // groupKind ('positive', 'general', or a dedicated field name like 'SOURCE_ID') -> templateId.
+    // One picker per KIND, shared across every operation that produces it — see the group-kind
+    // picker row below and its own comment for why (not one picker per literal request/operation).
+    const [templateByGroup, setTemplateByGroup] = useState({});
 
     useEffect(() => { if (workspaces.length === 0) fetchWorkspaces(); }, []);
+    useEffect(() => { if (templates.length === 0) fetchTemplates().catch(() => {}); }, []);
 
     // The collection containing whatever request is currently open in the main panel, if any —
     // "current collection" for the "Add to current collection" button below. Absent (no active
@@ -109,40 +116,84 @@ export default function SwaggerPayloadModal({ onClose }) {
             if (!body?.schema) { skipped++; continue; }
             const url = concreteUrlFor(spec, op, baseUrl);
             const positive = exampleForSchema(spec, body.schema);
-            out.push({ url, method: op.method, scenario: 'Positive (schema-valid)', input: positive, isPositive: true });
+            out.push({ url, method: op.method, scenario: 'Positive (schema-valid)', input: positive, isPositive: true, group: 'general' });
             for (const v of negativeVariantsForSchema(spec, body.schema)) {
-                out.push({ url, method: op.method, scenario: v.label, input: v.payload, isPositive: false });
+                out.push({ url, method: op.method, scenario: v.label, input: v.payload, isPositive: false, group: v.group || 'general' });
             }
         }
         return { rows: out, totalOps: ops.length, skippedCount: skipped };
     }, [spec]);
 
     // Same rows, grouped by operation (method+url) — one group per operation, split into its
-    // single positive scenario and its (possibly several) negative variants. Used by "create
-    // requests" below and by the Apitester-format export (both create real Apitester request
-    // objects); the on-screen table/Excel export stay flat (one row per scenario) since those are
-    // for human review, not for round-tripping.
+    // single positive scenario and its negative variants, which are further split by their OWN
+    // "group" tag (see negativeVariantsForSchema's own comment): 'general' for the generic
+    // required/minLength/maxLength/pattern violations, or a specific field's name (currently
+    // SOURCE_ID/REQUEST_REFERENCE_NUMBER) for that field's own dedicated variants — each distinct
+    // group becomes its OWN separate request below, not one shared "(negative)" request covering
+    // everything. Used by "create requests" below and by the Apitester-format export (both create
+    // real Apitester request objects); the on-screen table/Excel export stay flat (one row per
+    // scenario) since those are for human review, not for round-tripping.
     const groupedByOperation = useMemo(() => {
         const map = new Map();
         for (const r of rows) {
             const key = `${r.method} ${r.url}`;
-            if (!map.has(key)) map.set(key, { method: r.method, url: r.url, positive: null, negatives: [] });
+            if (!map.has(key)) map.set(key, { method: r.method, url: r.url, positive: null, negativesByGroup: new Map() });
             const g = map.get(key);
-            if (r.isPositive) g.positive = r; else g.negatives.push(r);
+            if (r.isPositive) { g.positive = r; continue; }
+            const groupKey = r.group || 'general';
+            if (!g.negativesByGroup.has(groupKey)) g.negativesByGroup.set(groupKey, []);
+            g.negativesByGroup.get(groupKey).push(r);
         }
         return [...map.values()];
     }, [rows]);
 
-    // Two DIFFERENT requests per operation, not one shared request — the positive scenario gets
-    // its own plain request with a concrete body (nothing to iterate, so no Input Data Set at
-    // all); every negative variant for that same operation still shares ONE separate request via
-    // Input Data Set entries + PAYLOAD_TEMPLATE, same as before, just no longer mixed in with the
-    // positive case.
+    // Every distinct group KIND seen across every operation — 'positive' plus whatever
+    // negativesByGroup keys show up ('general', and any dedicated field names). One template
+    // picker per kind (below), shared across all operations that produce it, rather than one per
+    // individual operation — a spec with 20 operations would otherwise need 20 near-identical
+    // pickers per kind for no real benefit; picking a template for "SOURCE_ID" once applies it to
+    // every operation's SOURCE_ID request.
+    const groupKinds = useMemo(() => {
+        const kinds = new Set();
+        for (const g of groupedByOperation) {
+            if (g.positive) kinds.add('positive');
+            for (const k of g.negativesByGroup.keys()) kinds.add(k);
+        }
+        // 'positive' and 'general' first (most common), then the rest alphabetically.
+        return [...kinds].sort((a, b) => {
+            const rank = (k) => (k === 'positive' ? 0 : k === 'general' ? 1 : 2);
+            return rank(a) - rank(b) || a.localeCompare(b);
+        });
+    }, [groupedByOperation]);
+
+    const groupKindLabel = (kind) => (kind === 'positive' ? 'Positive' : kind === 'general' ? 'General negative' : kind);
+
+    // Template's preRequest is PREPENDED before the entry's own (empty, for every generated
+    // scenario here) preRequest; postResponse is APPENDED after — see templates-api.xml's own
+    // comment on this exact merge choice.
+    const applyTemplate = (entry, kind) => {
+        const templateId = templateByGroup[kind];
+        const tpl = templateId ? templates.find(t => t.id === templateId) : null;
+        if (!tpl) return entry;
+        return {
+            ...entry,
+            preRequest: [...(tpl.preRequest || []), ...(entry.preRequest || [])],
+            postResponse: [...(entry.postResponse || []), ...(tpl.postResponse || [])],
+        };
+    };
+
+    // Several DIFFERENT requests per operation, not one shared request: the positive scenario
+    // gets its own plain request with a concrete body (nothing to iterate, so no Input Data Set
+    // at all); every negative variant still reaches its target via Input Data Set entries +
+    // PAYLOAD_TEMPLATE, but now ONE separate request PER GROUP — the generic violations in
+    // "(negative)", and SOURCE_ID/REQUEST_REFERENCE_NUMBER each in their own
+    // "(negative - <field>)" request, so a field important enough to get dedicated scenarios also
+    // gets reviewed on its own instead of buried in a long list of unrelated field violations.
     const buildRequestsFromGroups = (groups) => {
         const out = [];
         for (const g of groups) {
             if (g.positive) {
-                out.push({
+                out.push(applyTemplate({
                     name: `${g.method} ${g.url} (positive)`.slice(0, 120),
                     preRequest: [],
                     request: {
@@ -152,11 +203,13 @@ export default function SwaggerPayloadModal({ onClose }) {
                     },
                     postResponse: [],
                     inputDataSets: [],
-                });
+                }, 'positive'));
             }
-            if (g.negatives.length > 0) {
-                out.push({
-                    name: `${g.method} ${g.url} (negative)`.slice(0, 120),
+            for (const [groupKey, negatives] of g.negativesByGroup) {
+                if (!negatives.length) continue;
+                const suffix = groupKey === 'general' ? 'negative' : `negative - ${groupKey}`;
+                out.push(applyTemplate({
+                    name: `${g.method} ${g.url} (${suffix})`.slice(0, 120),
                     preRequest: [],
                     request: {
                         method: g.method, url: g.url, params: [],
@@ -164,8 +217,8 @@ export default function SwaggerPayloadModal({ onClose }) {
                         bodyMode: 'raw-json', body: PAYLOAD_TEMPLATE, inputSource: 'dataset',
                     },
                     postResponse: [],
-                    inputDataSets: g.negatives.map(s => ({ name: s.scenario, body: JSON.stringify(s.input, null, 2), headers: [] })),
-                });
+                    inputDataSets: negatives.map(s => ({ name: s.scenario, body: JSON.stringify(s.input, null, 2), headers: [] })),
+                }, groupKey));
             }
         }
         return out;
@@ -322,9 +375,10 @@ export default function SwaggerPayloadModal({ onClose }) {
     // Apitester's own collection/request shape (same {name, requests:[{name, request:{...},
     // inputDataSets:[...]}]} shape import-collections/buildFoldersFromSwagger already produce),
     // so this stays consistent with — and can feed straight back into — that same import path.
-    // One request per operation (see groupedByOperation/buildRequestsFromGroups above), not one
-    // per scenario — every scenario for an operation lands as one of that request's own Input
-    // Data Set entries instead.
+    // A handful of requests per operation, not one per scenario (see groupedByOperation/
+    // buildRequestsFromGroups above) — positive, general-negative, and one per dedicated field
+    // group each land as their own request, with every scenario in that group as one of its own
+    // Input Data Set entries.
     const exportApitesterFormat = () => {
         const folder = {
             name: spec?.info?.title || 'Swagger Scenarios',
@@ -373,6 +427,28 @@ export default function SwaggerPayloadModal({ onClose }) {
                                 <button onClick={exportApitesterFormat} style={btnStyle} disabled={!rows.length}>⬇ Apitester format</button>
                             </div>
                         </div>
+
+                        {groupKinds.length > 0 && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10,
+                                padding: 10, border: `1px solid ${C.border}`, borderRadius: C.radiusSm, background: C.surface,
+                            }}>
+                                <span style={{ fontSize: 10, color: C.textFaint, fontWeight: 700, letterSpacing: '0.03em' }}>TEMPLATE PER SCENARIO</span>
+                                {groupKinds.map(kind => (
+                                    <label key={kind} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: C.textDim }}>
+                                        {groupKindLabel(kind)}
+                                        <select
+                                            style={{ ...inputStyle, padding: '3px 6px', fontSize: 11 }}
+                                            value={templateByGroup[kind] || ''}
+                                            onChange={e => setTemplateByGroup(m => ({ ...m, [kind]: e.target.value }))}
+                                        >
+                                            <option value="">No template</option>
+                                            {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                        </select>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
 
                         {rows.length > 0 && (
                             <div style={{

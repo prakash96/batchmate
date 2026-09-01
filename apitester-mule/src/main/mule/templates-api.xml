@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- Reusable pre-request/post-response step lists — a template is exactly {preRequest:[...],
+         postResponse:[...]}, the SAME step shapes a real request's own preRequest/postResponse
+         already use (CallRequestStepsList/PostResponseFields on the frontend edit both the same
+         way regardless of which one they're attached to). Deliberately no request-section fields
+         at all (no method/url/headers/body) — applying a template never touches those.
+
+         Two apply points on the frontend (both client-side merges, nothing server-side "applies"
+         a template — this API is just plain CRUD):
+           - CollectionTree's "+ Add Request" flow: a brand new request has empty preRequest/
+             postResponse anyway, so applying a template there just SETS them to the template's
+             own arrays.
+           - SwaggerPayloadModal's generated scenarios: the template's preRequest is PREPENDED
+             before the generated request's own (empty, for these) preRequest, and postResponse
+             APPENDED after — see that component's own applyTemplate.
+
+         Global, not scoped to a workspace/collection — same reasoning as mock-api.xml's mock
+         endpoints: a template is useful regardless of which workspace the new request ends up in. -->
+
+    <flow name="list-templates">
+        <http:listener config-ref="HTTP_Listener_config" path="/templates" allowedMethods="GET" doc:name="GET /templates"/>
+        <db:select config-ref="Database_Config" target="rows" doc:name="Select all templates">
+            <db:sql>SELECT id, name, pre_request_json, post_response_json FROM syskm.templates ORDER BY name</db:sql>
+        </db:select>
+        <ee:transform doc:name="Rows to template objects">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.rows map ((r) -> {
+    id: r.id,
+    name: r.name,
+    preRequest: read(r.pre_request_json default '[]', 'application/json'),
+    postResponse: read(r.post_response_json default '[]', 'application/json')
+})]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="create-template">
+        <http:listener config-ref="HTTP_Listener_config" path="/templates" allowedMethods="POST" doc:name="POST /templates"/>
+        <set-variable variableName="newId" value="#[uuid()]" doc:name="new id"/>
+        <db:insert config-ref="Database_Config" doc:name="Insert template">
+            <db:sql><![CDATA[INSERT INTO syskm.templates (id, name, pre_request_json, post_response_json) VALUES (:id, :name, :preRequest, :postResponse)]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: vars.newId,
+                name: payload.name default 'New Template',
+                preRequest: write(payload.preRequest default [], 'application/json'),
+                postResponse: write(payload.postResponse default [], 'application/json')
+            }]]]></db:input-parameters>
+        </db:insert>
+        <ee:transform doc:name="Response — the new template's id">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0 output application/json --- {id: vars.newId}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="save-template">
+        <http:listener config-ref="HTTP_Listener_config" path="/templates/{id}/save" allowedMethods="POST" doc:name="POST /templates/{id}/save"/>
+        <!-- Oracle MERGE (upsert) — same pattern as requests-api.xml's save-request. -->
+        <db:update config-ref="Database_Config" doc:name="Upsert template">
+            <db:sql><![CDATA[
+MERGE INTO syskm.templates t
+USING (SELECT :id AS id, :name AS name, :preRequest AS pre_request_json, :postResponse AS post_response_json FROM DUAL) s
+ON (t.id = s.id)
+WHEN MATCHED THEN UPDATE SET
+    t.name = s.name, t.pre_request_json = s.pre_request_json, t.post_response_json = s.post_response_json
+WHEN NOT MATCHED THEN INSERT (id, name, pre_request_json, post_response_json)
+    VALUES (s.id, s.name, s.pre_request_json, s.post_response_json)
+]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+                id: attributes.uriParams.id,
+                name: payload.name default 'New Template',
+                preRequest: write(payload.preRequest default [], 'application/json'),
+                postResponse: write(payload.postResponse default [], 'application/json')
+            }]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0 output text/plain --- "Template saved"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+    <flow name="delete-template">
+        <http:listener config-ref="HTTP_Listener_config" path="/templates/{id}" allowedMethods="DELETE" doc:name="DELETE /templates/{id}"/>
+        <db:delete config-ref="Database_Config" doc:name="Delete template">
+            <db:sql>DELETE FROM syskm.templates WHERE id = :id</db:sql>
+            <db:input-parameters><![CDATA[#[{id: attributes.uriParams.id}]]]></db:input-parameters>
+        </db:delete>
+        <ee:transform doc:name="Plain text response">
+            <ee:message><ee:set-payload><![CDATA[%dw 2.0 output text/plain --- "Template deleted"]]></ee:set-payload></ee:message>
+        </ee:transform>
+    </flow>
+
+</mule>

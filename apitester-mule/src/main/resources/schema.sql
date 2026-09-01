@@ -105,6 +105,20 @@ CREATE TABLE run_all_reports (
     run_at        TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
 );
 
+-- Templates — reusable pre-request/post-response step lists (see templates-api.xml's own
+-- file-level comment) that apply-template flows can graft onto a newly-created request, GLOBAL
+-- like mock_endpoints/connections below (not scoped to a workspace/collection) — a template is
+-- useful regardless of which workspace the request being created lives in. Deliberately no
+-- request-section columns (method/url/headers/body) — templates only ever carry pre-request/
+-- post-response steps, never touch a request's own method/url/body.
+CREATE TABLE templates (
+    id                  VARCHAR2(64) PRIMARY KEY,
+    name                VARCHAR2(255) NOT NULL,
+    pre_request_json    CLOB DEFAULT '[]' NOT NULL,
+    post_response_json  CLOB DEFAULT '[]' NOT NULL,
+    created_ts          TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
+);
+
 -- Mock server — global, not scoped to a workspace/collection (see mock-api.xml's own file-level
 -- comment for the full design). "method" is an exact HTTP verb (GET/POST/PUT/PATCH/DELETE/...) or
 -- '*' for "any method"; "path" is a template like /users/{id}/orders — a {segment} matches any

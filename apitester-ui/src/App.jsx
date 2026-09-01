@@ -6,6 +6,7 @@ import JsonCompareModal from './components/JsonCompareModal';
 import SwaggerPayloadModal from './components/SwaggerPayloadModal';
 import AuditLogModal from './components/AuditLogModal';
 import MockServerModal from './components/MockServerModal';
+import TemplateManagerModal from './components/TemplateManagerModal';
 import { useThemeStore, THEMES } from './store/themeStore';
 import { C, btnStyle, inputStyle } from './theme';
 
@@ -15,6 +16,7 @@ export default function App() {
     const [showSwaggerPayload, setShowSwaggerPayload] = useState(false);
     const [showAuditLog, setShowAuditLog] = useState(false);
     const [showMockServer, setShowMockServer] = useState(false);
+    const [showTemplates, setShowTemplates] = useState(false);
     const { theme, setTheme } = useThemeStore();
 
     // Reflects the selected theme onto <html> so every inline style built from theme.js's
@@ -47,6 +49,7 @@ export default function App() {
                     <button onClick={() => setShowSwaggerPayload(true)} style={btnStyle}>🧬 Swagger Payloads</button>
                     <button onClick={() => setShowAuditLog(true)} style={btnStyle}>📜 Audit Log</button>
                     <button onClick={() => setShowMockServer(true)} style={btnStyle}>🎭 Mock Server</button>
+                    <button onClick={() => setShowTemplates(true)} style={btnStyle}>📋 Templates</button>
                 </div>
             </div>
             <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
@@ -62,6 +65,7 @@ export default function App() {
             {showSwaggerPayload && <SwaggerPayloadModal onClose={() => setShowSwaggerPayload(false)} />}
             {showAuditLog && <AuditLogModal onClose={() => setShowAuditLog(false)} />}
             {showMockServer && <MockServerModal onClose={() => setShowMockServer(false)} />}
+            {showTemplates && <TemplateManagerModal onClose={() => setShowTemplates(false)} />}
         </div>
     );
 }

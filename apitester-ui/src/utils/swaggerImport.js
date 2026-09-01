@@ -137,7 +137,7 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0) {
         // Non-object top-level schema (e.g. the body IS just a string/array) — required/
         // minLength/maxLength/pattern don't apply at this level, only the type itself does.
         const v = wrongTypeValue(schema.type);
-        return v === null ? [] : [{ label: `Wrong type (expected ${schema.type})`, payload: v }];
+        return v === null ? [] : [{ label: `Wrong type (expected ${schema.type})`, group: 'general', payload: v }];
     }
 
     const props = schema.properties || {};
@@ -145,11 +145,19 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0) {
     const positive = exampleForSchema(spec, schema, depth) || {};
     const variants = [];
 
+    // Every variant carries a "group" — which request it belongs to once SwaggerPayloadModal
+    // turns these into actual requests (see buildRequestsFromGroups there): 'general' for the
+    // generic required/minLength/maxLength/pattern violations below (all share ONE "(negative)"
+    // request's Input Data Set), and the field's own name for SOURCE_ID/REQUEST_REFERENCE_NUMBER
+    // (each gets its OWN separate request/data-set, kept out of the general one entirely — these
+    // are significant enough business fields to review on their own, not buried in a long list of
+    // unrelated field violations).
+
     // One variant per required field, that field omitted (everything else stays valid).
     for (const key of required) {
         const rest = { ...positive };
         delete rest[key];
-        variants.push({ label: `Missing required field "${key}"`, payload: rest });
+        variants.push({ label: `Missing required field "${key}"`, group: 'general', payload: rest });
     }
 
     // Per-field minLength/maxLength/pattern violations — these three are string-only
@@ -159,14 +167,14 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0) {
         if (fieldSchema.type && fieldSchema.type !== 'string') continue;
         if (typeof fieldSchema.minLength === 'number' && fieldSchema.minLength > 0) {
             const tooShort = 'x'.repeat(Math.max(0, fieldSchema.minLength - 1));
-            variants.push({ label: `"${key}" shorter than minLength (${fieldSchema.minLength})`, payload: { ...positive, [key]: tooShort } });
+            variants.push({ label: `"${key}" shorter than minLength (${fieldSchema.minLength})`, group: 'general', payload: { ...positive, [key]: tooShort } });
         }
         if (typeof fieldSchema.maxLength === 'number') {
             const tooLong = 'x'.repeat(fieldSchema.maxLength + 1);
-            variants.push({ label: `"${key}" longer than maxLength (${fieldSchema.maxLength})`, payload: { ...positive, [key]: tooLong } });
+            variants.push({ label: `"${key}" longer than maxLength (${fieldSchema.maxLength})`, group: 'general', payload: { ...positive, [key]: tooLong } });
         }
         if (typeof fieldSchema.pattern === 'string') {
-            variants.push({ label: `"${key}" doesn't match pattern /${fieldSchema.pattern}/`, payload: { ...positive, [key]: valueViolatingPattern(fieldSchema.pattern) } });
+            variants.push({ label: `"${key}" doesn't match pattern /${fieldSchema.pattern}/`, group: 'general', payload: { ...positive, [key]: valueViolatingPattern(fieldSchema.pattern) } });
         }
     }
 
@@ -177,7 +185,10 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0) {
     // the constraint-based loop above produces nothing for them even though they're exactly the
     // fields worth testing missing/empty/null/wrong-type against. Matched case-insensitively
     // (schemas vary between SOURCE_ID/sourceId/source_id for the "same" field) and only for
-    // properties that actually exist on THIS schema.
+    // properties that actually exist on THIS schema. Tagged with their OWN group (the field name
+    // itself) rather than 'general' — SwaggerPayloadModal's buildRequestsFromGroups gives each
+    // group its own separate request, so these end up as their own "(negative - SOURCE_ID)" /
+    // "(negative - REQUEST_REFERENCE_NUMBER)" requests instead of mixed into the general one.
     const CRITICAL_FIELD_NAMES = ['SOURCE_ID', 'REQUEST_REFERENCE_NUMBER'];
     for (const key of Object.keys(props)) {
         if (!CRITICAL_FIELD_NAMES.some(n => n.toLowerCase() === key.toLowerCase())) continue;
@@ -187,17 +198,17 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0) {
             // same "omit this key" case.
             const rest = { ...positive };
             delete rest[key];
-            variants.push({ label: `Missing "${key}"`, payload: rest });
+            variants.push({ label: `Missing "${key}"`, group: key, payload: rest });
         }
-        variants.push({ label: `"${key}" empty string`, payload: { ...positive, [key]: '' } });
-        variants.push({ label: `"${key}" null`, payload: { ...positive, [key]: null } });
-        variants.push({ label: `"${key}" wrong type`, payload: { ...positive, [key]: wrongTypeValue(fieldSchema.type || 'string') } });
+        variants.push({ label: `"${key}" empty string`, group: key, payload: { ...positive, [key]: '' } });
+        variants.push({ label: `"${key}" null`, group: key, payload: { ...positive, [key]: null } });
+        variants.push({ label: `"${key}" wrong type`, group: key, payload: { ...positive, [key]: wrongTypeValue(fieldSchema.type || 'string') } });
     }
 
     if (!variants.length) {
         const keys = Object.keys(props);
         if (keys.length) {
-            variants.push({ label: `"${keys[0]}" has the wrong type (no required/minLength/maxLength/pattern declared to violate instead)`, payload: { ...positive, [keys[0]]: wrongTypeValue(deref(spec, props[keys[0]]).type) } });
+            variants.push({ label: `"${keys[0]}" has the wrong type (no required/minLength/maxLength/pattern declared to violate instead)`, group: 'general', payload: { ...positive, [keys[0]]: wrongTypeValue(deref(spec, props[keys[0]]).type) } });
         }
     }
 
