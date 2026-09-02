@@ -6,15 +6,16 @@ import {
 } from '../utils/swaggerImport';
 import { useCollectionStore } from '../store/collectionStore';
 import { useTemplateStore } from '../store/templateStore';
-import { applyTemplateInput } from '../utils/templateApply';
+import { applyTemplateInput, collectHeaderPlaceholders, fillHeaderPlaceholders } from '../utils/templateApply';
 import UnlockWorkspaceModal from './UnlockWorkspaceModal';
 
-// DataWeave, not JS — see templating.xml's file comment. Only the NEGATIVE-variant request (see
-// buildRequestsFromGroups below) uses this; the actual JSON for each negative scenario lives in
-// that request's own Input Data Set entries — at run time, whichever entry the current iteration
-// is on gets templated in here via the same "payload" binding templating.xml's eval-template
-// already exposes for body access everywhere else in this app. The positive-scenario request
-// doesn't need this at all — it just gets a concrete body directly, since there's only one.
+// DataWeave, not JS — see templating.xml's file comment. Every generated request (positive AND
+// each negative-variant group, see buildRequestsFromGroups below) uses this as its literal body —
+// the actual JSON for each scenario lives in that request's own Input Data Set entries (just one
+// entry for the positive request, one per variant for a negative-variant request) — at run time,
+// whichever entry the current iteration is on gets templated in here via the same "payload"
+// binding templating.xml's eval-template already exposes for body access everywhere else in this
+// app.
 const PAYLOAD_TEMPLATE = '$(payload)';
 
 /** Standalone tool: paste/upload an OpenAPI/Swagger spec and get one combined table of test
@@ -33,9 +34,10 @@ const PAYLOAD_TEMPLATE = '$(payload)';
  *
  *  Creating requests (via the two buttons below the table) groups scenarios by operation (method
  *  + URL) into up to TWO requests per operation, not one per scenario: the positive scenario gets
- *  its own plain request with a concrete body, and every negative variant for that same operation
- *  shares one separate request via Input Data Set entries (PAYLOAD_TEMPLATE as the body; each
- *  run/iteration pulls its actual body from the current entry instead). */
+ *  its own request with a single Input Data Set entry, and every negative variant for that same
+ *  operation shares one separate request via its own Input Data Set entries (PAYLOAD_TEMPLATE as
+ *  the body in both cases; each run/iteration pulls its actual body from the current entry
+ *  instead) — see PAYLOAD_TEMPLATE's own comment. */
 export default function SwaggerPayloadModal({ onClose }) {
     const [specText, setSpecText] = useState('');
     const [spec, setSpec] = useState(null);
@@ -57,6 +59,9 @@ export default function SwaggerPayloadModal({ onClose }) {
     // One picker per KIND, shared across every operation that produces it — see the group-kind
     // picker row below and its own comment for why (not one picker per literal request/operation).
     const [templateByGroup, setTemplateByGroup] = useState({});
+    // placeholder name (from a selected template's own ${NAME} header values, see
+    // templateApply.js's PLACEHOLDER_RE) -> the concrete value to substitute at generation time.
+    const [placeholderValues, setPlaceholderValues] = useState({});
     // opKey (`${method} ${url}`) -> raw text the user typed into that operation's Positive row,
     // overriding the auto-generated schema example as the base every negative variant for that
     // operation mutates from — see the rows useMemo below and the Positive cell's own comment.
@@ -193,30 +198,49 @@ export default function SwaggerPayloadModal({ onClose }) {
 
     const groupKindLabel = (kind) => (kind === 'positive' ? 'Positive' : kind === 'general' ? 'General negative' : kind);
 
+    // Every distinct ${NAME} placeholder (excluding ${vars.x}, this app's own runtime variable
+    // syntax — see templateApply.js's PLACEHOLDER_RE) across every CURRENTLY SELECTED template's
+    // Input headers — one across all group kinds, not per kind, so picking the same template for
+    // two kinds doesn't ask for the same value twice. Drives the "TEMPLATE HEADER VALUES" prompt
+    // below; filled in at generation time since there's no runtime mechanism to supply these.
+    const templatePlaceholderNames = useMemo(() => {
+        const names = new Set();
+        for (const kind of groupKinds) {
+            const templateId = templateByGroup[kind];
+            const tpl = templateId ? templates.find(t => t.id === templateId) : null;
+            if (!tpl) continue;
+            for (const n of collectHeaderPlaceholders(tpl.input?.headers)) names.add(n);
+        }
+        return [...names].sort();
+    }, [groupKinds, templateByGroup, templates]);
+
     // Template's preRequest is PREPENDED before the entry's own (empty, for every generated
     // scenario here) preRequest; postResponse is APPENDED after; input.headers is UNIONED into
-    // the generated request's headers (skipping any key already present) — the generated body is
-    // schema-derived and never touched by a template here. See templates-api.xml's own comment on
-    // this exact merge choice, and applyTemplateInput's own comment for the 'merge' mode.
+    // the generated request's headers (skipping any key already present), then any ${NAME}
+    // placeholder left in a header value gets filled from placeholderValues — the generated body
+    // is schema-derived and never touched by a template here. See templates-api.xml's own comment
+    // on this exact merge choice, and applyTemplateInput's own comment for the 'merge' mode.
     const applyTemplate = (entry, kind) => {
         const templateId = templateByGroup[kind];
         const tpl = templateId ? templates.find(t => t.id === templateId) : null;
         if (!tpl) return entry;
+        const merged = applyTemplateInput(entry.request, tpl, 'merge');
         return {
             ...entry,
             preRequest: [...(tpl.preRequest || []), ...(entry.preRequest || [])],
             postResponse: [...(entry.postResponse || []), ...(tpl.postResponse || [])],
-            request: applyTemplateInput(entry.request, tpl, 'merge'),
+            request: { ...merged, headers: fillHeaderPlaceholders(merged.headers, placeholderValues) },
         };
     };
 
-    // Several DIFFERENT requests per operation, not one shared request: the positive scenario
-    // gets its own plain request with a concrete body (nothing to iterate, so no Input Data Set
-    // at all); every negative variant still reaches its target via Input Data Set entries +
-    // PAYLOAD_TEMPLATE, but now ONE separate request PER GROUP — the generic violations in
-    // "(negative)", and SOURCE_ID/REQUEST_REFERENCE_NUMBER each in their own
-    // "(negative - <field>)" request, so a field important enough to get dedicated scenarios also
-    // gets reviewed on its own instead of buried in a long list of unrelated field violations.
+    // Several DIFFERENT requests per operation, not one shared request: the positive scenario and
+    // every negative variant group each get their OWN request, and ALL of them reach their target
+    // via Input Data Set entries + PAYLOAD_TEMPLATE (the positive one just has a single entry) —
+    // one consistent mechanism rather than the positive request's body being special-cased as a
+    // literal JSON string. The generic negative violations land in "(negative)", and
+    // SOURCE_ID/REQUEST_REFERENCE_NUMBER each in their own "(negative - <field>)" request, so a
+    // field important enough to get dedicated scenarios also gets reviewed on its own instead of
+    // buried in a long list of unrelated field violations.
     const buildRequestsFromGroups = (groups) => {
         const out = [];
         for (const g of groups) {
@@ -227,10 +251,10 @@ export default function SwaggerPayloadModal({ onClose }) {
                     request: {
                         method: g.method, url: g.url, params: [],
                         headers: [{ key: 'Content-Type', value: 'application/json', enabled: true }],
-                        bodyMode: 'raw-json', body: JSON.stringify(g.positive.input, null, 2),
+                        bodyMode: 'raw-json', body: PAYLOAD_TEMPLATE, inputSource: 'dataset',
                     },
                     postResponse: [],
-                    inputDataSets: [],
+                    inputDataSets: [{ name: g.positive.scenario, body: JSON.stringify(g.positive.input, null, 2), headers: [] }],
                 }, 'positive'));
             }
             for (const [groupKey, negatives] of g.negativesByGroup) {
@@ -478,6 +502,27 @@ export default function SwaggerPayloadModal({ onClose }) {
                             </div>
                         )}
 
+                        {templatePlaceholderNames.length > 0 && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10,
+                                padding: 10, border: `1px solid ${C.border}`, borderRadius: C.radiusSm, background: C.surface,
+                            }}>
+                                <span style={{ fontSize: 10, color: C.textFaint, fontWeight: 700, letterSpacing: '0.03em' }}>TEMPLATE HEADER VALUES</span>
+                                <span style={{ fontSize: 10, color: C.textFaint }}>(the selected template{templatePlaceholderNames.length === 1 ? "'s" : "s'"} headers reference these — filled in here, not per operation)</span>
+                                {templatePlaceholderNames.map(name => (
+                                    <label key={name} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: C.textDim }}>
+                                        <code style={{ color: C.textDim }}>${'{' + name + '}'}</code>
+                                        <input
+                                            style={{ ...inputStyle, padding: '3px 6px', fontSize: 11, width: 160 }}
+                                            value={placeholderValues[name] || ''}
+                                            onChange={e => setPlaceholderValues(m => ({ ...m, [name]: e.target.value }))}
+                                            placeholder="value"
+                                        />
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+
                         {rows.length > 0 && (
                             <div style={{
                                 display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 10,
@@ -485,7 +530,7 @@ export default function SwaggerPayloadModal({ onClose }) {
                             }}>
                                 <span style={{ fontSize: 10, color: C.textFaint, fontWeight: 700, letterSpacing: '0.03em' }}>CREATE REQUESTS</span>
                                 <span style={{ fontSize: 10, color: C.textFaint }}>
-                                    ({requestCount} request{requestCount === 1 ? '' : 's'} — one plain request per operation for its positive scenario, plus one more per operation with every negative variant as an Input Data Set entry)
+                                    ({requestCount} request{requestCount === 1 ? '' : 's'} — one request per operation for its positive scenario (a single Input Data Set entry), plus one more per operation with every negative variant as its own Input Data Set entry)
                                 </span>
                                 <button
                                     onClick={addToCurrentCollection} style={btnStyle}

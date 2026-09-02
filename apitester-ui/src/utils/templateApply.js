@@ -22,3 +22,32 @@ export function applyTemplateInput(request, tpl, mode) {
     const body = mode === 'replace' && input.body ? input.body : request.body;
     return { ...request, body, headers };
 }
+
+// Matches a ${...} placeholder in a header value, EXCLUDING ${vars.x} — that's this app's own
+// runtime collection/global-variable syntax (see RequestSection's own hint text: "Use ${vars.x}
+// anywhere in the URL to interpolate a global/collection variable"), already resolved at send
+// time and left alone here. Anything else inside ${} (e.g. ${API_KEY}) is a template author's own
+// fill-in-later placeholder — there's no runtime mechanism to supply it, so it needs a concrete
+// value up front instead (see SwaggerPayloadModal's "TEMPLATE HEADER VALUES" prompt).
+const PLACEHOLDER_RE = /\$\{(?!vars\.)([^}]+)\}/g;
+
+/** Every distinct placeholder name referenced across a set of header rows' values. */
+export function collectHeaderPlaceholders(headers) {
+    const names = new Set();
+    for (const h of headers || []) {
+        if (typeof h.value !== 'string') continue;
+        for (const m of h.value.matchAll(PLACEHOLDER_RE)) names.add(m[1]);
+    }
+    return names;
+}
+
+/** Replaces each ${name} placeholder in header values with values[name] — anything missing or
+ *  left blank stays untouched (still visibly a placeholder) rather than becoming an empty string. */
+export function fillHeaderPlaceholders(headers, values) {
+    return (headers || []).map(h => ({
+        ...h,
+        value: typeof h.value === 'string'
+            ? h.value.replace(PLACEHOLDER_RE, (m, name) => (values[name] ? values[name] : m))
+            : h.value,
+    }));
+}
