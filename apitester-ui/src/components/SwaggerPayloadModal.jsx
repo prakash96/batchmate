@@ -2,10 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { C, inputStyle, btnStyle, primaryBtnStyle } from '../theme';
 import {
     parseSwaggerText, extractOperations, requestBodyFor, getBaseUrl, concreteUrlFor,
-    exampleForSchema, negativeVariantsForSchema, readFileAsText,
+    exampleForSchema, negativeVariantsForSchema, withStandardFieldDefaults, readFileAsText,
 } from '../utils/swaggerImport';
 import { useCollectionStore } from '../store/collectionStore';
 import { useTemplateStore } from '../store/templateStore';
+import { applyTemplateInput } from '../utils/templateApply';
 import UnlockWorkspaceModal from './UnlockWorkspaceModal';
 
 // DataWeave, not JS — see templating.xml's file comment. Only the NEGATIVE-variant request (see
@@ -22,6 +23,13 @@ const PAYLOAD_TEMPLATE = '$(payload)';
  *  operation's request body, each isolating exactly that one violation. Columns: URL / Scenario /
  *  Input Data. Reuses the exact same schema-example machinery buildFoldersFromSwagger's own
  *  import flow already relies on. Operations with no request body (GET, etc.) contribute no rows.
+ *
+ *  The Positive row's Input Data cell is EDITABLE — paste a real success request there (see
+ *  positiveOverrides state) and every negative variant for that same operation mutates from it
+ *  instead of the auto-generated placeholder example, so fields the variant isn't testing stay
+ *  realistic. Either way, SOURCE_ID/REQUEST_REFERENCE_NUMBER are normalized to this org's own
+ *  standard values (see withStandardFieldDefaults in swaggerImport.js) on every row except each
+ *  field's own dedicated negative variants, which still need to carry the bad value under test.
  *
  *  Creating requests (via the two buttons below the table) groups scenarios by operation (method
  *  + URL) into up to TWO requests per operation, not one per scenario: the positive scenario gets
@@ -49,6 +57,10 @@ export default function SwaggerPayloadModal({ onClose }) {
     // One picker per KIND, shared across every operation that produces it — see the group-kind
     // picker row below and its own comment for why (not one picker per literal request/operation).
     const [templateByGroup, setTemplateByGroup] = useState({});
+    // opKey (`${method} ${url}`) -> raw text the user typed into that operation's Positive row,
+    // overriding the auto-generated schema example as the base every negative variant for that
+    // operation mutates from — see the rows useMemo below and the Positive cell's own comment.
+    const [positiveOverrides, setPositiveOverrides] = useState({});
 
     useEffect(() => { if (workspaces.length === 0) fetchWorkspaces(); }, []);
     useEffect(() => { if (templates.length === 0) fetchTemplates().catch(() => {}); }, []);
@@ -104,7 +116,8 @@ export default function SwaggerPayloadModal({ onClose }) {
 
     // {rows, totalOps, skippedCount} — skippedCount is operations with no request body (GET,
     // etc.), which contribute no scenario rows since there's no body to generate positive/
-    // negative examples for.
+    // negative examples for. Each row carries its operation's opKey so the Positive row's cell
+    // can look up (and edit) positiveOverrides — see that state's own comment.
     const { rows, totalOps, skippedCount } = useMemo(() => {
         if (!spec) return { rows: [], totalOps: 0, skippedCount: 0 };
         const baseUrl = getBaseUrl(spec);
@@ -115,14 +128,26 @@ export default function SwaggerPayloadModal({ onClose }) {
             const body = requestBodyFor(spec, op.operation, op.parameters);
             if (!body?.schema) { skipped++; continue; }
             const url = concreteUrlFor(spec, op, baseUrl);
-            const positive = exampleForSchema(spec, body.schema);
-            out.push({ url, method: op.method, scenario: 'Positive (schema-valid)', input: positive, isPositive: true, group: 'general' });
-            for (const v of negativeVariantsForSchema(spec, body.schema)) {
-                out.push({ url, method: op.method, scenario: v.label, input: v.payload, isPositive: false, group: v.group || 'general' });
+            const opKey = `${op.method} ${url}`;
+            const overrideText = positiveOverrides[opKey];
+            let overrideParsed = null, overrideError = null;
+            if (overrideText != null) {
+                try { overrideParsed = JSON.parse(overrideText); } catch (e) { overrideError = e.message; }
+            }
+            // A parse error keeps showing the user's own (broken) text in the box rather than
+            // silently falling back — but negative variants still need SOMETHING to build from,
+            // so they fall back to the auto-generated example until the JSON is fixed.
+            const positive = withStandardFieldDefaults(overrideParsed || exampleForSchema(spec, body.schema));
+            out.push({
+                url, method: op.method, opKey, scenario: 'Positive (schema-valid)', input: positive,
+                isPositive: true, group: 'general', overrideText, overrideError,
+            });
+            for (const v of negativeVariantsForSchema(spec, body.schema, 0, positive)) {
+                out.push({ url, method: op.method, opKey, scenario: v.label, input: v.payload, isPositive: false, group: v.group || 'general' });
             }
         }
         return { rows: out, totalOps: ops.length, skippedCount: skipped };
-    }, [spec]);
+    }, [spec, positiveOverrides]);
 
     // Same rows, grouped by operation (method+url) — one group per operation, split into its
     // single positive scenario and its negative variants, which are further split by their OWN
@@ -169,8 +194,10 @@ export default function SwaggerPayloadModal({ onClose }) {
     const groupKindLabel = (kind) => (kind === 'positive' ? 'Positive' : kind === 'general' ? 'General negative' : kind);
 
     // Template's preRequest is PREPENDED before the entry's own (empty, for every generated
-    // scenario here) preRequest; postResponse is APPENDED after — see templates-api.xml's own
-    // comment on this exact merge choice.
+    // scenario here) preRequest; postResponse is APPENDED after; input.headers is UNIONED into
+    // the generated request's headers (skipping any key already present) — the generated body is
+    // schema-derived and never touched by a template here. See templates-api.xml's own comment on
+    // this exact merge choice, and applyTemplateInput's own comment for the 'merge' mode.
     const applyTemplate = (entry, kind) => {
         const templateId = templateByGroup[kind];
         const tpl = templateId ? templates.find(t => t.id === templateId) : null;
@@ -179,6 +206,7 @@ export default function SwaggerPayloadModal({ onClose }) {
             ...entry,
             preRequest: [...(tpl.preRequest || []), ...(entry.preRequest || [])],
             postResponse: [...(entry.postResponse || []), ...(tpl.postResponse || [])],
+            request: applyTemplateInput(entry.request, tpl, 'merge'),
         };
     };
 
@@ -505,7 +533,30 @@ export default function SwaggerPayloadModal({ onClose }) {
                                                 <td style={{ ...tdStyle, fontFamily: C.mono, color: C.textDim, wordBreak: 'break-all' }}>{r.url}</td>
                                                 <td style={{ ...tdStyle, color: r.isPositive ? C.success : C.danger, fontWeight: 600 }}>{r.scenario}</td>
                                                 <td style={tdStyle}>
-                                                    <pre style={{ margin: 0, fontFamily: C.mono, fontSize: 11, whiteSpace: 'pre-wrap' }}>{JSON.stringify(r.input, null, 2)}</pre>
+                                                    {r.isPositive ? (
+                                                        <div>
+                                                            <textarea
+                                                                style={{
+                                                                    ...inputStyle, width: '100%', minHeight: 90, fontFamily: C.mono, fontSize: 11,
+                                                                    resize: 'vertical', borderColor: r.overrideError ? C.danger : C.border,
+                                                                }}
+                                                                value={r.overrideText ?? JSON.stringify(r.input, null, 2)}
+                                                                onChange={(e) => setPositiveOverrides(m => ({ ...m, [r.opKey]: e.target.value }))}
+                                                                title="Paste a real success request here — every field you keep is what the negative variants below mutate from, instead of the auto-generated placeholder."
+                                                            />
+                                                            {r.overrideError && <div style={{ fontSize: 10, color: C.danger, marginTop: 3 }}>Invalid JSON — {r.overrideError}, still using the last valid input below</div>}
+                                                            {r.overrideText != null && (
+                                                                <button
+                                                                    onClick={() => setPositiveOverrides(m => { const n = { ...m }; delete n[r.opKey]; return n; })}
+                                                                    style={{ ...btnStyle, padding: '2px 6px', fontSize: 10, marginTop: 4 }}
+                                                                >
+                                                                    ↺ Reset to auto-generated
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <pre style={{ margin: 0, fontFamily: C.mono, fontSize: 11, whiteSpace: 'pre-wrap' }}>{JSON.stringify(r.input, null, 2)}</pre>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

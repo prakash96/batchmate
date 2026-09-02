@@ -105,19 +105,23 @@ CREATE TABLE run_all_reports (
     run_at        TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
 );
 
--- Templates — reusable pre-request/post-response step lists (see templates-api.xml's own
+-- Templates — reusable pre-request/input/post-response step lists (see templates-api.xml's own
 -- file-level comment) that apply-template flows can graft onto a newly-created request, GLOBAL
 -- like mock_endpoints/connections below (not scoped to a workspace/collection) — a template is
--- useful regardless of which workspace the request being created lives in. Deliberately no
--- request-section columns (method/url/headers/body) — templates only ever carry pre-request/
--- post-response steps, never touch a request's own method/url/body.
+-- useful regardless of which workspace the request being created lives in. input_json is exactly
+-- {body, headers:[...]} — the same two fields the Input tab edits — never method/url, which a
+-- template never touches.
 CREATE TABLE templates (
     id                  VARCHAR2(64) PRIMARY KEY,
     name                VARCHAR2(255) NOT NULL,
     pre_request_json    CLOB DEFAULT '[]' NOT NULL,
+    input_json          CLOB DEFAULT '{}' NOT NULL,
     post_response_json  CLOB DEFAULT '[]' NOT NULL,
     created_ts          TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
 );
+-- Run this instead of the CREATE TABLE above against an EXISTING database that already has a
+-- templates table (from before input_json existed):
+--   ALTER TABLE templates ADD input_json CLOB DEFAULT '{}' NOT NULL;
 
 -- Mock server — global, not scoped to a workspace/collection (see mock-api.xml's own file-level
 -- comment for the full design). "method" is an exact HTTP verb (GET/POST/PUT/PATCH/DELETE/...) or

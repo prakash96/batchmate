@@ -11,20 +11,23 @@
         http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
         http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 
-    <!-- Reusable pre-request/post-response step lists — a template is exactly {preRequest:[...],
-         postResponse:[...]}, the SAME step shapes a real request's own preRequest/postResponse
+    <!-- Reusable pre-request/input/post-response step lists — a template is exactly
+         {preRequest:[...], input:{body, headers:[...]}, postResponse:[...]}. preRequest/
+         postResponse are the SAME step shapes a real request's own preRequest/postResponse
          already use (CallRequestStepsList/PostResponseFields on the frontend edit both the same
-         way regardless of which one they're attached to). Deliberately no request-section fields
-         at all (no method/url/headers/body) — applying a template never touches those.
+         way regardless of which one they're attached to); input is the same {body, headers}
+         shape the Input tab edits. Deliberately no method/url — applying a template never
+         touches those.
 
          Two apply points on the frontend (both client-side merges, nothing server-side "applies"
-         a template — this API is just plain CRUD):
+         a template — this API is just plain CRUD; see apitester-ui/src/utils/templateApply.js):
            - CollectionTree's "+ Add Request" flow: a brand new request has empty preRequest/
-             postResponse anyway, so applying a template there just SETS them to the template's
-             own arrays.
+             postResponse/body/headers anyway, so applying a template there just SETS them to the
+             template's own values.
            - SwaggerPayloadModal's generated scenarios: the template's preRequest is PREPENDED
-             before the generated request's own (empty, for these) preRequest, and postResponse
-             APPENDED after — see that component's own applyTemplate.
+             before the generated request's own (empty, for these) preRequest, postResponse
+             APPENDED after, and input.headers UNIONED in (skipping any key already present) —
+             the generated body is schema-derived and never touched by a template there.
 
          Global, not scoped to a workspace/collection — same reasoning as mock-api.xml's mock
          endpoints: a template is useful regardless of which workspace the new request ends up in. -->
@@ -32,7 +35,7 @@
     <flow name="list-templates">
         <http:listener config-ref="HTTP_Listener_config" path="/templates" allowedMethods="GET" doc:name="GET /templates"/>
         <db:select config-ref="Database_Config" target="rows" doc:name="Select all templates">
-            <db:sql>SELECT id, name, pre_request_json, post_response_json FROM syskm.templates ORDER BY name</db:sql>
+            <db:sql>SELECT id, name, pre_request_json, input_json, post_response_json FROM syskm.templates ORDER BY name</db:sql>
         </db:select>
         <ee:transform doc:name="Rows to template objects">
             <ee:message>
@@ -43,6 +46,7 @@ vars.rows map ((r) -> {
     id: r.id,
     name: r.name,
     preRequest: read(r.pre_request_json default '[]', 'application/json'),
+    input: read(r.input_json default '{}', 'application/json'),
     postResponse: read(r.post_response_json default '[]', 'application/json')
 })]]></ee:set-payload>
             </ee:message>
@@ -53,11 +57,12 @@ vars.rows map ((r) -> {
         <http:listener config-ref="HTTP_Listener_config" path="/templates" allowedMethods="POST" doc:name="POST /templates"/>
         <set-variable variableName="newId" value="#[uuid()]" doc:name="new id"/>
         <db:insert config-ref="Database_Config" doc:name="Insert template">
-            <db:sql><![CDATA[INSERT INTO syskm.templates (id, name, pre_request_json, post_response_json) VALUES (:id, :name, :preRequest, :postResponse)]]></db:sql>
+            <db:sql><![CDATA[INSERT INTO syskm.templates (id, name, pre_request_json, input_json, post_response_json) VALUES (:id, :name, :preRequest, :input, :postResponse)]]></db:sql>
             <db:input-parameters><![CDATA[#[{
                 id: vars.newId,
                 name: payload.name default 'New Template',
                 preRequest: write(payload.preRequest default [], 'application/json'),
+                input: write(payload.input default {}, 'application/json'),
                 postResponse: write(payload.postResponse default [], 'application/json')
             }]]]></db:input-parameters>
         </db:insert>
@@ -74,17 +79,18 @@ vars.rows map ((r) -> {
         <db:update config-ref="Database_Config" doc:name="Upsert template">
             <db:sql><![CDATA[
 MERGE INTO syskm.templates t
-USING (SELECT :id AS id, :name AS name, :preRequest AS pre_request_json, :postResponse AS post_response_json FROM DUAL) s
+USING (SELECT :id AS id, :name AS name, :preRequest AS pre_request_json, :input AS input_json, :postResponse AS post_response_json FROM DUAL) s
 ON (t.id = s.id)
 WHEN MATCHED THEN UPDATE SET
-    t.name = s.name, t.pre_request_json = s.pre_request_json, t.post_response_json = s.post_response_json
-WHEN NOT MATCHED THEN INSERT (id, name, pre_request_json, post_response_json)
-    VALUES (s.id, s.name, s.pre_request_json, s.post_response_json)
+    t.name = s.name, t.pre_request_json = s.pre_request_json, t.input_json = s.input_json, t.post_response_json = s.post_response_json
+WHEN NOT MATCHED THEN INSERT (id, name, pre_request_json, input_json, post_response_json)
+    VALUES (s.id, s.name, s.pre_request_json, s.input_json, s.post_response_json)
 ]]></db:sql>
             <db:input-parameters><![CDATA[#[{
                 id: attributes.uriParams.id,
                 name: payload.name default 'New Template',
                 preRequest: write(payload.preRequest default [], 'application/json'),
+                input: write(payload.input default {}, 'application/json'),
                 postResponse: write(payload.postResponse default [], 'application/json')
             }]]]></db:input-parameters>
         </db:update>

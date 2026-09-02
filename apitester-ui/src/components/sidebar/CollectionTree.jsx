@@ -4,6 +4,7 @@ import { useTemplateStore } from '../../store/templateStore';
 import { C, btnStyle, inputStyle, methodBadgeStyle } from '../../theme';
 import { readFileAsText, buildFoldersFromSwagger } from '../../utils/swaggerImport';
 import { buildFoldersFromPostman } from '../../utils/postmanImport';
+import { applyTemplateInput } from '../../utils/templateApply';
 import RunAllReportModal from '../RunAllReportModal';
 import UnlockWorkspaceModal from '../UnlockWorkspaceModal';
 
@@ -229,8 +230,15 @@ export default function CollectionTree() {
                                 // A brand-new request's own preRequest/postResponse start empty, so
                                 // applying a template here is just setting them to its arrays — no
                                 // prepend/append merge needed the way SwaggerPayloadModal's
-                                // already-populated generated scenarios require.
-                                await saveRequest({ ...created, preRequest: tpl.preRequest, postResponse: tpl.postResponse });
+                                // already-populated generated scenarios require. Input (body/
+                                // headers) applies the same way — see applyTemplateInput's own
+                                // comment for the 'replace' vs 'merge' distinction.
+                                await saveRequest({
+                                    ...created,
+                                    preRequest: tpl.preRequest,
+                                    postResponse: tpl.postResponse,
+                                    request: applyTemplateInput(created.request, tpl, 'replace'),
+                                });
                             }
                         }
                         setActiveRequest(created.id);

@@ -4,14 +4,15 @@ import { useCollectionStore, flattenRequests } from '../store/collectionStore';
 import { C, inputStyle, btnStyle, primaryBtnStyle } from '../theme';
 import CallRequestStepsList from './shared/CallRequestStepsList';
 import PostResponseFields from './panels/PostResponseFields';
+import KeyValueTable from './shared/KeyValueTable';
 
 let nextDraftId = 1;
 function blankDraft() {
-    return { id: `__new_${nextDraftId++}`, isNew: true, name: 'New Template', preRequest: [], postResponse: [] };
+    return { id: `__new_${nextDraftId++}`, isNew: true, name: 'New Template', preRequest: [], input: { body: '', headers: [] }, postResponse: [] };
 }
 
 /** Manages the global template list (see templates-api.xml) — one flat list, no workspace/
- *  collection scoping. Each row expands into its own editor (name + the SAME Pre-Request/
+ *  collection scoping. Each row expands into its own editor (name + the SAME Pre-Request/Input/
  *  Post-Response step editors RequestPanel uses for a real request), same accordion pattern
  *  MockServerModal/RunAllReportModal use. */
 export default function TemplateManagerModal({ onClose }) {
@@ -37,7 +38,12 @@ export default function TemplateManagerModal({ onClose }) {
     const allRequests = flattenRequests(folders);
     const rows = [...localNew, ...templates];
 
-    const draftFor = (row) => drafts[row.id] || { name: row.name, preRequest: row.preRequest || [], postResponse: row.postResponse || [] };
+    const draftFor = (row) => drafts[row.id] || {
+        name: row.name,
+        preRequest: row.preRequest || [],
+        input: { body: row.input?.body || '', headers: row.input?.headers || [] },
+        postResponse: row.postResponse || [],
+    };
 
     const openRow = (row) => {
         if (openId === row.id) { setOpenId(null); return; }
@@ -50,7 +56,7 @@ export default function TemplateManagerModal({ onClose }) {
     const addNew = () => {
         const draft = blankDraft();
         setLocalNew((l) => [draft, ...l]);
-        setDrafts((d) => ({ ...d, [draft.id]: { name: draft.name, preRequest: draft.preRequest, postResponse: draft.postResponse } }));
+        setDrafts((d) => ({ ...d, [draft.id]: { name: draft.name, preRequest: draft.preRequest, input: draft.input, postResponse: draft.postResponse } }));
         setOpenId(draft.id);
     };
 
@@ -59,7 +65,7 @@ export default function TemplateManagerModal({ onClose }) {
         if (!draft) return;
         setError(null);
         setSavingId(row.id);
-        const body = { name: draft.name, preRequest: draft.preRequest, postResponse: draft.postResponse };
+        const body = { name: draft.name, preRequest: draft.preRequest, input: draft.input, postResponse: draft.postResponse };
         try {
             if (row.isNew) {
                 await createTemplate(body);
@@ -91,7 +97,7 @@ export default function TemplateManagerModal({ onClose }) {
                     </div>
                 </div>
                 <div style={{ fontSize: 10, color: C.textFaint, marginBottom: 14 }}>
-                    Reusable Pre-Request/Post-Response step lists — pick one when creating a new request (sidebar's "+req"), or per scenario in the Swagger Payload Generator. Doesn't touch a request's own method/url/headers/body.
+                    Reusable Pre-Request/Input/Post-Response step lists — pick one when creating a new request (sidebar's "+req"), or per scenario in the Swagger Payload Generator. Never touches a request's own method/url.
                 </div>
 
                 {error && <div style={{ fontSize: 11, color: C.danger, marginBottom: 10 }}>{error}</div>}
@@ -117,7 +123,9 @@ export default function TemplateManagerModal({ onClose }) {
                                 >
                                     <span style={{ fontSize: 10, color: C.textFaint, transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▶</span>
                                     <span style={{ fontSize: 12, fontWeight: 700, color: C.text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</span>
-                                    <span style={{ fontSize: 10, color: C.textDim }}>{(row.preRequest || []).length} pre · {(row.postResponse || []).length} post</span>
+                                    <span style={{ fontSize: 10, color: C.textDim }}>
+                                        {(row.preRequest || []).length} pre{row.input?.body || (row.input?.headers || []).length ? ' · has input' : ''} · {(row.postResponse || []).length} post
+                                    </span>
                                     <button onClick={(e) => { e.stopPropagation(); remove(row); }} style={{ ...btnStyle, padding: '3px 8px' }}>✕</button>
                                 </div>
                                 {open && (
@@ -134,6 +142,26 @@ export default function TemplateManagerModal({ onClose }) {
                                                 allRequests={allRequests}
                                                 currentRequestId={null}
                                                 emptyLabel="No pre-request steps yet — add a Call Request."
+                                            />
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: 11, fontWeight: 700, color: C.text, marginBottom: 6 }}>Input</div>
+                                            <div style={{ fontSize: 10, color: C.textFaint, marginBottom: 8 }}>
+                                                Default body/headers applied when this template is picked. On a brand-new request these are set outright; in the
+                                                Swagger Payload Generator only headers not already present get added — the generated body is schema-derived and stays untouched.
+                                            </div>
+                                            <div style={{ fontSize: 10, color: C.textFaint, marginBottom: 4, fontWeight: 700, letterSpacing: '0.03em' }}>BODY</div>
+                                            <textarea
+                                                style={{ ...inputStyle, width: '100%', minHeight: 80, fontFamily: C.mono, resize: 'vertical', marginBottom: 10 }}
+                                                placeholder="(left blank — not applied)"
+                                                value={draft.input.body}
+                                                onChange={(e) => updateDraft(row.id, { input: { ...draft.input, body: e.target.value } })}
+                                            />
+                                            <div style={{ fontSize: 10, color: C.textFaint, marginBottom: 4, fontWeight: 700, letterSpacing: '0.03em' }}>HEADERS</div>
+                                            <KeyValueTable
+                                                rows={draft.input.headers}
+                                                onChange={(headers) => updateDraft(row.id, { input: { ...draft.input, headers } })}
+                                                keyPlaceholder="header"
                                             />
                                         </div>
                                         <div>

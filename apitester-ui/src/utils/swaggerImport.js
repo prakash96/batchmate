@@ -83,6 +83,38 @@ export function exampleForSchema(spec, schemaIn, depth = 0) {
     }
 }
 
+// This org's own APIs standardize two identifier fields regardless of what an individual spec's
+// schema declares for them: SOURCE_ID is always "SI", and REQUEST_REFERENCE_NUMBER is always
+// "SBISI" followed by a DataWeave now()-based timestamp — the SAME "$(...)" templated-expression
+// syntax templating.xml's eval-template evaluates for every outgoing request body (see that
+// file's comment), so this literal string, once embedded in a generated request's JSON body,
+// re-evaluates to a fresh value on every actual send rather than a value fixed once at scenario-
+// generation time — which is what makes it "unique" per execution rather than merely once. Format
+// confirmed with the user as 'YYYYMMDDHHmmSSSSSSS' (year/month/day/hour/minute + a 7-digit
+// fraction-of-second — deliberately no whole-seconds field, by their own choice after being shown
+// the alternative). Matched case-insensitively against whatever the schema names the property
+// (SOURCE_ID/sourceId/source_id all recur across specs), same as CRITICAL_FIELD_NAMES below.
+const CRITICAL_FIELD_DEFAULTS = {
+    SOURCE_ID: () => 'SI',
+    REQUEST_REFERENCE_NUMBER: () => "SBISI$(now() as DateTime as String {format: 'YYYYMMDDHHmmSSSSSSS'})",
+};
+
+/** Applies the CRITICAL_FIELD_DEFAULTS above to whichever of a payload's own keys matches one of
+ *  those field names (case-insensitively) — used as the shared base every scenario variant below
+ *  spreads from, so a variant that isn't specifically testing SOURCE_ID/REQUEST_REFERENCE_NUMBER
+ *  still carries a valid value for it, and the one variant that IS testing it simply overwrites
+ *  this default the same way it already overwrites everything else it mutates (spread-then-
+ *  override, so this needs no special-casing per variant). */
+export function withStandardFieldDefaults(payload) {
+    if (!payload || typeof payload !== 'object') return payload;
+    const out = { ...payload };
+    for (const key of Object.keys(out)) {
+        const match = Object.keys(CRITICAL_FIELD_DEFAULTS).find(n => n.toLowerCase() === key.toLowerCase());
+        if (match) out[key] = CRITICAL_FIELD_DEFAULTS[match]();
+    }
+    return out;
+}
+
 // Deliberately violates the schema in ONE representative way, preferring the single most
 // common validation-testing need — omitting a required field — over corrupting a field's
 // type, over corrupting the whole value's type, if the schema offers no better hook for that.
@@ -125,13 +157,19 @@ export function negativeExampleForSchema(spec, schemaIn, depth = 0) {
 // it isolates exactly the one rule under test (never two violations stacked in the same
 // payload). Falls back to a single wrong-type variant only if the schema declares none of
 // those four constraints anywhere, so there's still something to show.
-export function negativeVariantsForSchema(spec, schemaIn, depth = 0) {
+// positiveOverride — an optional "success request" payload (a real, user-provided example
+// rather than the auto-generated one) to base every variant on instead — see
+// SwaggerPayloadModal's own positiveOverrides state comment for why: pasting a real example
+// keeps every field the negative variant ISN'T testing at a realistic value instead of a bare
+// schema-example placeholder. Standard-field-normalized either way (see withStandardFieldDefaults
+// above) since SOURCE_ID/REQUEST_REFERENCE_NUMBER follow a fixed convention regardless of source.
+export function negativeVariantsForSchema(spec, schemaIn, depth = 0, positiveOverride = null) {
     const schema = deref(spec, schemaIn);
     if (!schema || depth > 6) return [];
 
-    if (Array.isArray(schema.allOf)) return negativeVariantsForSchema(spec, schema.allOf[0], depth + 1);
+    if (Array.isArray(schema.allOf)) return negativeVariantsForSchema(spec, schema.allOf[0], depth + 1, positiveOverride);
     const alt = schema.oneOf || schema.anyOf;
-    if (Array.isArray(alt) && alt.length) return negativeVariantsForSchema(spec, alt[0], depth + 1);
+    if (Array.isArray(alt) && alt.length) return negativeVariantsForSchema(spec, alt[0], depth + 1, positiveOverride);
 
     if (!(schema.properties || schema.type === 'object')) {
         // Non-object top-level schema (e.g. the body IS just a string/array) — required/
@@ -142,7 +180,7 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0) {
 
     const props = schema.properties || {};
     const required = Array.isArray(schema.required) ? schema.required : [];
-    const positive = exampleForSchema(spec, schema, depth) || {};
+    const positive = withStandardFieldDefaults(positiveOverride || exampleForSchema(spec, schema, depth) || {});
     const variants = [];
 
     // Every variant carries a "group" — which request it belongs to once SwaggerPayloadModal

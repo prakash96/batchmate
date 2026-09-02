@@ -14,10 +14,11 @@ import java.util.*;
 /**
  * Flat-file storage for templates — mirrors apitester-mule's templates-api.xml exactly (paths +
  * JSON shapes), so apitester-ui's TemplateManagerModal works unchanged whichever backend it's
- * pointed at. A template is exactly {id, name, preRequest:[...], postResponse:[...]} — the SAME
- * step shapes a real request's own preRequest/postResponse already use, no request-section fields
- * (method/url/headers/body) at all. Global, not scoped to a workspace/collection, same convention
- * as MockService/WorkspaceService (one flat file, {@code _templates.json}).
+ * pointed at. A template is exactly {id, name, preRequest:[...], input:{body, headers:[...]},
+ * postResponse:[...]} — preRequest/postResponse are the SAME step shapes a real request's own
+ * preRequest/postResponse already use, and input is the same {body, headers} shape the Input tab
+ * edits; never method/url. Global, not scoped to a workspace/collection, same convention as
+ * MockService/WorkspaceService (one flat file, {@code _templates.json}).
  */
 @Service
 public class TemplateService {
@@ -93,6 +94,7 @@ public class TemplateService {
         node.put("id", id);
         node.put("name", body.path("name").asText("New Template"));
         node.set("preRequest", body.path("preRequest").isArray() ? body.path("preRequest") : objectMapper.createArrayNode());
+        node.set("input", body.path("input").isObject() ? body.path("input") : objectMapper.createObjectNode());
         node.set("postResponse", body.path("postResponse").isArray() ? body.path("postResponse") : objectMapper.createArrayNode());
         return node;
     }
