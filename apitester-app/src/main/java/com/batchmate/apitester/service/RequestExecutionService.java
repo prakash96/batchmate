@@ -62,6 +62,22 @@ public class RequestExecutionService {
     private final ProducerTemplate producerTemplate;
     private final ObjectMapper objectMapper;
 
+    // Per-request-id lock guarding "deploy this request's Camel route, then invoke it" as ONE
+    // atomic critical section (see the deploy+send call site below) — CollectionRunService's own
+    // "Run All (parallel)" mode can now call run() for several DIFFERENT main requests
+    // concurrently, but if two of them share a callee (e.g. two main flows both Call-Request the
+    // same "Get Auth Token" utility request), running that SAME request id's deploy+invoke on two
+    // threads at once would race on CamelRouteDeployService's remove-then-add-by-id deploy —
+    // corrupting or dropping one run. Locking per id (not one global lock) means distinct request
+    // ids still run fully concurrently; only actual same-id contention ever serializes, and only
+    // briefly. Grows one entry per distinct request id ever run for the life of the app — bounded
+    // by how many requests exist, never by how many times they're run, so not a real leak.
+    private final java.util.concurrent.ConcurrentHashMap<String, Object> routeLocks = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private Object routeLock(String requestId) {
+        return routeLocks.computeIfAbsent(requestId, k -> new Object());
+    }
+
     public RequestExecutionService(RequestService requestService,
                                     CollectionService collectionService,
                                     GlobalVarsService globalVarsService,
@@ -309,11 +325,15 @@ public class RequestExecutionService {
         Exchange resultExchange = null;
         try {
             Path yamlPath = requestService.saveCamelYaml(requestId, yaml);
-            camelDeployService.deploy(requestId, yamlPath);
-            resultExchange = producerTemplate.send("direct:" + requestId, e -> {
-                e.getMessage().setBody(null);
-                vars.forEach(e::setProperty);
-            });
+            // See routeLock's own comment — deploy-then-invoke for THIS request id must be atomic
+            // with respect to any other thread doing the same for the SAME id.
+            synchronized (routeLock(requestId)) {
+                camelDeployService.deploy(requestId, yamlPath);
+                resultExchange = producerTemplate.send("direct:" + requestId, e -> {
+                    e.getMessage().setBody(null);
+                    vars.forEach(e::setProperty);
+                });
+            }
             Exception ex = resultExchange.getException();
             if (ex != null) throw new RuntimeException(ex.getMessage(), ex);
             status = "success";

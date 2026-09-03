@@ -15,8 +15,10 @@ function applyStatuses(report) {
 // "Run All" for a collection — runs every main request (see the backend's CollectionRunService
 // javadoc for what "main" means) and returns/persists a consolidated report.
 export const useRunAllStore = create(() => ({
-    runAll: async (collectionId) => {
-        const res = await fetch(`${BASE_URL}/collections/${collectionId}/run-all`, { method: 'POST' });
+    runAll: async (collectionId, parallel = false) => {
+        const res = await fetch(`${BASE_URL}/collections/${collectionId}/run-all`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ parallel }),
+        });
         if (!res.ok) throw new Error(`Run All failed (${res.status})`);
         const report = await res.json();
         applyStatuses(report);

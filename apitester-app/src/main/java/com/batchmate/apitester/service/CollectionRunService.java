@@ -21,9 +21,12 @@ import java.util.*;
  * called from Main) is deliberately excluded — running it standalone wouldn't exercise anything a
  * real workflow doesn't already cover, and would double-count it in the consolidated report.
  *
- * Runs are SEQUENTIAL, not parallel: nested Call Request chains (re)deploy the same Camel route id
- * for a callee, and doing that concurrently from two different top-level "main" runs at once isn't
- * something the route-deploy/producer-template plumbing is built to handle safely.
+ * Sequential by default; the caller (RunAllReportModal's "Run in parallel" checkbox) can opt into
+ * concurrent execution instead — see runAll(collectionId, parallel). Nested Call Request chains
+ * (re)deploy the same Camel route id for a callee on every run, which used to make concurrent
+ * top-level runs unsafe if two of them shared a callee; RequestExecutionService now guards that
+ * exact deploy+invoke critical section with a per-request-id lock (see its own routeLock comment),
+ * so distinct request ids genuinely run in parallel and only actual same-id contention serializes.
  *
  * The resulting report is persisted (one JSON file per collection, under apitester-data/
  * run-all-reports/) so the sidebar's "last report" icon can show it later without re-running
@@ -34,6 +37,10 @@ public class CollectionRunService {
 
     private static final Logger log = LoggerFactory.getLogger(CollectionRunService.class);
     private static final String REPORTS_SUBDIR = "run-all-reports";
+    // Bounds how many main requests actually fire at once in parallel mode — unbounded concurrency
+    // here would mean firing every main request's HTTP call simultaneously, which is more a stress
+    // test than a functional "Run All". Matches run-all-api.xml's parallel-foreach maxConcurrency.
+    private static final int PARALLEL_MAX_CONCURRENCY = 5;
 
     private final RequestService requestService;
     private final CollectionService collectionService;
@@ -53,45 +60,18 @@ public class CollectionRunService {
     // ── Run all ────────────────────────────────────────────────────────────────
 
     public Map<String, Object> runAll(String collectionId) throws IOException {
+        return runAll(collectionId, false);
+    }
+
+    public Map<String, Object> runAll(String collectionId, boolean parallel) throws IOException {
         List<JsonNode> mainRequests = findMainRequests(collectionId);
         String collectionName = collectionName(collectionId);
-
-        List<Map<String, Object>> results = new ArrayList<>();
-        int passedCount = 0, failedCount = 0;
         long startMs = System.currentTimeMillis();
 
-        for (JsonNode req : mainRequests) {
-            String id = req.path("id").asText();
-            String name = req.path("name").asText(id);
-
-            Map<String, Object> runResult;
-            try {
-                runResult = executionService.run(id, Collections.emptyMap());
-            } catch (Exception e) {
-                log.warn("Run All: request '{}' ({}) threw: {}", name, id, e.getMessage());
-                runResult = new LinkedHashMap<>();
-                runResult.put("status", "failed");
-                runResult.put("error", e.getMessage());
-                runResult.put("durationMs", 0L);
-            }
-
-            List<Map<String, Object>> checks = flattenChecks(runResult);
-            long checksPassed = checks.stream().filter(c -> Boolean.TRUE.equals(c.get("passed"))).count();
-            long checksFailed = checks.stream().filter(c -> Boolean.FALSE.equals(c.get("passed"))).count();
-            boolean ok = "success".equals(String.valueOf(runResult.get("status"))) && checksFailed == 0;
-            if (ok) passedCount++; else failedCount++;
-
-            Map<String, Object> entry = new LinkedHashMap<>();
-            entry.put("requestId", id);
-            entry.put("requestName", name);
-            entry.put("status", ok ? "success" : "failed");
-            entry.put("durationMs", runResult.get("durationMs"));
-            entry.put("error", runResult.get("error"));
-            entry.put("checksPassed", checksPassed);
-            entry.put("checksFailed", checksFailed);
-            entry.put("checksTotal", (long) checks.size());
-            entry.put("fullResult", runResult);
-            results.add(entry);
+        List<Map<String, Object>> results = parallel ? runParallel(mainRequests) : runSequential(mainRequests);
+        int passedCount = 0, failedCount = 0;
+        for (Map<String, Object> entry : results) {
+            if ("success".equals(entry.get("status"))) passedCount++; else failedCount++;
         }
 
         Map<String, Object> report = new LinkedHashMap<>();
@@ -106,6 +86,81 @@ public class CollectionRunService {
 
         saveReport(collectionId, report);
         return report;
+    }
+
+    private List<Map<String, Object>> runSequential(List<JsonNode> mainRequests) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (JsonNode req : mainRequests) results.add(runOne(req));
+        return results;
+    }
+
+    /** Fires every main request's run() concurrently (bounded by PARALLEL_MAX_CONCURRENCY), then
+     *  reassembles the results in the SAME order as mainRequests regardless of completion order —
+     *  the report should read the same (row-for-row) whichever mode produced it. Safe against two
+     *  main requests sharing a callee thanks to RequestExecutionService's own per-request-id lock
+     *  (see its routeLock comment) — this method doesn't need to know or care which ones overlap. */
+    private List<Map<String, Object>> runParallel(List<JsonNode> mainRequests) {
+        java.util.concurrent.ExecutorService pool =
+                java.util.concurrent.Executors.newFixedThreadPool(Math.max(1, Math.min(PARALLEL_MAX_CONCURRENCY, mainRequests.size())));
+        try {
+            List<java.util.concurrent.Future<Map<String, Object>>> futures = new ArrayList<>();
+            for (JsonNode req : mainRequests) futures.add(pool.submit(() -> runOne(req)));
+            List<Map<String, Object>> results = new ArrayList<>(futures.size());
+            for (java.util.concurrent.Future<Map<String, Object>> f : futures) {
+                try {
+                    results.add(f.get());
+                } catch (Exception e) {
+                    // runOne() itself never throws (see its own try/catch) — a Future only throws
+                    // here for something outside that, e.g. thread-pool-level interruption.
+                    Map<String, Object> failed = new LinkedHashMap<>();
+                    failed.put("status", "failed");
+                    failed.put("error", e.getMessage());
+                    failed.put("durationMs", 0L);
+                    failed.put("checksPassed", 0L);
+                    failed.put("checksFailed", 0L);
+                    failed.put("checksTotal", 0L);
+                    results.add(failed);
+                }
+            }
+            return results;
+        } finally {
+            pool.shutdown();
+        }
+    }
+
+    /** Runs ONE main request and builds its report entry — never throws (a failure becomes a
+     *  "failed" entry instead), same contract both runSequential and runParallel rely on. */
+    private Map<String, Object> runOne(JsonNode req) {
+        String id = req.path("id").asText();
+        String name = req.path("name").asText(id);
+
+        Map<String, Object> runResult;
+        try {
+            runResult = executionService.run(id, Collections.emptyMap());
+        } catch (Exception e) {
+            log.warn("Run All: request '{}' ({}) threw: {}", name, id, e.getMessage());
+            runResult = new LinkedHashMap<>();
+            runResult.put("status", "failed");
+            runResult.put("error", e.getMessage());
+            runResult.put("durationMs", 0L);
+        }
+
+        List<Map<String, Object>> checks = flattenChecks(runResult);
+        long checksPassed = checks.stream().filter(c -> Boolean.TRUE.equals(c.get("passed"))).count();
+        long checksFailed = checks.stream().filter(c -> Boolean.FALSE.equals(c.get("passed"))).count();
+        boolean ok = "success".equals(String.valueOf(runResult.get("status"))) && checksFailed == 0;
+
+        Map<String, Object> entry = new LinkedHashMap<>();
+        entry.put("requestId", id);
+        entry.put("requestName", name);
+        entry.put("status", ok ? "success" : "failed");
+        entry.put("durationMs", runResult.get("durationMs"));
+        entry.put("error", runResult.get("error"));
+        entry.put("checksPassed", checksPassed);
+        entry.put("checksFailed", checksFailed);
+        entry.put("checksTotal", (long) checks.size());
+        entry.put("fullResult", runResult);
+        return entry;
     }
 
     /** Pulls every check (Response Validation) result out of a single run() result, flattening the

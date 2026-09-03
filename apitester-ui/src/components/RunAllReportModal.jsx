@@ -16,6 +16,11 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
     const [exporting, setExporting] = useState(false);
     const [error, setError] = useState(null);
     const [openIndex, setOpenIndex] = useState(null);
+    // Off by default — mirrors run-all-api.xml's <foreach>/CollectionRunService.runSequential
+    // default. When checked, main requests with no overlapping callee run genuinely concurrently
+    // (see RequestExecutionService's routeLock / run-all-api.xml's parallel-foreach comments for
+    // why that's safe); requests that DO share a callee still serialize on that shared id.
+    const [parallel, setParallel] = useState(false);
 
     useEffect(() => {
         (async () => {
@@ -24,7 +29,7 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
             try {
                 if (autoRun) {
                     setRunning(true);
-                    setReport(await runAll(collectionId));
+                    setReport(await runAll(collectionId, parallel));
                 } else {
                     setReport(await fetchLastReport(collectionId));
                 }
@@ -44,7 +49,7 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
         setRunning(true);
         setError(null);
         try {
-            setReport(await runAll(collectionId));
+            setReport(await runAll(collectionId, parallel));
             setOpenIndex(null);
         } catch (e) {
             setError(e.message);
@@ -72,13 +77,18 @@ export default function RunAllReportModal({ collectionId, collectionName, onClos
             <div className="at-modal" style={{ background: C.panel, border: `1px solid ${C.border}`, borderRadius: C.radius, boxShadow: C.shadowLg, width: 900, maxHeight: '88vh', overflowY: 'auto', padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Run All — {collectionName}</span>
-                    <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: C.textDim }}>
+                            <input type="checkbox" checked={parallel} onChange={e => setParallel(e.target.checked)} disabled={running} />
+                            Run in parallel
+                        </label>
                         <button onClick={doRunAll} style={primaryBtnStyle} disabled={running}>{running ? 'Running…' : '▶ Run All'}</button>
                         <button onClick={onClose} style={btnStyle}>Close</button>
                     </div>
                 </div>
                 <div style={{ fontSize: 10, color: C.textFaint, marginBottom: 14 }}>
                     Runs every "main" request — one no other request in this collection calls via Call Request.
+                    {parallel && ' Running in parallel (up to 5 at once) — requests that share a callee still run one at a time relative to each other.'}
                 </div>
 
                 {error && <div style={{ fontSize: 11, color: C.danger, marginBottom: 10 }}>{error}</div>}

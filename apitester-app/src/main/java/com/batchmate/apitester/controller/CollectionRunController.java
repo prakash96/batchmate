@@ -24,9 +24,11 @@ public class CollectionRunController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> runAll(@PathVariable String collectionId) {
+    public ResponseEntity<Map<String, Object>> runAll(@PathVariable String collectionId,
+                                                        @RequestBody(required = false) Map<String, Object> body) {
+        boolean parallel = body != null && Boolean.TRUE.equals(body.get("parallel"));
         try {
-            return ResponseEntity.ok(runService.runAll(collectionId));
+            return ResponseEntity.ok(runService.runAll(collectionId, parallel));
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }

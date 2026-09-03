@@ -183,6 +183,17 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0, positiveOve
     const positive = withStandardFieldDefaults(positiveOverride || exampleForSchema(spec, schema, depth) || {});
     const variants = [];
 
+    // A couple of identifier fields that recur across this org's own APIs — SOURCE_ID and
+    // REQUEST_REFERENCE_NUMBER — get their own dedicated negative variants below regardless of
+    // what the schema itself declares, each in its own group/request. So they're excluded from
+    // the generic required/minLength/maxLength/pattern loops right below (matched
+    // case-insensitively — schemas vary between SOURCE_ID/sourceId/source_id for the "same"
+    // field) even if the schema also happens to declare e.g. `required` or a `pattern` on one of
+    // them — otherwise the same field would show up twice: once buried in "(negative)" and again,
+    // correctly, in its own dedicated request.
+    const CRITICAL_FIELD_NAMES = ['SOURCE_ID', 'REQUEST_REFERENCE_NUMBER'];
+    const isCritical = (key) => CRITICAL_FIELD_NAMES.some(n => n.toLowerCase() === key.toLowerCase());
+
     // Every variant carries a "group" — which request it belongs to once SwaggerPayloadModal
     // turns these into actual requests (see buildRequestsFromGroups there): 'general' for the
     // generic required/minLength/maxLength/pattern violations below (all share ONE "(negative)"
@@ -193,6 +204,7 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0, positiveOve
 
     // One variant per required field, that field omitted (everything else stays valid).
     for (const key of required) {
+        if (isCritical(key)) continue;
         const rest = { ...positive };
         delete rest[key];
         variants.push({ label: `Missing required field "${key}"`, group: 'general', payload: rest });
@@ -201,6 +213,7 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0, positiveOve
     // Per-field minLength/maxLength/pattern violations — these three are string-only
     // constraints in JSON Schema/OpenAPI, so only checked on string-typed properties.
     for (const key of Object.keys(props)) {
+        if (isCritical(key)) continue;
         const fieldSchema = deref(spec, props[key]);
         if (fieldSchema.type && fieldSchema.type !== 'string') continue;
         if (typeof fieldSchema.minLength === 'number' && fieldSchema.minLength > 0) {
@@ -216,21 +229,22 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0, positiveOve
         }
     }
 
-    // A couple of identifier fields that recur across this org's own APIs — SOURCE_ID and
-    // REQUEST_REFERENCE_NUMBER (the latter already seen in real production request definitions)
-    // — get their own dedicated negative variants regardless of what the schema itself declares:
-    // specs commonly leave these as a bare `type: string` with no minLength/maxLength/pattern, so
-    // the constraint-based loop above produces nothing for them even though they're exactly the
-    // fields worth testing missing/empty/null/wrong-type against. Matched case-insensitively
-    // (schemas vary between SOURCE_ID/sourceId/source_id for the "same" field) and only for
-    // properties that actually exist on THIS schema. Tagged with their OWN group (the field name
-    // itself) rather than 'general' — SwaggerPayloadModal's buildRequestsFromGroups gives each
-    // group its own separate request, so these end up as their own "(negative - SOURCE_ID)" /
+    // SOURCE_ID/REQUEST_REFERENCE_NUMBER's own dedicated negative variants (see CRITICAL_FIELD_NAMES
+    // above) — specs commonly leave these as a bare `type: string` with no minLength/maxLength/
+    // pattern, so the constraint-based loops above produce nothing for them even though they're
+    // exactly the fields worth testing missing/wrong-type against. Only for properties that
+    // actually exist on THIS schema. Tagged with their OWN group (the field name itself) rather
+    // than 'general' — SwaggerPayloadModal's buildRequestsFromGroups gives each group its own
+    // separate request, so these end up as their own "(negative - SOURCE_ID)" /
     // "(negative - REQUEST_REFERENCE_NUMBER)" requests instead of mixed into the general one.
-    const CRITICAL_FIELD_NAMES = ['SOURCE_ID', 'REQUEST_REFERENCE_NUMBER'];
+    // REQUEST_REFERENCE_NUMBER skips the empty-string/null variants (unlike SOURCE_ID) — this
+    // field is always auto-populated by this org's own standard convention (see
+    // withStandardFieldDefaults), so the API accepts a blank/absent value as valid rather than
+    // rejecting it, making those two cases false negatives rather than real violations.
     for (const key of Object.keys(props)) {
-        if (!CRITICAL_FIELD_NAMES.some(n => n.toLowerCase() === key.toLowerCase())) continue;
+        if (!isCritical(key)) continue;
         const fieldSchema = deref(spec, props[key]);
+        const isRefNumber = key.toLowerCase() === 'request_reference_number';
         if (!required.includes(key)) {
             // Only add this if the required-field loop above didn't already cover the exact
             // same "omit this key" case.
@@ -238,13 +252,15 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0, positiveOve
             delete rest[key];
             variants.push({ label: `Missing "${key}"`, group: key, payload: rest });
         }
-        variants.push({ label: `"${key}" empty string`, group: key, payload: { ...positive, [key]: '' } });
-        variants.push({ label: `"${key}" null`, group: key, payload: { ...positive, [key]: null } });
+        if (!isRefNumber) {
+            variants.push({ label: `"${key}" empty string`, group: key, payload: { ...positive, [key]: '' } });
+            variants.push({ label: `"${key}" null`, group: key, payload: { ...positive, [key]: null } });
+        }
         variants.push({ label: `"${key}" wrong type`, group: key, payload: { ...positive, [key]: wrongTypeValue(fieldSchema.type || 'string') } });
     }
 
     if (!variants.length) {
-        const keys = Object.keys(props);
+        const keys = Object.keys(props).filter(k => !isCritical(k));
         if (keys.length) {
             variants.push({ label: `"${keys[0]}" has the wrong type (no required/minLength/maxLength/pattern declared to violate instead)`, group: 'general', payload: { ...positive, [keys[0]]: wrongTypeValue(deref(spec, props[keys[0]]).type) } });
         }

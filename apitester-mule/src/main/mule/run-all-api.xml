@@ -20,13 +20,27 @@
          setting is still honored (run-nested-request explicitly skips that check; see its own
          comment). No loopback HTTP call here anymore, matching execution-engine.xml's own
          call-request-step — see that file's header comment for the full loopback-vs-flow-ref
-         writeup. Runs are still sequential (<foreach>, not scatter-gather), for the same reason
-         nested Call Request chains are: see execution-engine.xml's file-level comment. -->
+         writeup.
+
+         Sequential by default (<foreach>); POST body {parallel: true} (the "Run in parallel"
+         checkbox in RunAllReportModal) switches to <parallel-foreach> instead. Safe here because
+         <parallel-foreach> forks the Mule EVENT per item, so each branch gets its OWN isolated
+         copy of vars — the exact same snapshot/restore isolation run-nested-request already
+         relies on for a single nested call, just applied per top-level branch here instead of one
+         nested hop. This is a genuinely different mechanism from the Java/Camel backend's own
+         parallel-safety fix (a per-request-id lock around Camel's deploy-by-id step, see
+         RequestExecutionService's routeLock comment) — there's no analogous route-redeploy step
+         in this Mule flow-ref model, so no equivalent lock is needed here. run-all-one-item
+         (below) holds the actual per-item logic once, reused by BOTH branches so they can't drift. -->
 
     <flow name="run-all">
         <http:listener config-ref="HTTP_Listener_config" path="/collections/{collectionId}/run-all" allowedMethods="POST" doc:name="POST .../run-all"/>
         <set-variable variableName="raStartMs" value="#[now() as Number {unit: 'milliseconds'}]"/>
         <set-variable variableName="raCollectionId" value="#[attributes.uriParams.collectionId]"/>
+        <!-- Captured before the "Find main requests" transform below overwrites payload with the
+             (JSON-object, so payload.parallel is safe even against a body-less POST) request body
+             it's actually about. -->
+        <set-variable variableName="raParallel" value="#[(payload.parallel default false) as Boolean]" doc:name="parallel?"/>
 
         <db:select config-ref="Database_Config" target="raCols" doc:name="Select all collections">
             <db:sql>SELECT id, name, parent_id FROM syskm.collections</db:sql>
@@ -53,65 +67,25 @@ reqs filter ((r) -> (scopeIds contains r.collection_id) and !(calledIds contains
             </ee:message>
         </ee:transform>
         <set-variable variableName="mainRequests" value="#[payload]" doc:name="mainRequests"/>
-        <set-variable variableName="raResults" value="#[[]]"/>
 
-        <foreach collection="#[vars.mainRequests]" doc:name="Run each main request (flow-ref, sequential)">
-            <!-- Capture the loop item BEFORE the flow-ref overwrites payload with run-request's
-                 own result. -->
-            <set-variable variableName="raCurrentItem" value="#[payload]" doc:name="current item"/>
-            <try doc:name="Run one (never throw — reported as a failed entry instead)">
-                <!-- Mirrors requests-api.xml's run-request-http: that flow sets these same two
-                     vars from the inbound HTTP request/body before its own flow-ref into
-                     run-request — this is that same call, just without a real HTTP hop to get
-                     there. No caller-vars/depth/chain vars to seed here (unlike
-                     run-nested-request): run-request sets rsDepth/rsChain/rsCallerVars etc. to
-                     their genuine-top-level-call values itself, unconditionally, every time it
-                     runs — see its own file-level comment. -->
-                <set-variable variableName="requestId" value="#[vars.raCurrentItem.id]" doc:name="requestId"/>
-                <set-variable variableName="overrideVars" value="#[{}]" doc:name="overrideVars"/>
-                <flow-ref name="run-request" doc:name="Run (execution-engine.xml)"/>
-                <ee:transform doc:name="Build result entry">
-                    <ee:message>
-                        <ee:set-payload><![CDATA[%dw 2.0
-output application/json
-// run-request's own payload IS the result already — a real DataWeave object, not JSON text
-// needing read() the way the old loopback http:request's response body sometimes did.
-var runResult = payload
-fun checksOf(r) = if (r.iterating == true) flatten((r.iterations default []) map ((it) -> (it.checks default []))) else (r.checks default [])
-var checks = checksOf(runResult)
-var checksFailed = sizeOf(checks filter ((c) -> c.passed == false))
-var ok = runResult.status == "success" and checksFailed == 0
----
-{
-    requestId: vars.raCurrentItem.id,
-    requestName: vars.raCurrentItem.name,
-    status: if (ok) "success" else "failed",
-    durationMs: runResult.durationMs default 0,
-    error: runResult.error,
-    checksPassed: sizeOf(checks filter ((c) -> c.passed == true)),
-    checksFailed: checksFailed,
-    checksTotal: sizeOf(checks),
-    fullResult: runResult
-}]]></ee:set-payload>
-                    </ee:message>
-                </ee:transform>
-                <set-variable variableName="raEntry" value="#[payload]" doc:name="capture entry"/>
-                <error-handler>
-                    <on-error-continue type="ANY" doc:name="Run threw — record as failed">
-                        <set-variable variableName="raEntry" value="#[output application/java --- {
-                            requestId: vars.raCurrentItem.id,
-                            requestName: vars.raCurrentItem.name,
-                            status: 'failed',
-                            durationMs: 0,
-                            error: error.description,
-                            checksPassed: 0, checksFailed: 0, checksTotal: 0,
-                            fullResult: {}
-                        }]"/>
-                    </on-error-continue>
-                </error-handler>
-            </try>
-            <set-variable variableName="raResults" value="#[output application/java --- vars.raResults ++ [vars.raEntry]]" doc:name="accumulate"/>
-        </foreach>
+        <choice doc:name="Sequential or parallel?">
+            <when expression="#[vars.raParallel]">
+                <!-- target= collects each branch's final PAYLOAD into an array, in the SAME order
+                     as vars.mainRequests regardless of which branch actually finished first —
+                     maxConcurrency bounds how many main requests' HTTP calls fire at once, since
+                     unbounded would be more a stress test than a functional "Run All". -->
+                <parallel-foreach collection="#[vars.mainRequests]" target="raResults" maxConcurrency="5" doc:name="Run each main request (parallel-foreach, isolated per-branch event)">
+                    <flow-ref name="run-all-one-item" doc:name="Run one"/>
+                </parallel-foreach>
+            </when>
+            <otherwise>
+                <set-variable variableName="raResults" value="#[[]]"/>
+                <foreach collection="#[vars.mainRequests]" doc:name="Run each main request (flow-ref, sequential)">
+                    <flow-ref name="run-all-one-item" doc:name="Run one"/>
+                    <set-variable variableName="raResults" value="#[output application/java --- vars.raResults ++ [payload]]" doc:name="accumulate"/>
+                </foreach>
+            </otherwise>
+        </choice>
 
         <db:select config-ref="Database_Config" target="raColRow" doc:name="Collection name">
             <db:sql>SELECT name FROM syskm.collections WHERE id = :id</db:sql>
@@ -154,6 +128,66 @@ var failed = sizeOf(vars.raResults) - passed
             <db:input-parameters><![CDATA[#[{id: vars.raCollectionId, report: write(vars.raReport, "application/json")}]]]></db:input-parameters>
         </db:insert>
         <set-payload value="#[%dw 2.0 output application/json --- vars.raReport]" doc:name="Result as payload"/>
+    </flow>
+
+    <!-- Runs ONE main request as part of Run All — used by BOTH the sequential <foreach> and the
+         parallel <parallel-foreach> branches in run-all above, so their per-item behavior can't
+         drift apart. payload in is {id, name} (one entry of vars.mainRequests); payload out is
+         this item's finished report entry. Never throws — a failure becomes a "failed" entry
+         instead, same contract CollectionRunService.runOne (Java side) follows. -->
+    <flow name="run-all-one-item">
+        <!-- Capture the loop item BEFORE the flow-ref overwrites payload with run-request's own
+             result. -->
+        <set-variable variableName="raCurrentItem" value="#[payload]" doc:name="current item"/>
+        <try doc:name="Run one (never throw — reported as a failed entry instead)">
+            <!-- Mirrors requests-api.xml's run-request-http: that flow sets these same two vars
+                 from the inbound HTTP request/body before its own flow-ref into run-request —
+                 this is that same call, just without a real HTTP hop to get there. No
+                 caller-vars/depth/chain vars to seed here (unlike run-nested-request): run-request
+                 sets rsDepth/rsChain/rsCallerVars etc. to their genuine-top-level-call values
+                 itself, unconditionally, every time it runs — see its own file-level comment. -->
+            <set-variable variableName="requestId" value="#[vars.raCurrentItem.id]" doc:name="requestId"/>
+            <set-variable variableName="overrideVars" value="#[{}]" doc:name="overrideVars"/>
+            <flow-ref name="run-request" doc:name="Run (execution-engine.xml)"/>
+            <ee:transform doc:name="Build result entry">
+                <ee:message>
+                    <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+// run-request's own payload IS the result already — a real DataWeave object, not JSON text
+// needing read() the way the old loopback http:request's response body sometimes did.
+var runResult = payload
+fun checksOf(r) = if (r.iterating == true) flatten((r.iterations default []) map ((it) -> (it.checks default []))) else (r.checks default [])
+var checks = checksOf(runResult)
+var checksFailed = sizeOf(checks filter ((c) -> c.passed == false))
+var ok = runResult.status == "success" and checksFailed == 0
+---
+{
+    requestId: vars.raCurrentItem.id,
+    requestName: vars.raCurrentItem.name,
+    status: if (ok) "success" else "failed",
+    durationMs: runResult.durationMs default 0,
+    error: runResult.error,
+    checksPassed: sizeOf(checks filter ((c) -> c.passed == true)),
+    checksFailed: checksFailed,
+    checksTotal: sizeOf(checks),
+    fullResult: runResult
+}]]></ee:set-payload>
+                </ee:message>
+            </ee:transform>
+            <error-handler>
+                <on-error-continue type="ANY" doc:name="Run threw — record as failed">
+                    <set-payload value="#[output application/java --- {
+                        requestId: vars.raCurrentItem.id,
+                        requestName: vars.raCurrentItem.name,
+                        status: 'failed',
+                        durationMs: 0,
+                        error: error.description,
+                        checksPassed: 0, checksFailed: 0, checksTotal: 0,
+                        fullResult: {}
+                    }]"/>
+                </on-error-continue>
+            </error-handler>
+        </try>
     </flow>
 
     <flow name="last-report">
