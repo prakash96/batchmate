@@ -232,20 +232,25 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0, positiveOve
     // SOURCE_ID/REQUEST_REFERENCE_NUMBER's own dedicated negative variants (see CRITICAL_FIELD_NAMES
     // above) — specs commonly leave these as a bare `type: string` with no minLength/maxLength/
     // pattern, so the constraint-based loops above produce nothing for them even though they're
-    // exactly the fields worth testing missing/wrong-type against. Only for properties that
-    // actually exist on THIS schema. Tagged with their OWN group (the field name itself) rather
-    // than 'general' — SwaggerPayloadModal's buildRequestsFromGroups gives each group its own
-    // separate request, so these end up as their own "(negative - SOURCE_ID)" /
-    // "(negative - REQUEST_REFERENCE_NUMBER)" requests instead of mixed into the general one.
-    // REQUEST_REFERENCE_NUMBER skips the empty-string/null variants (unlike SOURCE_ID) — this
-    // field is always auto-populated by this org's own standard convention (see
-    // withStandardFieldDefaults), so the API accepts a blank/absent value as valid rather than
-    // rejecting it, making those two cases false negatives rather than real violations.
+    // exactly the fields worth testing against. Only for properties that actually exist on THIS
+    // schema. Tagged with their OWN group (the field name itself) rather than 'general' —
+    // SwaggerPayloadModal's buildRequestsFromGroups gives each group its own separate request, so
+    // these end up as their own "(negative - SOURCE_ID)" / "(negative - REQUEST_REFERENCE_NUMBER)"
+    // requests instead of mixed into the general one.
+    //
+    // REQUEST_REFERENCE_NUMBER is NOT mandatory, so it gets no "Missing" variant at all (unlike
+    // SOURCE_ID) — omitting it is a valid request, not a violation. It also skips the empty-
+    // string/null variants (unlike SOURCE_ID) for the same reason: this field is always
+    // auto-populated by this org's own standard convention (see withStandardFieldDefaults), so the
+    // API accepts a blank/absent value as valid rather than rejecting it. What it gets INSTEAD:
+    // a too-short/too-long variant whenever the swagger spec itself declares a minLength/maxLength
+    // for it — same shorter/longer-than-declared-length idea the general constraint loop above
+    // uses for every other field, just scoped to this one field's own dedicated request.
     for (const key of Object.keys(props)) {
         if (!isCritical(key)) continue;
         const fieldSchema = deref(spec, props[key]);
         const isRefNumber = key.toLowerCase() === 'request_reference_number';
-        if (!required.includes(key)) {
+        if (!isRefNumber && !required.includes(key)) {
             // Only add this if the required-field loop above didn't already cover the exact
             // same "omit this key" case.
             const rest = { ...positive };
@@ -255,6 +260,16 @@ export function negativeVariantsForSchema(spec, schemaIn, depth = 0, positiveOve
         if (!isRefNumber) {
             variants.push({ label: `"${key}" empty string`, group: key, payload: { ...positive, [key]: '' } });
             variants.push({ label: `"${key}" null`, group: key, payload: { ...positive, [key]: null } });
+        }
+        if (isRefNumber) {
+            if (typeof fieldSchema.minLength === 'number' && fieldSchema.minLength > 0) {
+                const tooShort = 'x'.repeat(Math.max(0, fieldSchema.minLength - 1));
+                variants.push({ label: `"${key}" shorter than minLength (${fieldSchema.minLength})`, group: key, payload: { ...positive, [key]: tooShort } });
+            }
+            if (typeof fieldSchema.maxLength === 'number') {
+                const tooLong = 'x'.repeat(fieldSchema.maxLength + 1);
+                variants.push({ label: `"${key}" longer than maxLength (${fieldSchema.maxLength})`, group: key, payload: { ...positive, [key]: tooLong } });
+            }
         }
         variants.push({ label: `"${key}" wrong type`, group: key, payload: { ...positive, [key]: wrongTypeValue(fieldSchema.type || 'string') } });
     }

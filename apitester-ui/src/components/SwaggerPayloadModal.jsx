@@ -144,11 +144,11 @@ export default function SwaggerPayloadModal({ onClose }) {
             // so they fall back to the auto-generated example until the JSON is fixed.
             const positive = withStandardFieldDefaults(overrideParsed || exampleForSchema(spec, body.schema));
             out.push({
-                url, method: op.method, opKey, scenario: 'Positive (schema-valid)', input: positive,
+                url, path: op.path, method: op.method, opKey, scenario: 'Positive (schema-valid)', input: positive,
                 isPositive: true, group: 'general', overrideText, overrideError,
             });
             for (const v of negativeVariantsForSchema(spec, body.schema, 0, positive)) {
-                out.push({ url, method: op.method, opKey, scenario: v.label, input: v.payload, isPositive: false, group: v.group || 'general' });
+                out.push({ url, path: op.path, method: op.method, opKey, scenario: v.label, input: v.payload, isPositive: false, group: v.group || 'general' });
             }
         }
         return { rows: out, totalOps: ops.length, skippedCount: skipped };
@@ -167,7 +167,7 @@ export default function SwaggerPayloadModal({ onClose }) {
         const map = new Map();
         for (const r of rows) {
             const key = `${r.method} ${r.url}`;
-            if (!map.has(key)) map.set(key, { method: r.method, url: r.url, positive: null, negativesByGroup: new Map() });
+            if (!map.has(key)) map.set(key, { method: r.method, url: r.url, path: r.path, positive: null, negativesByGroup: new Map() });
             const g = map.get(key);
             if (r.isPositive) { g.positive = r; continue; }
             const groupKey = r.group || 'general';
@@ -246,7 +246,7 @@ export default function SwaggerPayloadModal({ onClose }) {
         for (const g of groups) {
             if (g.positive) {
                 out.push(applyTemplate({
-                    name: `${g.method} ${g.url} (positive)`.slice(0, 120),
+                    name: `${g.path} (positive)`.slice(0, 120),
                     preRequest: [],
                     request: {
                         method: g.method, url: g.url, params: [],
@@ -261,7 +261,7 @@ export default function SwaggerPayloadModal({ onClose }) {
                 if (!negatives.length) continue;
                 const suffix = groupKey === 'general' ? 'negative' : `negative - ${groupKey}`;
                 out.push(applyTemplate({
-                    name: `${g.method} ${g.url} (${suffix})`.slice(0, 120),
+                    name: `${g.path} (${suffix})`.slice(0, 120),
                     preRequest: [],
                     request: {
                         method: g.method, url: g.url, params: [],
